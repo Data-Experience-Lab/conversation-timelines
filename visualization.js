@@ -58,7 +58,6 @@ export class Visualization {
   ) {
     this.DataObj = dataobj;
     // console.log(this.DataObj.data);
-    this.currLevel = 0;
     this.data = this.DataObj.getData(this.levels[this.currLevel]);
     let lastMax = this.maxIndex;
     console.log(this.numTopicsShown);
@@ -67,10 +66,12 @@ export class Visualization {
     if (numTopics != this.numTopicsShown) {
       this.numTopicsShown = numTopics;
       this.visibleTopics = this.data
-        .slice(this.currIndex, this.currIndex + this.numTopicsShown);
+        .slice(this.currIndex, this.currIndex + this.numTopicsShown)
+        .reverse();
     } else {
       this.visibleTopics = this.data
-        .slice(this.currIndex, this.currIndex + this.numTopicsShown);
+        .slice(this.currIndex, this.currIndex + this.numTopicsShown)
+        .reverse();
     }
 
     document.getElementById("jumpToCurrent").style.display = "none";
@@ -124,7 +125,7 @@ export class Visualization {
       // console.log(this.data.at(-1));
       // If the newest topic isn't at the top of currently visible topics
       // Show the jump to current button
-      if (this.data.at(-1).id != this.visibleTopics.at(-1).id) {
+      if (this.data.at(-1).id != this.visibleTopics.at(0).id) {
         let [hours, minutes, seconds] = "";
 
         [hours, minutes, seconds] = this.getTimeDiff(time);
@@ -168,26 +169,28 @@ export class Visualization {
     let line = enter
       .append("div")
       .attr("class", "line")
-      .style("align-items", "center")
-      .style("display", "flex")
-      .style("position", "relative")
-      .style("padding-right", "12vw");
+      .style("align-items", "center");
 
-    let topicBlock = line.append("div").attr("class", "entry")
-      .style("flex-grow", "1");
-    
-    let time = line.append("div").attr("class", `timeDiv`)
-      .style("position", "absolute")
-      .style("right", "2vw")
-      .style("top", "0")
-      .style("z-index", "10")
-      .style("width", "10vw")
-      .style("text-align", "right");
+    let time = line.append("div").attr("class", `timeDiv`);
 
     time
       .append("h1")
       .attr("class", "time")
       .text((d) => d.time);
+
+    let turnBlock = line
+      .append("div")
+      .attr("class", "turnBlock")
+      .style("height", `100%`)
+      .style("background-color", "blue");
+
+    let timeBlock = line
+      .append("div")
+      .attr("class", "timeBlock")
+      .style("height", `100%`)
+      .style("background-color", this.timelineColour);
+
+    let topicBlock = line.append("div").attr("class", "entry");
 
     setTimeout(() => {
       line.attr("class", "line show");
@@ -195,12 +198,21 @@ export class Visualization {
     }, 10);
 
     topicBlock
-      .append("div")
-      .attr("class", "speechBubble")
-      .each((d, i, nodes) => {
-        const bubble = d3.select(nodes[i]);
-        this.renderSpeechBubbles(bubble, d);
-      });
+      .append("h1")
+      .attr("class", "topicSentences")
+      .text((d) => d.topic);
+
+    if (this.currLevel == 0) {
+      topicBlock
+        .append("p")
+        .attr("class", "repSentences")
+        .text((d) => d.segment);
+    } else {
+      topicBlock
+        .append("p")
+        .attr("class", "repSentences")
+        .text((d) => this.truncateStringAtWord(d.description, 150));
+    }
     // }.bind(this)
     // );
     // }
@@ -208,12 +220,14 @@ export class Visualization {
 
   // Handle updates to existing elements in the DOM
   handleUpdate(update) {
-    update.select(".speechBubble")
-      .each((d, i, nodes) => {
-        const bubble = d3.select(nodes[i]);
-        bubble.selectAll("*").remove();
-        this.renderSpeechBubbles(bubble, d);
-      });
+    update.select("h1.topicSentences").text((d) => d.topic);
+    if (this.currLevel == 0) {
+      update.select("p.repSentences").text((d) => d.segment);
+    } else {
+      update
+        .select("p.repSentences")
+        .text((d) => this.truncateStringAtWord(d.description, 150));
+    }
   }
 
   // Hide representative sentences for all topics except the selected one
@@ -303,7 +317,8 @@ export class Visualization {
     this.currIndex = this.maxIndex;
     this.visTopicIndex = 0;
     this.visibleTopics = this.data
-      .slice(this.currIndex, this.currIndex + this.numTopicsShown);
+      .slice(this.currIndex, this.currIndex + this.numTopicsShown)
+      .reverse();
     // console.log(this.visibleTopics);
     const timeOnly = this.formatTime(new Date());
     this.log += `${timeOnly}.Action.J\n`;
@@ -324,7 +339,8 @@ export class Visualization {
       }
       this.data = this.DataObj.getData(this.levels[this.currLevel]);
       this.visibleTopics = this.data
-        .slice(this.currIndex, this.currIndex + this.numTopicsShown);
+        .slice(this.currIndex, this.currIndex + this.numTopicsShown)
+        .reverse();
 
       // Find the index of the visible topic that matches currZoomTitle
       // Get the title of the current zoomed topic
@@ -366,7 +382,8 @@ export class Visualization {
           : 0;
       this.data = this.DataObj.getData(this.levels[this.currLevel]);
       this.visibleTopics = this.data
-        .slice(this.currIndex, this.currIndex + this.numTopicsShown);
+        .slice(this.currIndex, this.currIndex + this.numTopicsShown)
+        .reverse();
       const timeOnly = this.formatTime(new Date());
       this.log += `${timeOnly}.Mode.${this.levels[this.currLevel]}\n`;
       console.log(this.log);
@@ -384,7 +401,8 @@ export class Visualization {
     }
     if (this.currViewedTopic != this.data.at(-1)) {
       this.visibleTopics = this.data
-        .slice(this.currIndex, this.currIndex + this.numTopicsShown);
+        .slice(this.currIndex, this.currIndex + this.numTopicsShown)
+        .reverse();
 
       // console.log("Debug Up VTI" + this.visTopicIndex);
       // console.log("Debug Up CI " + this.currIndex);
@@ -412,7 +430,8 @@ export class Visualization {
     }
     if (this.currViewedTopic != this.data.at(0)) {
       this.visibleTopics = this.data
-        .slice(this.currIndex, this.currIndex + this.numTopicsShown);
+        .slice(this.currIndex, this.currIndex + this.numTopicsShown)
+        .reverse();
 
       // console.log("Debug Down VTI " + this.visTopicIndex);
       // console.log("Debug Down CI " + this.currIndex);
@@ -740,65 +759,46 @@ export class Visualization {
     }
   }
 
-  renderSpeechBubbles(bubble, data) {
-    if (data.speakerTurns && data.speakerTurns.turns) {
-      if (!this.speakerAlignment) {
-        this.speakerAlignment = {};
-      }
-      
-      data.speakerTurns.turns.forEach((turn, index) => {
-        const speakerId = parseInt(turn.speakerId.charAt(turn.speakerId.length - 1)) - 1;
-        
-        if (this.speakerAlignment[speakerId] === undefined) {
-          const alignRight = Object.keys(this.speakerAlignment).length > 0;
-          this.speakerAlignment[speakerId] = alignRight;
-        }
-        
-        const alignRight = this.speakerAlignment[speakerId];
-        
-        const bubbleContainer = bubble.append("div")
-          .style("display", "flex")
-          .style("justify-content", alignRight ? "flex-end" : "flex-start")
-          .style("margin", "8px 0");
-        
-        const bubbleDiv = bubbleContainer.append("div")
-          .attr("class", "speechBubbleItem")
-          .style("background-color", this.speakerColours[speakerId % 5])
-          .style("padding", "12px 18px")
-          .style("border-radius", "20px")
-          .style("position", "relative")
-          .style("max-width", "70%")
-          .style("word-wrap", "break-word")
-          .style("color", "white")
-          .style("font-weight", "500")
-          .style("box-shadow", "0 2px 8px rgba(0,0,0,0.15)")
-          .style("display", "inline-block");
-
-        if (alignRight) {
-          bubbleDiv.style("border-bottom-right-radius", "5px");
-        } else {
-          bubbleDiv.style("border-bottom-left-radius", "5px");
-        }
-
-        const processedText = this.processFillerWords(turn.speakerSeg);
-        bubbleDiv.html(processedText);
-      });
-    }
-  }
-
-  processFillerWords(text) {
-    const fillerWords = ["umm", "uhh", "uh", "um", "like", "you know", "well", "so", "basically", "actually", "literally"];
-    let processedText = text;
-
-    fillerWords.forEach(filler => {
-      const regex = new RegExp(`\\b${filler}\\b`, 'gi');
-      processedText = processedText.replace(regex, `<i>${filler}</i>`);
-    });
-
-    return processedText;
-  }
-
   setSpeakerTurnColours() {
-    
+    const lines = document.querySelectorAll(".line");
+
+    lines.forEach((line, i) => {
+      if (i < this.numTopicsShown) {
+        const turnBar = line.querySelector(".turnBlock");
+        if (this.visibleTopics[i].speakerTurns != null) {
+          let speakerTurn = this.visibleTopics[i].speakerTurns;
+          let lastSpeaker = "";
+          let totalHeight = 0;
+          for (var i = speakerTurn.turns.length - 1; i >= 0; i--) {
+            let turn = speakerTurn.turns[i];
+
+            let id =
+              parseInt(turn.speakerId.charAt(turn.speakerId.length - 1)) - 1;
+            if (i == speakerTurn.turns.length - 1) {
+              lastSpeaker = id;
+              totalHeight += turn.length / speakerTurn.total;
+            } else if (lastSpeaker == id) {
+              totalHeight += turn.length / speakerTurn.total;
+            } else {
+              let turndiv = document.createElement("div");
+              turnBar.appendChild(turndiv);
+              turndiv.style.backgroundColor =
+                this.speakerColours[lastSpeaker % 5];
+              turndiv.style.height = `${totalHeight * 100}%`;
+              lastSpeaker = id;
+              totalHeight = turn.length / speakerTurn.total;
+            }
+            if (i == 0) {
+              let turndiv = document.createElement("div");
+              turnBar.appendChild(turndiv);
+              turndiv.style.backgroundColor = this.speakerColours[id % 5];
+              turndiv.style.height = `${totalHeight * 100}%`;
+              lastSpeaker = "";
+              totalHeight = 0;
+            }
+          }
+        }
+      }
+    });
   }
 }
