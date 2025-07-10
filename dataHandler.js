@@ -1470,7 +1470,7 @@ export class DataHandler {
           topic: "READINESS FOR CHANGE",
           description: "I was not ready when she was ready.",
           segment:
-            "It's hard to mentally prepare. I was not ready when she was ready. Oh my gosh.",
+            "It's hard 💪 to mentally prepare. I was not ready when she was ready. Oh my gosh 😱.",
           time: "00:59:36",
           speakerTurns: {
             total: 16,
@@ -1484,7 +1484,7 @@ export class DataHandler {
               {
                 speakerId: "Guest-1",
                 speakerSeg:
-                  "It's hard to mentally prepare. I was not ready when she was ready. Oh my gosh.",
+                  "It's hard 💪 to mentally prepare. I was not ready when she was ready. Oh my gosh 😱.",
                 length: 16,
               },
             ],
@@ -1498,7 +1498,7 @@ export class DataHandler {
           topic: "SKYDIVING PROPOSAL",
           description:
             "Yeah, she was like, let's go skydiving, like right now.",
-          segment: "Yeah, she was like, let's go skydiving, like right now.",
+          segment: "Yeah, she was like, let's go skydiving ✈️, like right now.",
           time: "00:59:46",
           speakerTurns: {
             total: 10,
@@ -1512,7 +1512,7 @@ export class DataHandler {
               {
                 speakerId: "Guest-1",
                 speakerSeg:
-                  "Yeah, she was like, let's go skydiving, like right now.",
+                  "Yeah, she was like, let's go skydiving ✈️, like right now.",
                 length: 10,
               },
             ],
@@ -1526,7 +1526,7 @@ export class DataHandler {
           topic: "TRAVEL PLANS",
           description: "I thought that would be more time in between.",
           segment:
-            "I've never even thought about this before. What do you mean? Yeah, I thought she was like joking at first, or like by how soon she wanted to go, but then. Pictures of her. And I was like, Oh yeah, OK, yeah, I thought. I thought that would be more time in between.",
+            "I've never even thought 🤔 about this before. What do you mean? Yeah, I thought she was like joking 😄 at first, or like by how soon she wanted to go, but then. Pictures of her. And I was like, Oh yeah, OK 👌, yeah, I thought. I thought that would be more time ⏰ in between.",
           time: "00:59:57",
           speakerTurns: {
             total: 53,
@@ -1540,13 +1540,13 @@ export class DataHandler {
               {
                 speakerId: "Guest-1",
                 speakerSeg:
-                  "I've never even thought about this before. What do you mean? Yeah, I thought she was like joking at first, or like by how soon she wanted to go, but then.",
+                  "I've never even thought 🤔 about this before. What do you mean? Yeah, I thought she was like joking 😄 at first, or like by how soon she wanted to go, but then.",
                 length: 31,
               },
               {
                 speakerId: "Guest-1",
                 speakerSeg:
-                  "Pictures of her. And I was like, Oh yeah, OK, yeah, I thought. I thought that would be more time in between.",
+                  "Pictures of her. And I was like, Oh yeah, OK 👌, yeah, I thought. I thought that would be more time ⏰ in between.",
                 length: 22,
               },
             ],
@@ -1559,7 +1559,7 @@ export class DataHandler {
         {
           topic: "PERSONALITY DESCRIPTION",
           description: "Yeah, like she's, she's very much like.",
-          segment: "Yeah, like she's, she's very much like.",
+          segment: "Yeah, like she's, she's very much like 💯.",
           time: "01:00:08",
           speakerTurns: {
             total: 7,
@@ -1572,7 +1572,7 @@ export class DataHandler {
             turns: [
               {
                 speakerId: "Guest-1",
-                speakerSeg: "Yeah, like she's, she's very much like.",
+                speakerSeg: "Yeah, like she's, she's very much like 💯.",
                 length: 7,
               },
             ],

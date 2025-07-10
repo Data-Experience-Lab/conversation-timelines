@@ -332,10 +332,6 @@ h2 {
 
 .time, .total-time {
   color: white;
-  /*   background: rgba(255, 255, 255, 0.35); */
-  background: rgb(92 92 92 / 35%);
-  border-radius: 1vh;
-  padding: 0.2vh 1vw;
   display: block;
   font-size: 2vmin;
   min-width: fit-content;
