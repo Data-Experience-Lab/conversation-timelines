@@ -1,5 +1,5 @@
-import { DataHandler } from "/dataHandler.js";
-import { Visualization } from "/visualization.js";
+import { DataHandler } from "/js/dataHandler.js";
+import { Visualization } from "/js/visualization.js";
 
 export class SpeechToTopic {
   constructor() {
