@@ -19,19 +19,19 @@ startRecognition.addEventListener("click", function () {
   console.log("Transcribing");
   speechController.startContinuousRecording();
   startRecognition.style.display = "none";
-  document.querySelector("#zoom").style.display = "flex";
+  // document.querySelector("#zoom").style.display = "flex";
   eventListeners();
 });
 
-increase.addEventListener("click", function () {
-  console.log("increase");
-  speechController.zoomIn();
-});
+// increase.addEventListener("click", function () {
+//   console.log("increase");
+//   speechController.zoomIn();
+// });
 
-decrease.addEventListener("click", function () {
-  console.log("decrease");
-  speechController.zoomOut();
-});
+// decrease.addEventListener("click", function () {
+//   console.log("decrease");
+//   speechController.zoomOut();
+// });
 
 secretButton.addEventListener("click", function () {
   console.log("secret button pressed!");
@@ -45,6 +45,7 @@ d3.select("#jumpToCurrent").on("click", function () {
 // window.onload = speechController.startContinuousRecording();
 
 // allow left and right arrow keys to press back and forward (for now)
+// REMOVED: no longer need this function for keys
 document.onkeydown = function (e) {
   switch (e.keyCode) {
     case 27:
@@ -59,24 +60,24 @@ document.onkeydown = function (e) {
         speechController.escape();
       }
       break;
-    case 37:
-      if (!hidden) {
-        console.log("Left");
-        speechController.navBack();
-      }
-      break;
+    // case 37:
+    //   if (!hidden) {
+    //     console.log("Left");
+    //     speechController.navBack();
+    //   }
+    //   break;
     case 38:
       if (!hidden) {
         console.log("Up");
         speechController.scrollUp();
       }
       break;
-    case 39:
-      if (!hidden) {
-        console.log("Right");
-        speechController.navForward();
-      }
-      break;
+    // case 39:
+    //   if (!hidden) {
+    //     console.log("Right");
+    //     speechController.navForward();
+    //   }
+    //   break;
     case 40:
       if (!hidden) {
         console.log("Down");
@@ -87,10 +88,10 @@ document.onkeydown = function (e) {
       console.log("K");
       speechController.toggleVis();
       break;
-    case 78:
-      // N
-      speechController.zoomOut();
-      break;
+    // case 78:
+    //   // N
+    //   speechController.zoomOut();
+    //   break;
     case 77:
       // M
       console.log("M");
@@ -106,14 +107,14 @@ document.onkeydown = function (e) {
         speechController.jumpToCurr();
       }
       break;
-    case 189:
-      console.log("ZoomOut");
-      speechController.zoomOut();
-      break;
-    case 187:
-      console.log("ZoomIn");
-      speechController.zoomIn();
-      break;
+    // case 189:
+    //   console.log("ZoomOut");
+    //   speechController.zoomOut();
+    //   break;
+    // case 187:
+    //   console.log("ZoomIn");
+    //   speechController.zoomIn();
+    //   break;
   }
 };
 
@@ -180,16 +181,17 @@ function checkDirection() {
   let yDiff = touchEndY - touchStartY;
   console.log(`xdiff: ${xDiff}`);
   console.log(`ydiff: ${yDiff}`);
-  if (Math.abs(xDiff) > Math.abs(yDiff)) {
-    if (touchEndX < touchStartX) {
-      speechController.navBack();
-      console.log("swipe right");
-    }
-    if (touchEndX > touchStartX) {
-      speechController.navForward();
-      console.log("swipe left");
-    }
-  }
+  // REMOVED: navigating back and forth between views
+  // if (Math.abs(xDiff) > Math.abs(yDiff)) {
+  //   if (touchEndX < touchStartX) {
+  //     speechController.navBack();
+  //     console.log("swipe right");
+  //   }
+  //   if (touchEndX > touchStartX) {
+  //     speechController.navForward();
+  //     console.log("swipe left");
+  //   }
+  // }
   if (Math.abs(yDiff) > Math.abs(xDiff)) {
     if (touchEndY < touchStartY) {
       speechController.scrollUp();
