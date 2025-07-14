@@ -229,54 +229,57 @@ export class Visualization {
         .text((d) => this.truncateStringAtWord(d.description, 150));
     }
   }
+  /**
+   * Hide representative sentences for all topics except the selected one
+   * REMOVED: do not need this type of navigation anymore (I think)
+   * TODO:
+  **/
+  // hideRepSentences(selectedTopic) {
+  //   this.addDurations();
 
-  // Hide representative sentences for all topics except the selected one
-  hideRepSentences(selectedTopic) {
-    this.addDurations();
+  //   const entries = document.querySelectorAll(".line");
+  //   entries.forEach((entry, i) => {
+  //     const repSentence = entry.querySelector(".repSentences");
+  //     const topicSentence = entry.querySelector(".topicSentences");
+  //     const time = entry.querySelector(".time");
+  //     const totalTime = entry.querySelector(".total-time");
+  //     const bar = entry.querySelector(".turnBlock");
 
-    const entries = document.querySelectorAll(".line");
-    entries.forEach((entry, i) => {
-      const repSentence = entry.querySelector(".repSentences");
-      const topicSentence = entry.querySelector(".topicSentences");
-      const time = entry.querySelector(".time");
-      const totalTime = entry.querySelector(".total-time");
-      const bar = entry.querySelector(".turnBlock");
+  //     if (this.currLevel == 4) {
+  //       repSentence.style.color = this.topicsColours[i % 8];
+  //       topicSentence.style.color = this.topicsColours[i % 8];
+  //     } else {
+  //       topicSentence.style.color = "#bfbfbf";
+  //     }
 
-      if (this.currLevel == 4) {
-        repSentence.style.color = this.topicsColours[i % 8];
-        topicSentence.style.color = this.topicsColours[i % 8];
-      } else {
-        topicSentence.style.color = "#bfbfbf";
-      }
-
-      if (selectedTopic === topicSentence.__data__.id) {
-        repSentence.style.display = "block";
-        repSentence.setAttribute("id", "selected-entry");
-        topicSentence.setAttribute("id", "selected-entry");
-        entry.setAttribute("id", "selected-entry");
-        time.setAttribute("id", "selected-entry");
-        time.style.color = "white";
-        if (totalTime != null) {
-          totalTime.setAttribute("id", "selected-entry");
-          totalTime.style.color = "white";
-        }
-        bar.style.border = "0.3vw solid white";
-        repSentence.style.color = "white";
-        topicSentence.style.color = "white";
-      } else {
-        repSentence.style.display = "none";
-        repSentence.removeAttribute("id");
-        topicSentence.removeAttribute("id");
-        if (totalTime != null) {
-          totalTime.removeAttribute("id", "selected-entry");
-          totalTime.style.color = "#bfbfbf";
-        }
-        time.style.color = "#bfbfbf";
-        bar.style.border = "0.3vw solid black";
-        entry.removeAttribute("id");
-      }
-    });
-  }
+  //     if (selectedTopic === topicSentence.__data__.id) {
+  //       repSentence.style.display = "block";
+  //       repSentence.setAttribute("id", "selected-entry");
+  //       topicSentence.setAttribute("id", "selected-entry");
+  //       entry.setAttribute("id", "selected-entry");
+  //       time.setAttribute("id", "selected-entry");
+  //       time.style.color = "white";
+  //       if (totalTime != null) {
+  //         totalTime.setAttribute("id", "selected-entry");
+  //         totalTime.style.color = "white";
+  //       }
+  //       bar.style.border = "0.3vw solid white";
+  //       repSentence.style.color = "white";
+  //       topicSentence.style.color = "white";
+  //     } else {
+  //       repSentence.style.display = "none";
+  //       repSentence.removeAttribute("id");
+  //       topicSentence.removeAttribute("id");
+  //       if (totalTime != null) {
+  //         totalTime.removeAttribute("id", "selected-entry");
+  //         totalTime.style.color = "#bfbfbf";
+  //       }
+  //       time.style.color = "#bfbfbf";
+  //       bar.style.border = "0.3vw solid black";
+  //       entry.removeAttribute("id");
+  //     }
+  //   });
+  // }
 
   addDurations() {
     // Add duration. This is a stupid way but i am crashing out xxx
@@ -313,6 +316,10 @@ export class Visualization {
 
   // ************ Button click events ************
 
+  /**
+   * Allows user to jump to live transcription/newest summary level
+   * TODO: should I leave this here
+   */
   jumpToCurr() {
     this.currIndex = this.maxIndex;
     this.visTopicIndex = 0;
@@ -326,71 +333,84 @@ export class Visualization {
     this.updateScreen(this.DataObj, false, true);
   }
 
-  navForward() {
-    let currZoomInd = "";
-    if (this.currLevel > 0) {
-      this.currLevel = this.currLevel == 4 ? 2 : this.currLevel - 1;
-      if (this.currViewedTopic && this.currViewedTopic.zoomInIndex != null) {
-        currZoomInd = this.currViewedTopic.zoomInIndex;
-        this.currIndex =
-          currZoomInd >= this.numTopicsShown
-            ? currZoomInd - this.numTopicsShown
-            : 0;
-      }
-      this.data = this.DataObj.getData(this.levels[this.currLevel]);
-      this.visibleTopics = this.data
-        .slice(this.currIndex, this.currIndex + this.numTopicsShown)
-        .reverse();
+  /**
+   * Allows user to navigate to a different granularity (smaller granularity)
+   * TODO: ask if we shoudl remove
+   */
+  // navForward() {
+  //   let currZoomInd = "";
+  //   if (this.currLevel > 0) {
+  //     this.currLevel = this.currLevel == 4 ? 2 : this.currLevel - 1;
+  //     if (this.currViewedTopic && this.currViewedTopic.zoomInIndex != null) {
+  //       currZoomInd = this.currViewedTopic.zoomInIndex;
+  //       this.currIndex =
+  //         currZoomInd >= this.numTopicsShown
+  //           ? currZoomInd - this.numTopicsShown
+  //           : 0;
+  //     }
+  //     this.data = this.DataObj.getData(this.levels[this.currLevel]);
+  //     this.visibleTopics = this.data
+  //       .slice(this.currIndex, this.currIndex + this.numTopicsShown)
+  //       .reverse();
 
-      // Find the index of the visible topic that matches currZoomTitle
-      // Get the title of the current zoomed topic
-      let currZoomTitle = this.data[currZoomInd]?.topic;
-      if (currZoomTitle) {
-        this.visTopicIndex = this.visibleTopics.findIndex(
-          (topic) => topic.topic === currZoomTitle
-        );
-        // If no match is found, default to 0
-        if (this.visTopicIndex === -1) {
-          this.visTopicIndex = 0;
-        }
-      } else {
-        this.visTopicIndex = 0; // Default to 0 if currZoomTitle is undefined
-      }
-      const timeOnly = this.formatTime(new Date());
-      this.log += `${timeOnly}.Mode.${this.levels[this.currLevel]}\n`;
-      console.log(this.log);
-      // Update the screen
-      this.updateScreen(this.DataObj, true, true);
-    }
-  }
+  //     // Find the index of the visible topic that matches currZoomTitle
+  //     // Get the title of the current zoomed topic
+  //     let currZoomTitle = this.data[currZoomInd]?.topic;
+  //     if (currZoomTitle) {
+  //       this.visTopicIndex = this.visibleTopics.findIndex(
+  //         (topic) => topic.topic === currZoomTitle
+  //       );
+  //       // If no match is found, default to 0
+  //       if (this.visTopicIndex === -1) {
+  //         this.visTopicIndex = 0;
+  //       }
+  //     } else {
+  //       this.visTopicIndex = 0; // Default to 0 if currZoomTitle is undefined
+  //     }
+  //     const timeOnly = this.formatTime(new Date());
+  //     this.log += `${timeOnly}.Mode.${this.levels[this.currLevel]}\n`;
+  //     console.log(this.log);
+  //     // Update the screen
+  //     this.updateScreen(this.DataObj, true, true);
+  //   }
+  // }
 
-  navBack() {
-    if (
-      this.currLevel == 2 &&
-      this.DataObj.getData(this.levels[3]).length == 0
-    ) {
-      this.escape();
-    } else if (
-      this.currLevel < 4 &&
-      this.DataObj.getData(this.levels[this.currLevel + 1]).length > 0
-    ) {
-      this.currLevel += 1;
-      this.visTopicIndex = 0;
-      this.currIndex =
-        this.currViewedTopic.zoomOutIndex >= this.numTopicsShown
-          ? this.currViewedTopic.zoomOutIndex - this.numTopicsShown + 1
-          : 0;
-      this.data = this.DataObj.getData(this.levels[this.currLevel]);
-      this.visibleTopics = this.data
-        .slice(this.currIndex, this.currIndex + this.numTopicsShown)
-        .reverse();
-      const timeOnly = this.formatTime(new Date());
-      this.log += `${timeOnly}.Mode.${this.levels[this.currLevel]}\n`;
-      console.log(this.log);
-      this.updateScreen(this.DataObj, true, true);
-    }
-  }
+  /**
+   * Allows user to navigate to a larger granularity/time
+   * TODO: ask if need to remove
+   */
+  // navBack() {
+  //   if (
+  //     this.currLevel == 2 &&
+  //     this.DataObj.getData(this.levels[3]).length == 0
+  //   ) {
+  //     this.escape();
+  //   } else if (
+  //     this.currLevel < 4 &&
+  //     this.DataObj.getData(this.levels[this.currLevel + 1]).length > 0
+  //   ) {
+  //     this.currLevel += 1;
+  //     this.visTopicIndex = 0;
+  //     this.currIndex =
+  //       this.currViewedTopic.zoomOutIndex >= this.numTopicsShown
+  //         ? this.currViewedTopic.zoomOutIndex - this.numTopicsShown + 1
+  //         : 0;
+  //     this.data = this.DataObj.getData(this.levels[this.currLevel]);
+  //     this.visibleTopics = this.data
+  //       .slice(this.currIndex, this.currIndex + this.numTopicsShown)
+  //       .reverse();
+  //     const timeOnly = this.formatTime(new Date());
+  //     this.log += `${timeOnly}.Mode.${this.levels[this.currLevel]}\n`;
+  //     console.log(this.log);
+  //     this.updateScreen(this.DataObj, true, true);
+  //   }
+  // }
 
+  /**
+   * Allows user to scroll up throughout visualization
+   * REMOVED: Transitions will replace this (?)
+   * @param {*} log: logs to console 
+   */
   scrollUp(log = true) {
     if (this.visTopicIndex == 0 && this.currIndex < this.maxIndex) {
       this.currIndex = (this.currIndex + 1) % this.data.length;
@@ -417,6 +437,11 @@ export class Visualization {
     }
   }
 
+  /**
+   * Allows user to scroll down throughout visualization
+   * REMOVED: Transitions will replace this (?)
+   * @param {*} log: logs to console 
+   */
   scrollDown(log = true) {
     if (this.visTopicIndex == this.numTopicsShown - 1 && this.currIndex > 0) {
       this.currIndex = (this.currIndex - 1) % this.data.length;
@@ -467,29 +492,35 @@ export class Visualization {
     }
   }
 
-  zoomOut() {
-    // console.log("Out");
-    let newNum = this.numTopicsShown + 1;
-    // console.log(newNum);
-    if (newNum <= Math.min(16, this.data.length)) {
-      const timeOnly = this.formatTime(new Date());
-      this.log += `${timeOnly}.#+.${newNum}\n`;
-      console.log(this.log);
-      this.updateScreen(this.DataObj, true, true, newNum);
-    }
-  }
+  /**
+   * Allows user to remove topics from view
+   */
+  // zoomOut() {
+  //   // console.log("Out");
+  //   let newNum = this.numTopicsShown + 1;
+  //   // console.log(newNum);
+  //   if (newNum <= Math.min(16, this.data.length)) {
+  //     const timeOnly = this.formatTime(new Date());
+  //     this.log += `${timeOnly}.#+.${newNum}\n`;
+  //     console.log(this.log);
+  //     this.updateScreen(this.DataObj, true, true, newNum);
+  //   }
+  // }
 
-  zoomIn() {
-    // console.log("In");
-    let newNum = this.numTopicsShown - 1;
-    // console.log(newNum);
-    if (newNum >= 1) {
-      const timeOnly = this.formatTime(new Date());
-      this.log += `${timeOnly}.#-.${newNum}\n`;
-      console.log(this.log);
-      this.updateScreen(this.DataObj, true, true, this.numTopicsShown - 1);
-    }
-  }
+  /**
+   * Allows user to add topics to view
+   */
+  // zoomIn() {
+  //   // console.log("In");
+  //   let newNum = this.numTopicsShown - 1;
+  //   // console.log(newNum);
+  //   if (newNum >= 1) {
+  //     const timeOnly = this.formatTime(new Date());
+  //     this.log += `${timeOnly}.#-.${newNum}\n`;
+  //     console.log(this.log);
+  //     this.updateScreen(this.DataObj, true, true, this.numTopicsShown - 1);
+  //   }
+  // }
 
   timelineView() {
     const timeOnly = this.formatTime(new Date());
