@@ -178,17 +178,17 @@ export class Visualization {
       .attr("class", "time")
       .text((d) => d.time);
 
-    let turnBlock = line
-      .append("div")
-      .attr("class", "turnBlock")
-      .style("height", `100%`)
-      .style("background-color", "blue");
+    // let turnBlock = line
+    //   .append("div")
+    //   .attr("class", "turnBlock")
+    //   .style("height", `100%`)
+    //   .style("background-color", "blue");
 
-    let timeBlock = line
-      .append("div")
-      .attr("class", "timeBlock")
-      .style("height", `100%`)
-      .style("background-color", this.timelineColour);
+    // let timeBlock = line
+    //   .append("div")
+    //   .attr("class", "timeBlock")
+    //   .style("height", `100%`)
+    //   .style("background-color", this.timelineColour);
 
     let topicBlock = line.append("div").attr("class", "entry");
 
