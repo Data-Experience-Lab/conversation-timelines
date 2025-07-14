@@ -87,13 +87,13 @@ export class SpeechToTopic {
     return `${hours}:${minutes}:${seconds}`;
   }
   
-  navForward(){
-    this.vis.navForward();
-  }
+  // navForward(){
+  //   this.vis.navForward();
+  // }
   
-  navBack(){
-    this.vis.navBack();
-  }
+  // navBack(){
+  //   this.vis.navBack();
+  // }
   
   scrollUp(){
     this.vis.scrollUp();
