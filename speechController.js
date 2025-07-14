@@ -131,13 +131,13 @@ export class SpeechToTopic {
     return `${hours}:${minutes}:${seconds}`;
   }
 
-  navForward() {
-    this.vis.navForward();
-  }
+  // navForward() {
+  //   this.vis.navForward();
+  // }
 
-  navBack() {
-    this.vis.navBack();
-  }
+  // navBack() {
+  //   this.vis.navBack();
+  // }
 
   scrollUp() {
     this.vis.scrollUp();
@@ -155,13 +155,13 @@ export class SpeechToTopic {
     this.vis.jumpToCurr();
   }
 
-  zoomOut() {
-    this.vis.zoomOut();
-  }
+  // zoomOut() {
+  //   this.vis.zoomOut();
+  // }
 
-  zoomIn() {
-    this.vis.zoomIn();
-  }
+  // zoomIn() {
+  //   this.vis.zoomIn();
+  // }
   
   timelineView() {
     this.vis.timelineView();
