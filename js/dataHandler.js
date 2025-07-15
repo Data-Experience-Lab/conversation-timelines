@@ -1,4 +1,4 @@
-import { OpenAI } from "/conversation-timelines/openaiController.js";
+import { OpenAI } from "/conversation-timelines/js/openaiController.js";
 
 export class DataHandler {
   constructor() {
