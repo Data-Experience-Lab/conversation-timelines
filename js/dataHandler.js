@@ -1,4 +1,4 @@
-import { OpenAI } from "js/openaiController.js";
+import { OpenAI } from "./openaiController.js";
 
 export class DataHandler {
   constructor() {
