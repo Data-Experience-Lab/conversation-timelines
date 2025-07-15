@@ -1,4 +1,4 @@
-import { SpeechToTopic } from "/js/speechController.js";
+import { SpeechToTopic } from "/conversation-timelines/js/speechController.js";
 
 // swipe recognition
 let touchStartX = null;
