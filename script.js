@@ -23,16 +23,6 @@ startRecognition.addEventListener("click", function () {
   eventListeners();
 });
 
-increase.addEventListener("click", function () {
-  console.log("increase");
-  speechController.zoomIn();
-});
-
-decrease.addEventListener("click", function () {
-  console.log("decrease");
-  speechController.zoomOut();
-});
-
 secretButton.addEventListener("click", function () {
   console.log("secret button pressed!");
   speechController.download();
@@ -59,60 +49,32 @@ document.onkeydown = function (e) {
         speechController.escape();
       }
       break;
-    case 37:
-      if (!hidden) {
-        console.log("Left");
-        speechController.navBack();
-      }
-      break;
-    case 38:
-      if (!hidden) {
-        console.log("Up");
-        speechController.scrollUp();
-      }
-      break;
-    case 39:
-      if (!hidden) {
-        console.log("Right");
-        speechController.navForward();
-      }
-      break;
-    case 40:
-      if (!hidden) {
-        console.log("Down");
-        speechController.scrollDown();
-      }
-      break;
+    // case 38:
+    //   if (!hidden) {
+    //     console.log("Up");
+    //     speechController.scrollUp();
+    //   }
+    //   break;
+    // case 40:
+    //   if (!hidden) {
+    //     console.log("Down");
+    //     speechController.scrollDown();
+    //   }
+    //   break;
     case 75:
       console.log("K");
       speechController.toggleVis();
-      break;
-    case 78:
-      // N
-      speechController.zoomOut();
       break;
     case 77:
       // M
       console.log("M");
       speechController.timelineView();
       break;
-    case 79:
-      // O
-      speechController.zoomIn();
-      break;
     case 83:
       if (!hidden) {
         console.log("Jump to (S)");
         speechController.jumpToCurr();
       }
-      break;
-    case 189:
-      console.log("ZoomOut");
-      speechController.zoomOut();
-      break;
-    case 187:
-      console.log("ZoomIn");
-      speechController.zoomIn();
       break;
   }
 };
