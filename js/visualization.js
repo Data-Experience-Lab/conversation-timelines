@@ -90,7 +90,7 @@ export class Visualization {
         lastMax,
         this.currViewedTopic.time
       );
-      this.updateTimelineColour();
+      // this.updateTimelineColour();
       this.renderTimeline(this.visibleTopics);
       if (this.visibleTopics[this.visTopicIndex] != null) {
         this.hideRepSentences(this.visibleTopics[this.visTopicIndex].id);
@@ -216,54 +216,6 @@ export class Visualization {
       });
   }
 
-  // Hide representative sentences for all topics except the selected one
-  hideRepSentences(selectedTopic) {
-    this.addDurations();
-
-    const entries = document.querySelectorAll(".line");
-    entries.forEach((entry, i) => {
-      const repSentence = entry.querySelector(".repSentences");
-      const topicSentence = entry.querySelector(".topicSentences");
-      const time = entry.querySelector(".time");
-      const totalTime = entry.querySelector(".total-time");
-      const bar = entry.querySelector(".turnBlock");
-
-      if (this.currLevel == 4) {
-        repSentence.style.color = this.topicsColours[i % 8];
-        topicSentence.style.color = this.topicsColours[i % 8];
-      } else {
-        topicSentence.style.color = "#bfbfbf";
-      }
-
-      if (selectedTopic === topicSentence.__data__.id) {
-        repSentence.style.display = "block";
-        repSentence.setAttribute("id", "selected-entry");
-        topicSentence.setAttribute("id", "selected-entry");
-        entry.setAttribute("id", "selected-entry");
-        time.setAttribute("id", "selected-entry");
-        time.style.color = "white";
-        if (totalTime != null) {
-          totalTime.setAttribute("id", "selected-entry");
-          totalTime.style.color = "white";
-        }
-        bar.style.border = "0.3vw solid white";
-        repSentence.style.color = "white";
-        topicSentence.style.color = "white";
-      } else {
-        repSentence.style.display = "none";
-        repSentence.removeAttribute("id");
-        topicSentence.removeAttribute("id");
-        if (totalTime != null) {
-          totalTime.removeAttribute("id", "selected-entry");
-          totalTime.style.color = "#bfbfbf";
-        }
-        time.style.color = "#bfbfbf";
-        bar.style.border = "0.3vw solid black";
-        entry.removeAttribute("id");
-      }
-    });
-  }
-
   addDurations() {
     // Add duration. This is a stupid way but i am crashing out xxx
     if (this.currLevel == 4) {
@@ -311,121 +263,59 @@ export class Visualization {
     this.updateScreen(this.DataObj, false, true);
   }
 
-  navForward() {
-    let currZoomInd = "";
-    if (this.currLevel > 0) {
-      this.currLevel = this.currLevel == 4 ? 2 : this.currLevel - 1;
-      if (this.currViewedTopic && this.currViewedTopic.zoomInIndex != null) {
-        currZoomInd = this.currViewedTopic.zoomInIndex;
-        this.currIndex =
-          currZoomInd >= this.numTopicsShown
-            ? currZoomInd - this.numTopicsShown
-            : 0;
-      }
-      this.data = this.DataObj.getData(this.levels[this.currLevel]);
-      this.visibleTopics = this.data
-        .slice(this.currIndex, this.currIndex + this.numTopicsShown);
 
-      // Find the index of the visible topic that matches currZoomTitle
-      // Get the title of the current zoomed topic
-      let currZoomTitle = this.data[currZoomInd]?.topic;
-      if (currZoomTitle) {
-        this.visTopicIndex = this.visibleTopics.findIndex(
-          (topic) => topic.topic === currZoomTitle
-        );
-        // If no match is found, default to 0
-        if (this.visTopicIndex === -1) {
-          this.visTopicIndex = 0;
-        }
-      } else {
-        this.visTopicIndex = 0; // Default to 0 if currZoomTitle is undefined
-      }
-      const timeOnly = this.formatTime(new Date());
-      this.log += `${timeOnly}.Mode.${this.levels[this.currLevel]}\n`;
-      console.log(this.log);
-      // Update the screen
-      this.updateScreen(this.DataObj, true, true);
-    }
-  }
+  // scrollUp(log = true) {
+  //   if (this.visTopicIndex == 0 && this.currIndex < this.maxIndex) {
+  //     this.currIndex = (this.currIndex + 1) % this.data.length;
+  //   } else {
+  //     if (this.visTopicIndex > 0) {
+  //       this.visTopicIndex -= 1;
+  //     }
+  //   }
+  //   if (this.currViewedTopic != this.data.at(-1)) {
+  //     this.visibleTopics = this.data
+  //       .slice(this.currIndex, this.currIndex + this.numTopicsShown);
 
-  navBack() {
-    if (
-      this.currLevel == 2 &&
-      this.DataObj.getData(this.levels[3]).length == 0
-    ) {
-      this.escape();
-    } else if (
-      this.currLevel < 4 &&
-      this.DataObj.getData(this.levels[this.currLevel + 1]).length > 0
-    ) {
-      this.currLevel += 1;
-      this.visTopicIndex = 0;
-      this.currIndex =
-        this.currViewedTopic.zoomOutIndex >= this.numTopicsShown
-          ? this.currViewedTopic.zoomOutIndex - this.numTopicsShown + 1
-          : 0;
-      this.data = this.DataObj.getData(this.levels[this.currLevel]);
-      this.visibleTopics = this.data
-        .slice(this.currIndex, this.currIndex + this.numTopicsShown);
-      const timeOnly = this.formatTime(new Date());
-      this.log += `${timeOnly}.Mode.${this.levels[this.currLevel]}\n`;
-      console.log(this.log);
-      this.updateScreen(this.DataObj, true, true);
-    }
-  }
+  //     // console.log("Debug Up VTI" + this.visTopicIndex);
+  //     // console.log("Debug Up CI " + this.currIndex);
+  //     // console.log("Debug Up MI " + this.maxIndex);
+  //     // console.log("Debug Up: ", this.visibleTopics);
+  //     if (log) {
+  //       const timeOnly = this.formatTime(new Date());
+  //       this.log += `${timeOnly}.Action.↑\n`;
+  //       console.log(this.log);
+  //     }
+  //     this.updateScreen(this.DataObj);
+  //   }
+  // }
 
-  scrollUp(log = true) {
-    if (this.visTopicIndex == 0 && this.currIndex < this.maxIndex) {
-      this.currIndex = (this.currIndex + 1) % this.data.length;
-    } else {
-      if (this.visTopicIndex > 0) {
-        this.visTopicIndex -= 1;
-      }
-    }
-    if (this.currViewedTopic != this.data.at(-1)) {
-      this.visibleTopics = this.data
-        .slice(this.currIndex, this.currIndex + this.numTopicsShown);
+  // scrollDown(log = true) {
+  //   if (this.visTopicIndex == this.numTopicsShown - 1 && this.currIndex > 0) {
+  //     this.currIndex = (this.currIndex - 1) % this.data.length;
+  //   } else if (this.DataObj.getData(this.levels[this.currLevel]).length > 1) {
+  //     if (
+  //       this.visTopicIndex < this.numTopicsShown - 1 &&
+  //       this.visTopicIndex <
+  //         this.DataObj.getData(this.levels[this.currLevel]).length - 1
+  //     )
+  //       this.visTopicIndex += 1;
+  //   }
+  //   if (this.currViewedTopic != this.data.at(0)) {
+  //     this.visibleTopics = this.data
+  //       .slice(this.currIndex, this.currIndex + this.numTopicsShown);
 
-      // console.log("Debug Up VTI" + this.visTopicIndex);
-      // console.log("Debug Up CI " + this.currIndex);
-      // console.log("Debug Up MI " + this.maxIndex);
-      // console.log("Debug Up: ", this.visibleTopics);
-      if (log) {
-        const timeOnly = this.formatTime(new Date());
-        this.log += `${timeOnly}.Action.↑\n`;
-        console.log(this.log);
-      }
-      this.updateScreen(this.DataObj);
-    }
-  }
-
-  scrollDown(log = true) {
-    if (this.visTopicIndex == this.numTopicsShown - 1 && this.currIndex > 0) {
-      this.currIndex = (this.currIndex - 1) % this.data.length;
-    } else if (this.DataObj.getData(this.levels[this.currLevel]).length > 1) {
-      if (
-        this.visTopicIndex < this.numTopicsShown - 1 &&
-        this.visTopicIndex <
-          this.DataObj.getData(this.levels[this.currLevel]).length - 1
-      )
-        this.visTopicIndex += 1;
-    }
-    if (this.currViewedTopic != this.data.at(0)) {
-      this.visibleTopics = this.data
-        .slice(this.currIndex, this.currIndex + this.numTopicsShown);
-
-      // console.log("Debug Down VTI " + this.visTopicIndex);
-      // console.log("Debug Down CI " + this.currIndex);
-      // console.log("Debug Down MI " + this.maxIndex);
-      // console.log("Debug Down: ", this.visibleTopics);
-      if (log) {
-        const timeOnly = this.formatTime(new Date());
-        this.log += `${timeOnly}.Action.↓\n`;
-        console.log(this.log);
-      }
-      this.updateScreen(this.DataObj);
-    }
-  }
+  //     // console.log("Debug Down VTI " + this.visTopicIndex);
+  //     // console.log("Debug Down CI " + this.currIndex);
+  //     // console.log("Debug Down MI " + this.maxIndex);
+  //     // console.log("Debug Down: ", this.visibleTopics);
+  //     if (log) {
+  //       const timeOnly = this.formatTime(new Date());
+  //       this.log += `${timeOnly}.Action.↓\n`;
+  //       console.log(this.log);
+  //     }
+  //     this.updateScreen(this.DataObj);
+  //   }
+  // }
 
   escape() {
     if (this.currLevel != 4) {
@@ -448,29 +338,6 @@ export class Visualization {
     }
   }
 
-  zoomOut() {
-    // console.log("Out");
-    let newNum = this.numTopicsShown + 1;
-    // console.log(newNum);
-    if (newNum <= Math.min(16, this.data.length)) {
-      const timeOnly = this.formatTime(new Date());
-      this.log += `${timeOnly}.#+.${newNum}\n`;
-      console.log(this.log);
-      this.updateScreen(this.DataObj, true, true, newNum);
-    }
-  }
-
-  zoomIn() {
-    // console.log("In");
-    let newNum = this.numTopicsShown - 1;
-    // console.log(newNum);
-    if (newNum >= 1) {
-      const timeOnly = this.formatTime(new Date());
-      this.log += `${timeOnly}.#-.${newNum}\n`;
-      console.log(this.log);
-      this.updateScreen(this.DataObj, true, true, this.numTopicsShown - 1);
-    }
-  }
 
   timelineView() {
     const timeOnly = this.formatTime(new Date());
@@ -649,95 +516,6 @@ export class Visualization {
       jumpLabel.style.fontSize = this.repSize;
       repSentence.style.fontSize = this.repSize;
     });
-  }
-
-  calcTimeBlockHeight() {
-    // Calculate the height of the timeline bar based on the mode
-    if (this.currLevel == 4) {
-      let windowHeight = document.getElementById("topics").offsetHeight - 80;
-
-      // Calculate the total duration of all topics
-      const totalDuration = this.visibleTopics.reduce(
-        (sum, topic, index, topics) => {
-          if (index < topics.length) {
-            sum += topic.totalSeconds;
-          }
-          return sum;
-        },
-        0
-      );
-      console.log(totalDuration);
-      const lines = document.querySelectorAll(".line");
-
-      lines.forEach((line, i) => {
-        if (i < this.numTopicsShown) {
-          const bar = line.querySelector(".timeBlock");
-          const turnBar = line.querySelector(".turnBlock");
-          const entry = line.querySelector(".entry");
-          const topic = entry.querySelector(".topicSentences");
-
-          bar.style.backgroundColor = this.topicsColours[i % 8];
-
-          const percentage = this.visibleTopics[i].totalSeconds / totalDuration;
-          const barHeight = percentage * windowHeight;
-
-          // If the bar height is greater than content height,
-          // set the whole div to percentage to account for the
-          // margins
-          if (barHeight >= topic.offsetHeight) {
-            line.style.height = `${percentage * 100}%`;
-          } else {
-            bar.style.height = `${barHeight}px`;
-            turnBar.style.height = `${barHeight}px`;
-          }
-          bar.style.display = "none";
-        }
-      });
-    } else {
-      // document.getElementById("subTopics").style.display = "none";
-      // For other modes, evenly split the timeline bars
-      const lines = document.querySelectorAll(".line");
-      lines.forEach((line) => {
-        line.style.flexGrow = 1;
-        const bar = line.querySelector(".timeBlock");
-        bar.style.display = "none";
-      });
-    }
-  }
-
-  // Update the timeline colour based on the current level
-  updateTimelineColour() {
-    const levelText = document.getElementById("vis-level-text");
-    const textContainer = document.getElementById("text-container");
-    if (levelText) {
-      let level = this.levels[this.currLevel];
-      switch (level) {
-        case "s10":
-          levelText.textContent = `10s`;
-          // levelText.style.backgroundColor = "rgb(211, 33, 45, 0.6)";
-          // this.timelineColour = "#D3212D";
-          break;
-        case "s30":
-          levelText.textContent = `30s`;
-          // levelText.style.backgroundColor = "rgb(162, 38, 75, 0.6)";
-          // this.timelineColour = "#A2264B";
-          break;
-        case "m1":
-          levelText.textContent = `1m`;
-          // levelText.style.backgroundColor = "rgb(114, 43, 106, 0.6)";
-          // this.timelineColour = "#722B6A";
-          break;
-        case "m5":
-          levelText.textContent = `5m`;
-          // levelText.style.backgroundColor = "rgb(65, 47, 136, 0.6)";
-          // this.timelineColour = "#412F88";
-          break;
-        case "topics":
-          levelText.textContent = `Topics`;
-          // levelText.style.backgroundColor = "rgb(65, 47, 136, 0.6)";
-          break;
-      }
-    }
   }
 
   renderSpeechBubbles(bubble, data) {
