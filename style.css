@@ -222,19 +222,6 @@ h2 {
   overflow: visible;
 }
 
-#increase,
-#decrease {
-  margin-left: 2vw;
-  font-size: 2em;
-  height: 5vw;
-  width: 5vw;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 10vh;
-  background-color: #841b5f;
-}
-
 .entry,
 .subEntry {
   overflow-wrap: break-word;
