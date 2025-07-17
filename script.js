@@ -1,11 +1,14 @@
+//Hosted
 import { SpeechToTopic } from "/conversation-timelines/js/speechController.js";
+//Local
+// import { SpeechToTopic } from "/js/speechController.js";
 
 // swipe recognition
 let touchStartX = null;
 let touchEndX = null;
 let touchStartY = null;
 let touchEndY = null;
-let hidden = false;
+// let hidden = false;
 
 // Create class objects
 let speechController = new SpeechToTopic();
@@ -13,63 +16,39 @@ let speechController = new SpeechToTopic();
 const startRecognition = document.getElementById("startRecognition");
 const increase = document.getElementById("increase");
 const decrease = document.getElementById("decrease");
-const secretButton = document.getElementById("vis-level-text");
 
 startRecognition.addEventListener("click", function () {
   console.log("Transcribing");
   speechController.startContinuousRecording();
   startRecognition.style.display = "none";
-  document.querySelector("#zoom").style.display = "flex";
-  eventListeners();
+  // eventListeners();
 });
 
-secretButton.addEventListener("click", function () {
-  console.log("secret button pressed!");
-  speechController.download();
-});
 
 d3.select("#jumpToCurrent").on("click", function () {
   speechController.jumpToCurr();
 });
 
-// window.onload = speechController.startContinuousRecording();
-
 // allow left and right arrow keys to press back and forward (for now)
 document.onkeydown = function (e) {
   switch (e.keyCode) {
-    case 27:
-      if (!hidden) {
-        console.log("Esc");
-        speechController.escape();
-      }
+    case 38:
+      // if (!hidden) {
+        console.log("Up");
+        speechController.scrollUp();
+      // }
       break;
-    case 76:
-      if (!hidden) {
-        console.log("L");
-        speechController.escape();
-      }
+    case 40:
+      // if (!hidden) {
+        console.log("Down");
+        speechController.scrollDown();
+      // }
       break;
-    // case 38:
-    //   if (!hidden) {
-    //     console.log("Up");
-    //     speechController.scrollUp();
-    //   }
+    // case 77:
+    //   // M
+    //   console.log("M");
+    //   speechController.timelineView();
     //   break;
-    // case 40:
-    //   if (!hidden) {
-    //     console.log("Down");
-    //     speechController.scrollDown();
-    //   }
-    //   break;
-    case 75:
-      console.log("K");
-      speechController.toggleVis();
-      break;
-    case 77:
-      // M
-      console.log("M");
-      speechController.timelineView();
-      break;
     case 83:
       if (!hidden) {
         console.log("Jump to (S)");

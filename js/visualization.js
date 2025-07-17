@@ -53,7 +53,6 @@ export class Visualization {
   updateScreen(
     dataobj,
     debug = false,
-    resize = false,
     numTopics = this.numTopicsShown
   ) {
     this.DataObj = dataobj;
@@ -73,7 +72,7 @@ export class Visualization {
         .slice(this.currIndex, this.currIndex + this.numTopicsShown);
     }
 
-    document.getElementById("jumpToCurrent").style.display = "none";
+    // document.getElementById("jumpToCurrent").style.display = "none";
     document.getElementById("timeDetails").style.display = "none";
 
     // Update UI elements based on the current state
@@ -92,24 +91,13 @@ export class Visualization {
       );
       // this.updateTimelineColour();
       this.renderTimeline(this.visibleTopics);
-      if (this.visibleTopics[this.visTopicIndex] != null) {
-        this.hideRepSentences(this.visibleTopics[this.visTopicIndex].id);
-      }
     }
 
-    if (this.topicHidden) {
-      this.hideTopics();
-    } else {
-      this.showTopics();
-    }
-
-    if (this.data.length > 0) this.resizeFont(resize);
-    if (resize) {
-      this.scrollDown(false);
-      this.scrollUp(false);
-    }
-    this.calcTimeBlockHeight();
-    this.setSpeakerTurnColours();
+    // if (this.topicHidden) {
+    //   this.hideTopics();
+    // } else {
+    //   this.showTopics();
+    // }
   }
 
   // Handle navigation logic
@@ -155,16 +143,6 @@ export class Visualization {
 
   // Handle new elements entering the DOM
   handleEnter(enter) {
-    //     let top = "";
-    //     let h1 = document.querySelector(".topicSentences");
-    //     if (h1 != null) {
-    //       top = h1.textContent;
-    //     }
-
-    //     let topicsDisplayed = document.querySelectorAll(".line").length;
-    //     if (!(top == this.visibleTopics.at(0).topic) || !(topicsDisplayed == this.numTopicsShown)) {
-    //       enter.each(
-    //         function (d, i) {
     let line = enter
       .append("div")
       .attr("class", "line")
@@ -201,9 +179,6 @@ export class Visualization {
         const bubble = d3.select(nodes[i]);
         this.renderSpeechBubbles(bubble, d);
       });
-    // }.bind(this)
-    // );
-    // }
   }
 
   // Handle updates to existing elements in the DOM
@@ -216,38 +191,6 @@ export class Visualization {
       });
   }
 
-  addDurations() {
-    // Add duration. This is a stupid way but i am crashing out xxx
-    if (this.currLevel == 4) {
-      const lines = document.querySelectorAll(".line");
-      lines.forEach((line, i) => {
-        if (i < this.visibleTopics.length) {
-          let div = line.querySelector(".timeDiv");
-          let test = div.querySelector(".total-time");
-
-          if (test == null) {
-            let topic = this.visibleTopics.at(i);
-            console.log(topic);
-
-            let duration = this.timeDifference(
-              this.visibleTopics.at(i).totalSeconds
-            );
-            console.log(duration);
-
-            let newElement = document.createElement("h1");
-            newElement.textContent = duration;
-            newElement.classList.add("total-time");
-            console.log(div.querySelector(".time").offsetWidth);
-            newElement.style.maxWidth = `${
-              div.querySelector(".time").offsetWidth
-            }px`;
-            newElement.style.marginTop = "0.5vh";
-            div.appendChild(newElement); // Append the new <p> element to the div
-          }
-        }
-      });
-    }
-  }
 
   // ************ Button click events ************
 
@@ -264,147 +207,95 @@ export class Visualization {
   }
 
 
-  // scrollUp(log = true) {
-  //   if (this.visTopicIndex == 0 && this.currIndex < this.maxIndex) {
-  //     this.currIndex = (this.currIndex + 1) % this.data.length;
-  //   } else {
-  //     if (this.visTopicIndex > 0) {
-  //       this.visTopicIndex -= 1;
-  //     }
-  //   }
-  //   if (this.currViewedTopic != this.data.at(-1)) {
-  //     this.visibleTopics = this.data
-  //       .slice(this.currIndex, this.currIndex + this.numTopicsShown);
+  scrollUp(log = true) {
+    if (this.visTopicIndex == 0 && this.currIndex < this.maxIndex) {
+      this.currIndex = (this.currIndex + 1) % this.data.length;
+    } else {
+      if (this.visTopicIndex > 0) {
+        this.visTopicIndex -= 1;
+      }
+    }
+    if (this.currViewedTopic != this.data.at(-1)) {
+      this.visibleTopics = this.data
+        .slice(this.currIndex, this.currIndex + this.numTopicsShown);
 
-  //     // console.log("Debug Up VTI" + this.visTopicIndex);
-  //     // console.log("Debug Up CI " + this.currIndex);
-  //     // console.log("Debug Up MI " + this.maxIndex);
-  //     // console.log("Debug Up: ", this.visibleTopics);
-  //     if (log) {
+      if (log) {
+        const timeOnly = this.formatTime(new Date());
+        this.log += `${timeOnly}.Action.↑\n`;
+        console.log(this.log);
+      }
+      this.updateScreen(this.DataObj);
+    }
+  }
+
+  scrollDown(log = true) {
+    if (this.visTopicIndex == this.numTopicsShown - 1 && this.currIndex > 0) {
+      this.currIndex = (this.currIndex - 1) % this.data.length;
+    } else if (this.DataObj.getData(this.levels[this.currLevel]).length > 1) {
+      if (
+        this.visTopicIndex < this.numTopicsShown - 1 &&
+        this.visTopicIndex <
+          this.DataObj.getData(this.levels[this.currLevel]).length - 1
+      )
+        this.visTopicIndex += 1;
+    }
+    if (this.currViewedTopic != this.data.at(0)) {
+      this.visibleTopics = this.data
+        .slice(this.currIndex, this.currIndex + this.numTopicsShown);
+      if (log) {
+        const timeOnly = this.formatTime(new Date());
+        this.log += `${timeOnly}.Action.↓\n`;
+        console.log(this.log);
+      }
+      this.updateScreen(this.DataObj);
+    }
+  }
+
+  // timelineView() {
+  //   const timeOnly = this.formatTime(new Date());
+  //   let topics = document.querySelector("#topics");
+  //   if (!(topics.style.display == "none")) {
+  //     if (!this.topicHidden) {
+  //       this.hideTopics();
   //       const timeOnly = this.formatTime(new Date());
-  //       this.log += `${timeOnly}.Action.↑\n`;
+  //       this.log += `${timeOnly}.Vis.LV\n`;
   //       console.log(this.log);
+  //       this.topicHidden = true;
+  //     } else {
+  //       this.hideTopics();
+  //       const timeOnly = this.formatTime(new Date());
+  //       this.log += `${timeOnly}.Vis.FV\n`;
+  //       console.log(this.log);
+  //       this.showTopics();
+  //       this.topicHidden = false;
   //     }
-  //     this.updateScreen(this.DataObj);
   //   }
   // }
 
-  // scrollDown(log = true) {
-  //   if (this.visTopicIndex == this.numTopicsShown - 1 && this.currIndex > 0) {
-  //     this.currIndex = (this.currIndex - 1) % this.data.length;
-  //   } else if (this.DataObj.getData(this.levels[this.currLevel]).length > 1) {
-  //     if (
-  //       this.visTopicIndex < this.numTopicsShown - 1 &&
-  //       this.visTopicIndex <
-  //         this.DataObj.getData(this.levels[this.currLevel]).length - 1
-  //     )
-  //       this.visTopicIndex += 1;
-  //   }
-  //   if (this.currViewedTopic != this.data.at(0)) {
-  //     this.visibleTopics = this.data
-  //       .slice(this.currIndex, this.currIndex + this.numTopicsShown);
-
-  //     // console.log("Debug Down VTI " + this.visTopicIndex);
-  //     // console.log("Debug Down CI " + this.currIndex);
-  //     // console.log("Debug Down MI " + this.maxIndex);
-  //     // console.log("Debug Down: ", this.visibleTopics);
-  //     if (log) {
+  // toggleVis() {
+  //   let topics = document.querySelector("#topics");
+  //   let top = document.querySelector(".info-container");
+  //   let main = document.querySelector(".main");
+  //   requestAnimationFrame(() => {
+  //     if (topics.style.display == "flex") {
+  //       top.style.display = "none";
+  //       document.querySelector("#zoom").style.visibility = "hidden";
+  //       topics.style.display = "none";
+  //       main.style.border = "1vw solid #80808042";
   //       const timeOnly = this.formatTime(new Date());
-  //       this.log += `${timeOnly}.Action.↓\n`;
+  //       this.log += `${timeOnly}.Vis.NV\n`;
+  //       console.log(this.log);
+  //     } else {
+  //       topics.style.display = "flex";
+  //       top.style.display = "block";
+  //       document.querySelector("#zoom").style.visibility = "visible";
+  //       main.style.border = "";
+  //       const timeOnly = this.formatTime(new Date());
+  //       this.log += `${timeOnly}.Vis.FV\n`;
   //       console.log(this.log);
   //     }
-  //     this.updateScreen(this.DataObj);
-  //   }
+  //   });
   // }
-
-  escape() {
-    if (this.currLevel != 4) {
-      if (this.DataObj.getData(this.levels[4]).length > 0) {
-        this.currLevel = 4;
-        this.visTopicIndex = 0;
-        this.currIndex =
-          this.currViewedTopic.topicIndex >= this.numTopicsShown
-            ? this.currViewedTopic.topicIndex - this.numTopicsShown
-            : 0;
-        this.data = this.DataObj.getData(this.levels[this.currLevel]);
-        this.visibleTopics = this.data
-          .slice(this.currIndex, this.currIndex + this.numTopicsShown)
-          .reverse();
-        const timeOnly = this.formatTime(new Date());
-        this.log += `${timeOnly}.Mode.${this.levels[this.currLevel]}\n`;
-        console.log(this.log);
-        this.updateScreen(this.DataObj, true, true);
-      }
-    }
-  }
-
-
-  timelineView() {
-    const timeOnly = this.formatTime(new Date());
-    let topics = document.querySelector("#topics");
-    if (!(topics.style.display == "none")) {
-      if (!this.topicHidden) {
-        this.hideTopics();
-        const timeOnly = this.formatTime(new Date());
-        this.log += `${timeOnly}.Vis.LV\n`;
-        console.log(this.log);
-        this.topicHidden = true;
-      } else {
-        this.hideTopics();
-        const timeOnly = this.formatTime(new Date());
-        this.log += `${timeOnly}.Vis.FV\n`;
-        console.log(this.log);
-        this.showTopics();
-        this.topicHidden = false;
-      }
-    }
-  }
-
-  download() {
-    const timeOnly = this.formatTime(new Date());
-    this.log += `End Time: ${timeOnly}`;
-    const blob = new Blob([this.log], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
-    try {
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "sample.txt"; // Change the file name and extension as needed
-      document.body.appendChild(a);
-      a.click();
-      navigator.clipboard.writeText(this.log);
-      document.body.removeChild(a);
-    } catch (err) {
-      console.log(err);
-      document.querySelector(".repSentences").textContent = err;
-    }
-    // Clean up the URL object
-    URL.revokeObjectURL(url);
-  }
-
-  toggleVis() {
-    let topics = document.querySelector("#topics");
-    let top = document.querySelector(".info-container");
-    let main = document.querySelector(".main");
-    requestAnimationFrame(() => {
-      if (topics.style.display == "flex") {
-        top.style.display = "none";
-        document.querySelector("#zoom").style.visibility = "hidden";
-        topics.style.display = "none";
-        main.style.border = "1vw solid #80808042";
-        const timeOnly = this.formatTime(new Date());
-        this.log += `${timeOnly}.Vis.NV\n`;
-        console.log(this.log);
-      } else {
-        topics.style.display = "flex";
-        top.style.display = "block";
-        document.querySelector("#zoom").style.visibility = "visible";
-        main.style.border = "";
-        const timeOnly = this.formatTime(new Date());
-        this.log += `${timeOnly}.Vis.FV\n`;
-        console.log(this.log);
-      }
-    });
-  }
 
   // ************ Utility Functions ************
 
@@ -479,44 +370,6 @@ export class Visualization {
     return [hours, minutes, seconds];
   }
 
-  resizeFont(checkSize = false) {
-    const lines = document.querySelectorAll(".line");
-    let entrySize = document.querySelector(".entry:not(#selected-entry)");
-    if (entrySize == null) entrySize = document.querySelector(".entry");
-    let levelText = document.getElementById("vis-level-text");
-    let jumpButton = document.getElementById("jumpToCurrent");
-    let jumpLabel = document.getElementById("timeDetails");
-    // console.log(entrySize.offsetHeight);
-
-    let window = document.getElementById("topics");
-
-    lines.forEach((line) => {
-      let repSentence = line.querySelector(".repSentences");
-      let topicSentence = line.querySelector(".topicSentences");
-      let time = line.querySelector(".time");
-      let totalTime = line.querySelector(".total-time");
-
-      if (checkSize) {
-        this.topicSize = `clamp(15px, ${
-          (window.offsetHeight / this.visibleTopics.length) * 0.4
-        }px, 4vmin)`;
-        this.repSize = `clamp(10px, ${
-          (window.offsetHeight / this.visibleTopics.length) * 0.3
-        }px, 2.5vmin)`;
-      }
-
-      topicSentence.style.fontSize = this.topicSize;
-      time.style.fontSize = this.repSize;
-      if (totalTime != null) {
-        let totalTime = line.querySelector(".total-time");
-        totalTime.style.fontSize = this.repSize;
-      }
-      levelText.style.fontSize = this.topicSize;
-      jumpButton.style.fontSize = this.repSize;
-      jumpLabel.style.fontSize = this.repSize;
-      repSentence.style.fontSize = this.repSize;
-    });
-  }
 
   renderSpeechBubbles(bubble, data) {
     if (data.speakerTurns && data.speakerTurns.turns) {

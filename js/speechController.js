@@ -1,20 +1,24 @@
+// Hosted
 import { DataHandler } from "/conversation-timelines/js/dataHandler.js";
 import { Visualization } from "/conversation-timelines/js/visualization.js";
+// Local
+// import { DataHandler } from "/js/dataHandler.js";
+// import { Visualization } from "/js/visualization.js";
 
 export class SpeechToTopic {
   constructor() {
     this.data = new DataHandler();
     this.vis = new Visualization(this.data.getData());
     // status fields and start button in UI
-    this.SpeechSDK;
-    this.conversationTranscriber;
-    this.time = "";
-    this.transcript = "";
-    this.speakerTurns = { total: 0, speakers: [], turns: [] };
-    // subscription key and region for speech services.
-    this.subscriptionKey = "5zM4pkL95Eh0TgnAyNxSwZc4aAeKM9zcdJ1OtmhYy99xIkKvwmeSJQQJ99BDAC1i4TkXJ3w3AAAYACOGEFls";
-    this.serviceRegion = "centralus";
-    this.sdkSetup();
+    // this.SpeechSDK;
+    // this.conversationTranscriber;
+    // this.time = "";
+    // this.transcript = "";
+    // this.speakerTurns = { total: 0, speakers: [], turns: [] };
+    // // subscription key and region for speech services.
+    // this.subscriptionKey = "5zM4pkL95Eh0TgnAyNxSwZc4aAeKM9zcdJ1OtmhYy99xIkKvwmeSJQQJ99BDAC1i4TkXJ3w3AAAYACOGEFls";
+    // this.serviceRegion = "centralus";
+    // this.sdkSetup();
   }
 
   transcriptionStart() {
@@ -105,12 +109,12 @@ export class SpeechToTopic {
 
   async startContinuousRecording() {
     // Call function for initial render of display
-    this.vis.updateScreen(this.data, false, true);
-    try {
-      this.transcriptionStop();
-    } catch (error) {
-      console.error("Error accessing microphone:", error);
-    }
+    this.vis.updateScreen(this.data, false);
+    // try {
+    //   this.transcriptionStop();
+    // } catch (error) {
+    //   console.error("Error accessing microphone:", error);
+    // }
   }
 
   async handleTranscription(transcription, speakerTurns) {
@@ -131,13 +135,13 @@ export class SpeechToTopic {
     return `${hours}:${minutes}:${seconds}`;
   }
 
-  // scrollUp() {
-  //   this.vis.scrollUp();
-  // }
+  scrollUp() {
+    this.vis.scrollUp();
+  }
 
-  // scrollDown() {
-  //   this.vis.scrollDown();
-  // }
+  scrollDown() {
+    this.vis.scrollDown();
+  }
 
   escape() {
     this.vis.escape();
