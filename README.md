@@ -12,6 +12,8 @@ node server.js
 
 - You may need to refresh the server (By cancelling and rerunning the command then refreshing page) when you make changes.
 
+- Change the import statements in script.js, js/dataHandler.js, and js/speechController.js to local instead of hosted.
+
 ************* 
 ***Ignore for now. This is all pushed to git at the moment (which yes bad but later problem)***
 

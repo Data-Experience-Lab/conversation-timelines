@@ -1,9 +1,9 @@
 // Hosted
-// import { DataHandler } from "/conversation-timelines/js/dataHandler.js";
-// import { Visualization } from "/conversation-timelines/js/visualization.js";
+import { DataHandler } from "/conversation-timelines/js/dataHandler.js";
+import { Visualization } from "/conversation-timelines/js/visualization.js";
 // Local
-import { DataHandler } from "/js/dataHandler.js";
-import { Visualization } from "/js/visualization.js";
+// import { DataHandler } from "/js/dataHandler.js";
+// import { Visualization } from "/js/visualization.js";
 
 export class SpeechToTopic {
   constructor() {
