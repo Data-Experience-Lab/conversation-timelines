@@ -13,6 +13,8 @@ node server.js
 - You may need to refresh the server (By cancelling and rerunning the command then refreshing page) when you make changes.
 
 - Change the import statements in script.js, js/dataHandler.js, and js/speechController.js to local instead of hosted.
+- Change this.fetchURL in js/speechController.js to local instead of hosted
+- Remember to change these back to hosted before creating merge request!
 
 ************* 
 ***Ignore for now. This is all pushed to git at the moment (which yes bad but later problem)***

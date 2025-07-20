@@ -17,6 +17,8 @@ export class SpeechToTopic {
     this.speakerTurns = { total: 0, speakers: [], turns: [] };
     // subscription key and region for speech services.
     this.sdkSetup();
+    // this.fetchURL = "http://localhost:3000/api/speech-config"
+    this.fetchURL = "http://data-experience-lab.github.io/conversation-timelines/api/speech-config"
   }
 
   transcriptionStart() {
@@ -171,7 +173,7 @@ export class SpeechToTopic {
     }
 
     // Get region from backend
-    const response = await fetch("http://localhost:3000/api/speech-config");
+    const response = await fetch(this.fetchURL);
     const { region } = await response.json();
 
     const subscriptionKey = window.SPEECH_KEY; // Use global or injected key during dev
