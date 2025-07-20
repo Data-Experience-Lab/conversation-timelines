@@ -1,24 +1,22 @@
 // Hosted
-import { DataHandler } from "/conversation-timelines/js/dataHandler.js";
-import { Visualization } from "/conversation-timelines/js/visualization.js";
+// import { DataHandler } from "/conversation-timelines/js/dataHandler.js";
+// import { Visualization } from "/conversation-timelines/js/visualization.js";
 // Local
-// import { DataHandler } from "/js/dataHandler.js";
-// import { Visualization } from "/js/visualization.js";
+import { DataHandler } from "/js/dataHandler.js";
+import { Visualization } from "/js/visualization.js";
 
 export class SpeechToTopic {
   constructor() {
     this.data = new DataHandler();
     this.vis = new Visualization(this.data.getData());
     // status fields and start button in UI
-    // this.SpeechSDK;
-    // this.conversationTranscriber;
-    // this.time = "";
-    // this.transcript = "";
-    // this.speakerTurns = { total: 0, speakers: [], turns: [] };
-    // // subscription key and region for speech services.
-    // this.subscriptionKey = "5zM4pkL95Eh0TgnAyNxSwZc4aAeKM9zcdJ1OtmhYy99xIkKvwmeSJQQJ99BDAC1i4TkXJ3w3AAAYACOGEFls";
-    // this.serviceRegion = "centralus";
-    // this.sdkSetup();
+    this.SpeechSDK;
+    this.conversationTranscriber;
+    this.time = "";
+    this.transcript = "";
+    this.speakerTurns = { total: 0, speakers: [], turns: [] };
+    // subscription key and region for speech services.
+    this.sdkSetup();
   }
 
   transcriptionStart() {
@@ -110,11 +108,11 @@ export class SpeechToTopic {
   async startContinuousRecording() {
     // Call function for initial render of display
     this.vis.updateScreen(this.data, false);
-    // try {
-    //   this.transcriptionStop();
-    // } catch (error) {
-    //   console.error("Error accessing microphone:", error);
-    // }
+    try {
+      this.transcriptionStop();
+    } catch (error) {
+      console.error("Error accessing microphone:", error);
+    }
   }
 
   async handleTranscription(transcription, speakerTurns) {
@@ -165,24 +163,38 @@ export class SpeechToTopic {
   }
 
   //SDK SETUP*********************************
-  sdkSetup() {
-    if (!!window.SpeechSDK) {
-      this.SpeechSDK = window.SpeechSDK;
+
+  async sdkSetup() {
+    if (!window.SpeechSDK) {
+      console.error("Speech SDK not loaded");
+      return;
     }
 
-    const speechConfig = this.SpeechSDK.SpeechConfig.fromSubscription(
-      this.subscriptionKey,
-      this.serviceRegion
+    // Get region from backend
+    const response = await fetch("http://localhost:3000/api/speech-config");
+    const { region } = await response.json();
+
+    const subscriptionKey = window.SPEECH_KEY; // Use global or injected key during dev
+
+    if (!subscriptionKey) {
+      console.error("Speech subscription key not defined.");
+      return;
+    }
+
+    const speechConfig = window.SpeechSDK.SpeechConfig.fromSubscription(
+      subscriptionKey,
+      region
     );
 
     speechConfig.speechRecognitionLanguage = "en-US";
-    const audioConfig = this.SpeechSDK.AudioConfig.fromDefaultMicrophoneInput();
+    const audioConfig = window.SpeechSDK.AudioConfig.fromDefaultMicrophoneInput();
 
+    this.SpeechSDK = window.SpeechSDK;
     this.conversationTranscriber = new this.SpeechSDK.ConversationTranscriber(
       speechConfig,
       audioConfig
     );
-
+    
     this.conversationTranscriber.sessionStarted = function (s, e) {
       this.time = Date.now();
       console.log("SessionStarted event");

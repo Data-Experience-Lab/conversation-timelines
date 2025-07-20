@@ -1,24 +1,20 @@
-const API_URL = "https://api.openai.com/v1/chat/completions";
-const API_KEY = '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'
 export class OpenAI {
   constructor(){};
   
   
   // Get response from openAI
   async topicClassify(speech, lastTopic) {
-      // console.log("topicClassify topic:" + lastTopic);
+      console.log("getting topic" + speech);
       let resultText = "";
 
       try {
-        // Fetch the response from the OpenAI API with the signal from AbortController
-        const response = await fetch(API_URL, {
+        const response = await fetch("http://localhost:3000/api/chat", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              Authorization: `Bearer ${API_KEY}`,
             },
             body: JSON.stringify({
-              model: "gpt-4.5-preview",
+              model: "gpt-4o",
               messages: [
                 {
                   role: "system",
@@ -64,7 +60,7 @@ export class OpenAI {
         console.error("Error:", error);
         resultText = "Error occurred while generating.";
       }
-      // console.log("openai response", resultText.topic);
+      console.log("openai response", resultText);
       return resultText;
   };
   
@@ -122,7 +118,7 @@ export class OpenAI {
         console.error("Error:", error);
         resultText = "Error occurred while generating.";
       }
-      // console.log("openai response", resultText.topic);
+      console.log("openai response", resultText.topic);
       return resultText.subtopics;
   };
   
