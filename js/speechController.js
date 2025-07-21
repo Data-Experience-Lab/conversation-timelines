@@ -2,6 +2,8 @@
 import { DataHandler } from "/conversation-timelines/js/dataHandler.js";
 import { Visualization } from "/conversation-timelines/js/visualization.js";
 
+const APIURL = "https://convtimelines-backend.onrender.com"
+
 export class SpeechToTopic {
   constructor() {
     this.data = new DataHandler();
@@ -14,7 +16,7 @@ export class SpeechToTopic {
     this.speakerTurns = { total: 0, speakers: [], turns: [] };
     // subscription key and region for speech services.
     this.sdkSetup();
-}
+  }
 
   transcriptionStart() {
     console.log("Starting transcription...");
@@ -162,65 +164,68 @@ export class SpeechToTopic {
   //SDK SETUP*********************************
 
   async sdkSetup() {
-    if (!window.SpeechSDK) {
-      console.error("Speech SDK not loaded");
-      return;
-    }
+    try {
+      // Get speech token + region from backend
+      const response = await fetch(`${APIURL}/api/speech-token`, {
+        method: "POST"
+      });
 
-    // Get region from backend
-    const response = await fetch("https://convtimelines-backend.onrender.com/api/speech-config");
-    const { region } = await response.json();
-
-    const subscriptionKey = window.SPEECH_KEY; // Use global or injected key during dev
-
-    if (!subscriptionKey) {
-      console.error("Speech subscription key not defined.");
-      return;
-    }
-
-    const speechConfig = window.SpeechSDK.SpeechConfig.fromSubscription(
-      subscriptionKey,
-      region
-    );
-
-    speechConfig.speechRecognitionLanguage = "en-US";
-    const audioConfig = window.SpeechSDK.AudioConfig.fromDefaultMicrophoneInput();
-
-    this.SpeechSDK = window.SpeechSDK;
-    this.conversationTranscriber = new this.SpeechSDK.ConversationTranscriber(
-      speechConfig,
-      audioConfig
-    );
-    
-    this.conversationTranscriber.sessionStarted = function (s, e) {
-      this.time = Date.now();
-      console.log("SessionStarted event");
-      console.log("SessionId:" + e.sessionId);
-    };
-    this.conversationTranscriber.sessionStopped = function (s, e) {
-      console.log("SessionStopped event");
-      console.log("SessionId:" + e.sessionId);
-      this.conversationTranscriber.stopTranscribingAsync();
-    };
-    this.conversationTranscriber.canceled = function (s, e) {
-      console.log("Canceled event");
-      console.log(e.errorDetails);
-      this.conversationTranscriber.stopTranscribingAsync();
-    };
-    this.conversationTranscriber.transcribed = (s, e) => {
-      if (e.result.text != undefined && e.result.speakerId != "Unknown") {
-        console.log(e.result);
-        console.log(
-          "TRANSCRIBED: Text=" +
-            e.result.text +
-            " Speaker ID=" +
-            e.result.speakerId
-        );
-        this.addSegment(e.result);
-        this.transcript += e.result.text + " ";
-        console.log("transcript = " + this.transcript);
+      if (!response.ok) {
+        throw new Error("Failed to fetch speech token");
       }
-    };
+
+      const { token, region } = await response.json();
+
+      if (!token || !region) {
+        throw new Error("Missing token or region");
+      }
+
+      // Use token to configure Speech SDK
+      const speechConfig = window.SpeechSDK.SpeechConfig.fromAuthorizationToken(token, region);
+      speechConfig.speechRecognitionLanguage = "en-US";
+
+      // Store config, or continue with recognizer creation
+      this.speechConfig = speechConfig;
+      const audioConfig = window.SpeechSDK.AudioConfig.fromDefaultMicrophoneInput();
+
+      this.SpeechSDK = window.SpeechSDK;
+      this.conversationTranscriber = new this.SpeechSDK.ConversationTranscriber(
+        speechConfig,
+        audioConfig
+      );
+      
+      this.conversationTranscriber.sessionStarted = function (s, e) {
+        this.time = Date.now();
+        console.log("SessionStarted event");
+        console.log("SessionId:" + e.sessionId);
+      };
+      this.conversationTranscriber.sessionStopped = function (s, e) {
+        console.log("SessionStopped event");
+        console.log("SessionId:" + e.sessionId);
+        this.conversationTranscriber.stopTranscribingAsync();
+      };
+      this.conversationTranscriber.canceled = function (s, e) {
+        console.log("Canceled event");
+        console.log(e.errorDetails);
+        this.conversationTranscriber.stopTranscribingAsync();
+      };
+      this.conversationTranscriber.transcribed = (s, e) => {
+        if (e.result.text != undefined && e.result.speakerId != "Unknown") {
+          console.log(e.result);
+          console.log(
+            "TRANSCRIBED: Text=" +
+              e.result.text +
+              " Speaker ID=" +
+              e.result.speakerId
+          );
+          this.addSegment(e.result);
+          this.transcript += e.result.text + " ";
+          console.log("transcript = " + this.transcript);
+        }
+      };
+    } catch (err) {
+      console.error("Speech SDK setup failed:", err);
+    }
   }
 
   addSegment(result) {
