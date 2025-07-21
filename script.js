@@ -1,7 +1,5 @@
 //Hosted
 import { SpeechToTopic } from "/conversation-timelines/js/speechController.js";
-//Local
-// import { SpeechToTopic } from "/js/speechController.js";
 
 // swipe recognition
 let touchStartX = null;

@@ -1,7 +1,5 @@
 // Hosted
 import { OpenAI } from "/conversation-timelines/js/openaiController.js";
-// Local
-// import { OpenAI } from "/js/openaiController.js";
 
 export class DataHandler {
   constructor() {

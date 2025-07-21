@@ -1,9 +1,6 @@
 // Hosted
 import { DataHandler } from "/conversation-timelines/js/dataHandler.js";
 import { Visualization } from "/conversation-timelines/js/visualization.js";
-// Local
-// import { DataHandler } from "/js/dataHandler.js";
-// import { Visualization } from "/js/visualization.js";
 
 export class SpeechToTopic {
   constructor() {
@@ -17,9 +14,7 @@ export class SpeechToTopic {
     this.speakerTurns = { total: 0, speakers: [], turns: [] };
     // subscription key and region for speech services.
     this.sdkSetup();
-    // this.fetchURL = "http://localhost:3000/api/speech-config"
-    this.fetchURL = "http://data-experience-lab.github.io/conversation-timelines/api/speech-config"
-  }
+}
 
   transcriptionStart() {
     console.log("Starting transcription...");
@@ -173,7 +168,7 @@ export class SpeechToTopic {
     }
 
     // Get region from backend
-    const response = await fetch(this.fetchURL);
+    const response = await fetch("https://convtimelines-backend.onrender.com/api/speech-config");
     const { region } = await response.json();
 
     const subscriptionKey = window.SPEECH_KEY; // Use global or injected key during dev
