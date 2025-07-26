@@ -62,7 +62,7 @@ document.onkeydown = function (e) {
     case 37:
       if (!hidden) {
         console.log("Left");
-        speechController.navBack();
+        speechController.zoomOut();
       }
       break;
     case 38:
@@ -74,7 +74,7 @@ document.onkeydown = function (e) {
     case 39:
       if (!hidden) {
         console.log("Right");
-        speechController.navForward();
+        speechController.zoomIn();
       }
       break;
     case 40:
@@ -182,11 +182,11 @@ function checkDirection() {
   console.log(`ydiff: ${yDiff}`);
   if (Math.abs(xDiff) > Math.abs(yDiff)) {
     if (touchEndX < touchStartX) {
-      speechController.navBack();
+      speechController.zoomOut();
       console.log("swipe right");
     }
     if (touchEndX > touchStartX) {
-      speechController.navForward();
+      speechController.zoomIn();
       console.log("swipe left");
     }
   }

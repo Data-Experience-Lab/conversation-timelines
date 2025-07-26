@@ -10,6 +10,53 @@ export class Visualization {
     this.navMode = false; // When true, this updates the timeline in real time with new topics
     this.levels = ["s10", "s30", "m1", "m5", "topics"];
     this.currLevel = 0;
+    this.zoomValue = 0.0; // Start at speech bubble level
+    this.zoomStep = 0.02; // Step size for left/right arrow keys
+    
+    // the mapping we talked about in our convo
+    this.zoomConfig = {
+      "speechBubbles": {
+        "selector": ".speechBubbleItem",
+        "properties": {
+          "transform": [[0.0, "scale(1)"], [0.15, "scale(0.4)"], [0.3, "scale(0.2)"]],
+          "color": [[0.0, "white"], [0.15, "rgba(255,255,255,0.6)"], [0.25, "rgba(255,255,255,0.2)"], [0.3, "rgba(255,255,255,0.0)"]],
+          "font-size": [[0.0, "16px"], [0.15, "8px"], [0.3, "4px"]],
+          "width": [[0.0, "auto"], [0.35, "auto"], [0.4, "80px"], [0.6, "60px"]],
+          "height": [[0.0, "auto"], [0.35, "auto"], [0.4, "30px"], [0.6, "20px"]],
+          "max-width": [[0.0, "70%"], [0.35, "70%"], [0.4, "80px"], [0.6, "60px"]],
+          "overflow": [[0.0, "visible"], [0.35, "visible"], [0.4, "hidden"], [0.6, "hidden"]]
+        }
+      },
+      "speechBubbleContainers": {
+        "selector": ".speechBubble",
+        "properties": {
+          "width": [[0.0, "100%"], [0.08, "80%"], [0.15, "25%"], [0.3, "15%"]],
+          "margin-left": [[0.0, "0"], [0.08, "20%"], [0.15, "75%"], [0.3, "85%"]],
+          "margin-right": [[0.0, "0"], [0.15, "0"], [0.3, "0%"]]
+        }
+      },
+      "speechBubbleItems": {
+        "selector": ".speechBubble > div",
+        "properties": {
+          "justify-content": [[0.0, ""], [0.08, "flex-end"], [0.15, "flex-end"], [1.0, "flex-end"]]
+        }
+      },
+      "topics": {
+        "selector": ".topicSentences",
+        "properties": {
+          "opacity": [[0.0, 0.0], [0.05, 0.05], [0.08, 0.1], [0.12, 0.2], [0.16, 0.3], [0.2, 0.4], [0.25, 0.5], [0.3, 0.6], [0.35, 0.7], [0.4, 0.8], [0.45, 0.9], [0.5, 1.0], [1.0, 1.0]],
+          "transform": [[0.0, "translateX(-800px)"], [0.05, "translateX(-750px)"], [0.08, "translateX(-700px)"], [0.12, "translateX(-650px)"], [0.16, "translateX(-600px)"], [0.2, "translateX(-550px)"], [0.25, "translateX(-500px)"], [0.3, "translateX(-400px)"], [0.35, "translateX(-300px)"], [0.4, "translateX(-200px)"], [0.45, "translateX(-100px)"], [0.5, "translateX(-25px)"], [0.55, "translateX(0px)"]],
+          "font-size": [[0.0, "20px"], [0.4, "24px"], [0.7, "28px"], [1.0, "32px"]]
+        }
+      },
+      "repSentences": {
+        "selector": ".repSentences",
+        "properties": {
+          "opacity": [[0.0, 0.0], [0.08, 0.05], [0.12, 0.1], [0.16, 0.15], [0.2, 0.2], [0.25, 0.3], [0.3, 0.4], [0.35, 0.5], [0.4, 0.6], [0.45, 0.7], [0.5, 0.8], [0.55, 0.9], [0.6, 1.0], [1.0, 1.0]],
+          "transform": [[0.0, "translateX(-800px)"], [0.08, "translateX(-750px)"], [0.12, "translateX(-700px)"], [0.16, "translateX(-650px)"], [0.2, "translateX(-600px)"], [0.25, "translateX(-550px)"], [0.3, "translateX(-500px)"], [0.35, "translateX(-400px)"], [0.4, "translateX(-300px)"], [0.45, "translateX(-200px)"], [0.5, "translateX(-100px)"], [0.55, "translateX(-25px)"], [0.6, "translateX(0px)"]]
+        }
+      }
+    };
     this.timelineColour = "";
     this.visibleTopics;
     this.topicHidden = false;
@@ -110,6 +157,8 @@ export class Visualization {
     }
     this.calcTimeBlockHeight();
     this.setSpeakerTurnColours();
+    
+    this.updateZoomStyles();
   }
 
   // Handle navigation logic
@@ -121,9 +170,6 @@ export class Visualization {
     if (this.currIndex == this.maxIndex && this.visTopicIndex == 0) {
       this.navMode = false;
     } else if (this.data.length > 1) {
-      // console.log(this.data.at(-1));
-      // If the newest topic isn't at the top of currently visible topics
-      // Show the jump to current button
       if (this.data.at(-1).id != this.visibleTopics.at(-1).id) {
         let [hours, minutes, seconds] = "";
 
@@ -194,6 +240,18 @@ export class Visualization {
       topicBlock.attr("class", "entry show");
     }, 10);
 
+    // Create topic elements
+    topicBlock
+      .append("h1")
+      .attr("class", "topicSentences")
+      .text((d) => d.topic || `Topic ${d.id}`);
+    
+    topicBlock
+      .append("p")
+      .attr("class", "repSentences")
+      .text((d) => d.description || d.repSentence || "Representative sentence...");
+
+    // Create speech bubbles
     topicBlock
       .append("div")
       .attr("class", "speechBubble")
@@ -208,6 +266,14 @@ export class Visualization {
 
   // Handle updates to existing elements in the DOM
   handleUpdate(update) {
+    // Update topic text
+    update.select(".topicSentences")
+      .text((d) => d.topic || `Topic ${d.id}`);
+    
+    update.select(".repSentences")
+      .text((d) => d.description || d.repSentence || "Representative sentence...");
+
+    // Update speech bubbles
     update.select(".speechBubble")
       .each((d, i, nodes) => {
         const bubble = d3.select(nodes[i]);
@@ -783,6 +849,12 @@ export class Visualization {
         const processedText = this.processFillerWords(turn.speakerSeg);
         bubbleDiv.html(processedText);
       });
+      
+      // Apply zoom styling to newly created speech bubbles then see speaker colors are good
+      setTimeout(() => {
+        this.updateZoomStyles();
+        this.preserveSpeakerColors();
+      }, 10);
     }
   }
 
@@ -800,5 +872,172 @@ export class Visualization {
 
   setSpeakerTurnColours() {
     
+  }
+
+  // Ensure speaker colors are preserved after zoom styling
+  preserveSpeakerColors() {
+    const speechBubbles = document.querySelectorAll('.speechBubbleItem');
+    speechBubbles.forEach((bubble, index) => {
+      // See if the bubble has a background color, if not, apply default speaker color
+      const currentBgColor = bubble.style.backgroundColor;
+      if (!currentBgColor || currentBgColor === '' || currentBgColor === 'rgba(0, 0, 0, 0)') {
+        // Apply a default speaker color based on index if no color is set
+        const speakerId = index % 5;
+        bubble.style.backgroundColor = this.speakerColours[speakerId];
+        console.log(`Applied speaker color ${this.speakerColours[speakerId]} to bubble ${index}`);
+      }
+    });
+  }
+
+  // Interpolate value between keyframes based on current zoom
+  interpolateValue(keyframes, zoomValue) {
+    if (keyframes.length === 0) return null;
+    if (keyframes.length === 1) return keyframes[0][1];
+    
+    // Find the two keyframes to interpolate between
+    let lower = keyframes[0];
+    let upper = keyframes[keyframes.length - 1];
+    
+    for (let i = 0; i < keyframes.length - 1; i++) {
+      if (zoomValue >= keyframes[i][0] && zoomValue <= keyframes[i + 1][0]) {
+        lower = keyframes[i];
+        upper = keyframes[i + 1];
+        break;
+      }
+    }
+    
+    // If zoomValue is outside range, return boundary values
+    if (zoomValue <= lower[0]) return lower[1];
+    if (zoomValue >= upper[0]) return upper[1];
+    
+    // My way of trying to figure how tf to interpolate between numbers and things like rgb vals
+    const t = (zoomValue - lower[0]) / (upper[0] - lower[0]);
+    const lowerVal = lower[1];
+    const upperVal = upper[1];
+    
+    // Handle different value types
+    if (typeof lowerVal === 'number' && typeof upperVal === 'number') {
+      return lowerVal + (upperVal - lowerVal) * t;
+    }
+    
+    // Handle transform strings 
+    if (typeof lowerVal === 'string' && lowerVal.includes('scale') && upperVal.includes('scale')) {
+      const lowerScale = parseFloat(lowerVal.match(/scale\(([^)]+)\)/)[1]);
+      const upperScale = parseFloat(upperVal.match(/scale\(([^)]+)\)/)[1]);
+      const lowerTransX = lowerVal.includes('translateX') ? parseFloat(lowerVal.match(/translateX\(([^)]+)/)[1]) : 0;
+      const upperTransX = upperVal.includes('translateX') ? parseFloat(upperVal.match(/translateX\(([^)]+)/)[1]) : 0;
+      
+      const interpScale = lowerScale + (upperScale - lowerScale) * t;
+      const interpTransX = lowerTransX + (upperTransX - lowerTransX) * t;
+      const unit = upperVal.includes('vw') ? 'vw' : (upperVal.includes('px') ? 'px' : '');
+      
+      return `scale(${interpScale}) translateX(${interpTransX}${unit})`;
+    }
+    
+    // Handle rgba colors
+    if (typeof lowerVal === 'string' && lowerVal.includes('rgba') && typeof upperVal === 'string' && upperVal.includes('rgba')) {
+      const lowerMatch = lowerVal.match(/rgba\((\d+),(\d+),(\d+),([0-9.]+)\)/);
+      const upperMatch = upperVal.match(/rgba\((\d+),(\d+),(\d+),([0-9.]+)\)/);
+      if (lowerMatch && upperMatch) {
+        const r = Math.round(parseInt(lowerMatch[1]) + (parseInt(upperMatch[1]) - parseInt(lowerMatch[1])) * t);
+        const g = Math.round(parseInt(lowerMatch[2]) + (parseInt(upperMatch[2]) - parseInt(lowerMatch[2])) * t);
+        const b = Math.round(parseInt(lowerMatch[3]) + (parseInt(upperMatch[3]) - parseInt(lowerMatch[3])) * t);
+        const a = parseFloat(lowerMatch[4]) + (parseFloat(upperMatch[4]) - parseFloat(lowerMatch[4])) * t;
+        return `rgba(${r},${g},${b},${a})`;
+      }
+    }
+
+    // Handle size strings (rem, px, vw, etc.)
+    if (typeof lowerVal === 'string' && typeof upperVal === 'string') {
+      const lowerNum = parseFloat(lowerVal);
+      const upperNum = parseFloat(upperVal);
+      const unit = upperVal.replace(/[0-9.-]/g, '');
+      const interpNum = lowerNum + (upperNum - lowerNum) * t;
+      return `${interpNum}${unit}`;
+    }
+    
+    // For discrete values, use threshold
+    return t < 0.5 ? lowerVal : upperVal;
+  }
+
+  // Update all CSS properties based on current zoom value
+  updateZoomStyles() {
+    
+    Object.keys(this.zoomConfig).forEach(elementType => {
+      const config = this.zoomConfig[elementType];
+      const elements = document.querySelectorAll(config.selector);
+      console.log(`Found ${elements.length} elements for ${elementType} (${config.selector})`);
+      
+      elements.forEach(element => {
+        Object.keys(config.properties).forEach(property => {
+          const keyframes = config.properties[property];
+          const value = this.interpolateValue(keyframes, this.zoomValue);
+          
+          if (value !== null) {
+            if (property === 'transform') {
+              element.style.transform = value;
+            } else if (property === 'font-size') {
+              element.style.fontSize = value;
+            } else if (property === 'background-color') {
+              return;
+            } else if (property === 'margin-left') {
+              element.style.marginLeft = value;
+            } else if (property === 'margin-right') {
+              element.style.marginRight = value;
+            } else if (property === 'text-align') {
+              element.style.textAlign = value;
+            } else if (property === 'color') {
+              element.style.color = value;
+            } else if (property === 'justify-content') {
+              element.style.justifyContent = value;
+            } else if (property === 'width') {
+              element.style.width = value;
+            } else if (property === 'height') {
+              element.style.height = value;
+            } else if (property === 'max-width') {
+              element.style.maxWidth = value;
+            } else if (property === 'overflow') {
+              element.style.overflow = value;
+            } else {
+              element.style[property] = value;
+            }
+          }
+        });
+      });
+    });
+  }
+
+  // Set zoom value and update styles
+  setZoomValue(newZoomValue) {
+    this.zoomValue = Math.max(0.0, Math.min(1.0, newZoomValue));
+    console.log(`Setting zoom value to: ${this.zoomValue}`);
+    this.updateZoomStyles();
+    this.preserveSpeakerColors();
+    
+    // Update level indicator
+    const levelText = document.getElementById("vis-level-text");
+    if (levelText) {
+      if (this.zoomValue < 0.15) {
+        levelText.textContent = "Speech Bubbles";
+      } else if (this.zoomValue < 0.35) {
+        levelText.textContent = "10s Topics";
+      } else if (this.zoomValue < 0.55) {
+        levelText.textContent = "30s Topics";
+      } else if (this.zoomValue < 0.75) {
+        levelText.textContent = "1m Topics";
+      } else {
+        levelText.textContent = "5m Topics";
+      }
+    }
+  }
+
+  // Zoom in (increase zoom value)
+  zoomIn() {
+    this.setZoomValue(this.zoomValue + this.zoomStep);
+  }
+
+  // Zoom out (decrease zoom value)
+  zoomOut() {
+    this.setZoomValue(this.zoomValue - this.zoomStep);
   }
 }

@@ -256,9 +256,7 @@ h2 {
 .topicSentences {
   font-size: 4vmin;
   color: white;
-  /*   background: rgba(255, 255, 255, 0.35); */
-  /*   background: rgb(92 92 92 / 35%); */
-  background: rgb(68 68 68);
+  background: none;
   border-radius: 1vh;
   margin: 0;
   /*   margin-top: 10px; */
@@ -266,20 +264,20 @@ h2 {
   min-width: fit-content;
   padding: 0.2vh 1vw; /* Padding relative to viewport */
   display: block;
+  transition: opacity 0.3s ease, transform 0.3s ease, font-size 0.3s ease;
 }
 
 .repSentences {
   color: white;
   font-size: 2vmin; /* Smaller font size relative to topicSentences */
-  /*   background: rgba(255, 255, 255, 0.35); */
-  /*   background: rgb(92 92 92 / 35%); */
-  background: rgb(68 68 68);
+  background: none;
   border-radius: 1vh;
   padding: 0.2vh 1vw;
   max-width: 75vw;
   min-width: fit-content;
   margin-top: 0.5em;
   display: block;
+  transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
 #vis-level-text {
@@ -397,4 +395,15 @@ span {
   display: inline-block;
   vertical-align: middle;
   line-height: normal;
+}
+
+/* Speech bubble transition styles */
+.speechBubbleItem {
+  transition: opacity 0.3s ease, transform 0.3s ease, font-size 0.3s ease;
+  transform-origin: right center;
+}
+
+.speechBubble {
+  transition: width 0.3s ease, position 0.3s ease, right 0.3s ease, top 0.3s ease;
+  transform-origin: right center;
 }
