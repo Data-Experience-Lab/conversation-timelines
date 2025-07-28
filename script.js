@@ -30,11 +30,35 @@ d3.select("#jumpToCurrent").on("click", function () {
 // allow left and right arrow keys to press back and forward (for now)
 document.onkeydown = function (e) {
   switch (e.keyCode) {
+    case 27:
+      if (!hidden) {
+        console.log("Esc");
+        speechController.escape();
+      }
+      break;
+    case 76:
+      if (!hidden) {
+        console.log("L");
+        speechController.escape();
+      }
+      break;
+    case 37:
+      if (!hidden) {
+        console.log("Left");
+        speechController.zoomOut();
+      }
+      break;
     case 38:
       // if (!hidden) {
         console.log("Up");
         speechController.scrollUp();
       // }
+      break;
+    case 39:
+      if (!hidden) {
+        console.log("Right");
+        speechController.zoomIn();
+      }
       break;
     case 40:
       // if (!hidden) {
@@ -121,11 +145,11 @@ function checkDirection() {
   console.log(`ydiff: ${yDiff}`);
   if (Math.abs(xDiff) > Math.abs(yDiff)) {
     if (touchEndX < touchStartX) {
-      speechController.navBack();
+      speechController.zoomOut();
       console.log("swipe right");
     }
     if (touchEndX > touchStartX) {
-      speechController.navForward();
+      speechController.zoomIn();
       console.log("swipe left");
     }
   }
