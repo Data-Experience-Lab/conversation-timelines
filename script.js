@@ -30,15 +30,15 @@ d3.select("#jumpToCurrent").on("click", function () {
 });
 
 let slider = d3.sliderHorizontal()
-    .min(0)
-    .max(1)
-    .ticks(0)
+    .min(-1)
+    .max(0)
+    .ticks(10)
     .step(0.0001)
     .width(700)
     .displayValue(false)
     .on('onchange', val => {
-      console.log(val)
-      speechController.setSliderZoom(val);
+      console.log(Math.abs(val))
+      speechController.setSliderZoom(Math.abs(val));
     });
 
 d3.select("#slider")
@@ -46,7 +46,7 @@ d3.select("#slider")
     .style("margin-top", "0px")
     .append("svg")
     .attr("width", 1000)
-    .attr("height", 20)
+    .attr("height", 100)
     .append("g")
     .attr("transform", "translate(40,10)")
     .call(slider);
@@ -69,10 +69,10 @@ document.onkeydown = function (e) {
       break;
     case 37:
       // if (!hidden) {
-        console.log("Left");
-        console.log(slider.value())
+        console.log("Right");
         slider.value([slider.value() - 0.02]);
-        speechController.zoomOut();
+        console.log(slider.value())
+        speechController.zoomIn();
       // }
       break;
     case 38:
@@ -83,10 +83,10 @@ document.onkeydown = function (e) {
       break;
     case 39:
       // if (!hidden) {
-        console.log("Right");
-        slider.value([slider.value() + 0.02]);
+        console.log("Left");
         console.log(slider.value())
-        speechController.zoomIn();
+        slider.value([slider.value() + 0.02]);
+        speechController.zoomOut();
       // }
       break;
     case 40:

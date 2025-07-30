@@ -923,6 +923,9 @@ export class Visualization {
   }
 
   setSliderZoom(value) {
+    if (value<0.01){
+      value = 0;
+    }
     this.setZoomValue(value);
   }
 
