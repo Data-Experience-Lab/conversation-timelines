@@ -1,6 +1,5 @@
 export class Visualization {
   constructor() {
-    this.Data;
     this.currIndex = 0; // change to 0 if you want to go forwards
     this.visTopicIndex = 0;
     this.currViewedTopic;
@@ -12,6 +11,7 @@ export class Visualization {
     this.currLevel = 0;
     this.zoomValue = 0.0; // Start at speech bubble level
     this.zoomStep = 0.02; // Step size for left/right arrow keys
+    this.selfID = "Guest-1";
     
     // the mapping we talked about in our convo
     this.zoomConfig = {
@@ -38,7 +38,7 @@ export class Visualization {
       "speechBubbleItems": {
         "selector": ".speechBubble > div",
         "properties": {
-          "justify-content": [[0.0, ""], [0.08, "flex-end"], [0.15, "flex-end"], [1.0, "flex-end"]]
+          "justify-content": [[0.08, "flex-end"], [0.15, "flex-end"], [1.0, "flex-end"]]
         }
       },
       "topics": {
@@ -57,7 +57,6 @@ export class Visualization {
         }
       }
     };
-    this.timelineColour = "";
     this.visibleTopics;
     this.topicHidden = false;
     this.topicsColours = [
@@ -90,7 +89,7 @@ export class Visualization {
     let params = new URLSearchParams(document.location.search);
     let numTopicsParam = parseInt(params.get("numtopics"), 10);
     this.numTopicsShown =
-      !isNaN(numTopicsParam) && numTopicsParam > 0 ? numTopicsParam : 5;
+      !isNaN(numTopicsParam) && numTopicsParam > 0 ? numTopicsParam : 4;
     if (this.numTopicsShown > 16) {
       this.numTopicsShown = 16;
     }
@@ -137,7 +136,7 @@ export class Visualization {
         lastMax,
         this.currViewedTopic.time
       );
-      this.updateTimelineColour();
+
       this.renderTimeline(this.visibleTopics);
       if (this.visibleTopics[this.visTopicIndex] != null) {
         this.hideRepSentences(this.visibleTopics[this.visTopicIndex].id);
@@ -155,11 +154,11 @@ export class Visualization {
       this.scrollDown(false);
       this.scrollUp(false);
     }
-    this.calcTimeBlockHeight();
-    this.setSpeakerTurnColours();
-    
+
     this.updateZoomStyles();
+
   }
+
 
   // Handle navigation logic
   handleNavigation(visibleTopics, lastMax, time) {
@@ -201,16 +200,6 @@ export class Visualization {
 
   // Handle new elements entering the DOM
   handleEnter(enter) {
-    //     let top = "";
-    //     let h1 = document.querySelector(".topicSentences");
-    //     if (h1 != null) {
-    //       top = h1.textContent;
-    //     }
-
-    //     let topicsDisplayed = document.querySelectorAll(".line").length;
-    //     if (!(top == this.visibleTopics.at(0).topic) || !(topicsDisplayed == this.numTopicsShown)) {
-    //       enter.each(
-    //         function (d, i) {
     let line = enter
       .append("div")
       .attr("class", "line")
@@ -259,9 +248,6 @@ export class Visualization {
         const bubble = d3.select(nodes[i]);
         this.renderSpeechBubbles(bubble, d);
       });
-    // }.bind(this)
-    // );
-    // }
   }
 
   // Handle updates to existing elements in the DOM
@@ -292,7 +278,7 @@ export class Visualization {
       const topicSentence = entry.querySelector(".topicSentences");
       const time = entry.querySelector(".time");
       const totalTime = entry.querySelector(".total-time");
-      const bar = entry.querySelector(".turnBlock");
+      // const bar = entry.querySelector(".turnBlock");
 
       if (this.currLevel == 4) {
         repSentence.style.color = this.topicsColours[i % 8];
@@ -312,7 +298,7 @@ export class Visualization {
           totalTime.setAttribute("id", "selected-entry");
           totalTime.style.color = "white";
         }
-        bar.style.border = "0.3vw solid white";
+        // bar.style.border = "0.3vw solid white";
         repSentence.style.color = "white";
         topicSentence.style.color = "white";
       } else {
@@ -324,7 +310,7 @@ export class Visualization {
           totalTime.style.color = "#bfbfbf";
         }
         time.style.color = "#bfbfbf";
-        bar.style.border = "0.3vw solid black";
+        // bar.style.border = "0.3vw solid black";
         entry.removeAttribute("id");
       }
     });
@@ -452,10 +438,6 @@ export class Visualization {
       this.visibleTopics = this.data
         .slice(this.currIndex, this.currIndex + this.numTopicsShown);
 
-      // console.log("Debug Up VTI" + this.visTopicIndex);
-      // console.log("Debug Up CI " + this.currIndex);
-      // console.log("Debug Up MI " + this.maxIndex);
-      // console.log("Debug Up: ", this.visibleTopics);
       if (log) {
         const timeOnly = this.formatTime(new Date());
         this.log += `${timeOnly}.Action.↑\n`;
@@ -480,10 +462,6 @@ export class Visualization {
       this.visibleTopics = this.data
         .slice(this.currIndex, this.currIndex + this.numTopicsShown);
 
-      // console.log("Debug Down VTI " + this.visTopicIndex);
-      // console.log("Debug Down CI " + this.currIndex);
-      // console.log("Debug Down MI " + this.maxIndex);
-      // console.log("Debug Down: ", this.visibleTopics);
       if (log) {
         const timeOnly = this.formatTime(new Date());
         this.log += `${timeOnly}.Action.↓\n`;
@@ -514,29 +492,29 @@ export class Visualization {
     }
   }
 
-  zoomOut() {
-    // console.log("Out");
-    let newNum = this.numTopicsShown + 1;
-    // console.log(newNum);
-    if (newNum <= Math.min(16, this.data.length)) {
-      const timeOnly = this.formatTime(new Date());
-      this.log += `${timeOnly}.#+.${newNum}\n`;
-      console.log(this.log);
-      this.updateScreen(this.DataObj, true, true, newNum);
-    }
-  }
+  // zoomOut() {
+  //   // console.log("Out");
+  //   let newNum = this.numTopicsShown + 1;
+  //   // console.log(newNum);
+  //   if (newNum <= Math.min(16, this.data.length)) {
+  //     const timeOnly = this.formatTime(new Date());
+  //     this.log += `${timeOnly}.#+.${newNum}\n`;
+  //     console.log(this.log);
+  //     this.updateScreen(this.DataObj, true, true, newNum);
+  //   }
+  // }
 
-  zoomIn() {
-    // console.log("In");
-    let newNum = this.numTopicsShown - 1;
-    // console.log(newNum);
-    if (newNum >= 1) {
-      const timeOnly = this.formatTime(new Date());
-      this.log += `${timeOnly}.#-.${newNum}\n`;
-      console.log(this.log);
-      this.updateScreen(this.DataObj, true, true, this.numTopicsShown - 1);
-    }
-  }
+  // zoomIn() {
+  //   // console.log("In");
+  //   let newNum = this.numTopicsShown - 1;
+  //   // console.log(newNum);
+  //   if (newNum >= 1) {
+  //     const timeOnly = this.formatTime(new Date());
+  //     this.log += `${timeOnly}.#-.${newNum}\n`;
+  //     console.log(this.log);
+  //     this.updateScreen(this.DataObj, true, true, this.numTopicsShown - 1);
+  //   }
+  // }
 
   timelineView() {
     const timeOnly = this.formatTime(new Date());
@@ -717,115 +695,27 @@ export class Visualization {
     });
   }
 
-  calcTimeBlockHeight() {
-    // Calculate the height of the timeline bar based on the mode
-    if (this.currLevel == 4) {
-      let windowHeight = document.getElementById("topics").offsetHeight - 80;
-
-      // Calculate the total duration of all topics
-      const totalDuration = this.visibleTopics.reduce(
-        (sum, topic, index, topics) => {
-          if (index < topics.length) {
-            sum += topic.totalSeconds;
-          }
-          return sum;
-        },
-        0
-      );
-      console.log(totalDuration);
-      const lines = document.querySelectorAll(".line");
-
-      lines.forEach((line, i) => {
-        if (i < this.numTopicsShown) {
-          const bar = line.querySelector(".timeBlock");
-          const turnBar = line.querySelector(".turnBlock");
-          const entry = line.querySelector(".entry");
-          const topic = entry.querySelector(".topicSentences");
-
-          bar.style.backgroundColor = this.topicsColours[i % 8];
-
-          const percentage = this.visibleTopics[i].totalSeconds / totalDuration;
-          const barHeight = percentage * windowHeight;
-
-          // If the bar height is greater than content height,
-          // set the whole div to percentage to account for the
-          // margins
-          if (barHeight >= topic.offsetHeight) {
-            line.style.height = `${percentage * 100}%`;
-          } else {
-            bar.style.height = `${barHeight}px`;
-            turnBar.style.height = `${barHeight}px`;
-          }
-          bar.style.display = "none";
-        }
-      });
-    } else {
-      // document.getElementById("subTopics").style.display = "none";
-      // For other modes, evenly split the timeline bars
-      const lines = document.querySelectorAll(".line");
-      lines.forEach((line) => {
-        line.style.flexGrow = 1;
-        const bar = line.querySelector(".timeBlock");
-        bar.style.display = "none";
-      });
-    }
-  }
-
-  // Update the timeline colour based on the current level
-  updateTimelineColour() {
-    const levelText = document.getElementById("vis-level-text");
-    const textContainer = document.getElementById("text-container");
-    if (levelText) {
-      let level = this.levels[this.currLevel];
-      switch (level) {
-        case "s10":
-          levelText.textContent = `10s`;
-          // levelText.style.backgroundColor = "rgb(211, 33, 45, 0.6)";
-          // this.timelineColour = "#D3212D";
-          break;
-        case "s30":
-          levelText.textContent = `30s`;
-          // levelText.style.backgroundColor = "rgb(162, 38, 75, 0.6)";
-          // this.timelineColour = "#A2264B";
-          break;
-        case "m1":
-          levelText.textContent = `1m`;
-          // levelText.style.backgroundColor = "rgb(114, 43, 106, 0.6)";
-          // this.timelineColour = "#722B6A";
-          break;
-        case "m5":
-          levelText.textContent = `5m`;
-          // levelText.style.backgroundColor = "rgb(65, 47, 136, 0.6)";
-          // this.timelineColour = "#412F88";
-          break;
-        case "topics":
-          levelText.textContent = `Topics`;
-          // levelText.style.backgroundColor = "rgb(65, 47, 136, 0.6)";
-          break;
-      }
-    }
-  }
 
   renderSpeechBubbles(bubble, data) {
     if (data.speakerTurns && data.speakerTurns.turns) {
-      if (!this.speakerAlignment) {
-        this.speakerAlignment = {};
-      }
-      
+
       data.speakerTurns.turns.forEach((turn, index) => {
-        const speakerId = parseInt(turn.speakerId.charAt(turn.speakerId.length - 1)) - 1;
-        
-        if (this.speakerAlignment[speakerId] === undefined) {
-          const alignRight = Object.keys(this.speakerAlignment).length > 0;
-          this.speakerAlignment[speakerId] = alignRight;
+        const speakerId = parseInt(turn.speakerId.charAt(turn.speakerId.length - 1)) - 1;  
+        //If speaker is self, align right
+        const alignRight = (turn.speakerId == this.selfID);
+        let speakerClass = ""
+        if (alignRight) {
+          speakerClass = "self"
         }
         
-        const alignRight = this.speakerAlignment[speakerId];
-        
         const bubbleContainer = bubble.append("div")
+          .attr("class", speakerClass)
           .style("display", "flex")
-          .style("justify-content", alignRight ? "flex-end" : "flex-start")
-          .style("margin", "8px 0");
+          .style("margin", "8px 0")
+          .style("width", "90%")
+
+        console.log(turn)
+        console.log(alignRight)
         
         const bubbleDiv = bubbleContainer.append("div")
           .attr("class", "speechBubbleItem")
@@ -868,10 +758,6 @@ export class Visualization {
     });
 
     return processedText;
-  }
-
-  setSpeakerTurnColours() {
-    
   }
 
   // Ensure speaker colors are preserved after zoom styling
@@ -966,7 +852,7 @@ export class Visualization {
     Object.keys(this.zoomConfig).forEach(elementType => {
       const config = this.zoomConfig[elementType];
       const elements = document.querySelectorAll(config.selector);
-      console.log(`Found ${elements.length} elements for ${elementType} (${config.selector})`);
+      // console.log(`Found ${elements.length} elements for ${elementType} (${config.selector})`);
       
       elements.forEach(element => {
         Object.keys(config.properties).forEach(property => {
@@ -989,7 +875,12 @@ export class Visualization {
             } else if (property === 'color') {
               element.style.color = value;
             } else if (property === 'justify-content') {
-              element.style.justifyContent = value;
+              if (this.zoomValue>0.15) {
+                element.style.justifyContent = 'flex-end';
+              } else {
+                let isSelf = (element.getAttribute("class") == "self")
+                element.style.justifyContent = (isSelf) ? "flex-end" : "flex-start";
+              }
             } else if (property === 'width') {
               element.style.width = value;
             } else if (property === 'height') {
@@ -1029,6 +920,10 @@ export class Visualization {
         levelText.textContent = "5m Topics";
       }
     }
+  }
+
+  setSliderZoom(value) {
+    this.setZoomValue(value);
   }
 
   // Zoom in (increase zoom value)

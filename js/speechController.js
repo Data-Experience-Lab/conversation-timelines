@@ -140,6 +140,18 @@ export class SpeechToTopic {
     this.vis.scrollDown();
   }
 
+  setSliderZoom(value) {
+    this.vis.setSliderZoom(value);
+  }
+
+  zoomIn() {
+    this.vis.zoomIn();
+  }
+
+  zoomOut() {
+    this.vis.zoomOut();
+  }
+
   escape() {
     this.vis.escape();
   }

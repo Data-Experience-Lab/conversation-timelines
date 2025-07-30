@@ -6,6 +6,7 @@ let touchStartX = null;
 let touchEndX = null;
 let touchStartY = null;
 let touchEndY = null;
+let sliderVal = 0;
 // let hidden = false;
 
 // Create class objects
@@ -20,6 +21,7 @@ startRecognition.addEventListener("click", function () {
   speechController.startContinuousRecording();
   startRecognition.style.display = "none";
   // eventListeners();
+  document.querySelector("#slider").style.display = "block"
 });
 
 
@@ -27,26 +29,51 @@ d3.select("#jumpToCurrent").on("click", function () {
   speechController.jumpToCurr();
 });
 
+let slider = d3.sliderHorizontal()
+    .min(0)
+    .max(1)
+    .ticks(0)
+    .step(0.0001)
+    .width(700)
+    .displayValue(false)
+    .on('onchange', val => {
+      console.log(val)
+      speechController.setSliderZoom(val);
+    });
+
+d3.select("#slider")
+    .style("width","90%")
+    .style("margin-top", "0px")
+    .append("svg")
+    .attr("width", 1000)
+    .attr("height", 20)
+    .append("g")
+    .attr("transform", "translate(40,10)")
+    .call(slider);
+
+
 // allow left and right arrow keys to press back and forward (for now)
 document.onkeydown = function (e) {
   switch (e.keyCode) {
     case 27:
-      if (!hidden) {
+      // if (!hidden) {
         console.log("Esc");
         speechController.escape();
-      }
+      // }
       break;
     case 76:
-      if (!hidden) {
+      // if (!hidden) {
         console.log("L");
         speechController.escape();
-      }
+      // }
       break;
     case 37:
-      if (!hidden) {
+      // if (!hidden) {
         console.log("Left");
+        console.log(slider.value())
+        slider.value([slider.value() - 0.02]);
         speechController.zoomOut();
-      }
+      // }
       break;
     case 38:
       // if (!hidden) {
@@ -55,10 +82,12 @@ document.onkeydown = function (e) {
       // }
       break;
     case 39:
-      if (!hidden) {
+      // if (!hidden) {
         console.log("Right");
+        slider.value([slider.value() + 0.02]);
+        console.log(slider.value())
         speechController.zoomIn();
-      }
+      // }
       break;
     case 40:
       // if (!hidden) {
@@ -72,10 +101,10 @@ document.onkeydown = function (e) {
     //   speechController.timelineView();
     //   break;
     case 83:
-      if (!hidden) {
+      // if (!hidden) {
         console.log("Jump to (S)");
         speechController.jumpToCurr();
-      }
+      // }
       break;
   }
 };
