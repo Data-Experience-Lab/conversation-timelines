@@ -32,7 +32,7 @@ d3.select("#jumpToCurrent").on("click", function () {
 let slider = d3.sliderHorizontal()
     .min(-1)
     .max(0)
-    .ticks(10)
+    .ticks(0)
     .step(0.0001)
     .width(700)
     .displayValue(false)
