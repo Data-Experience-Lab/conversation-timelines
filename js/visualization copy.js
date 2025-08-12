@@ -1,7 +1,7 @@
 export class Visualization {
   constructor() {
     this.DataObj;
-    this.lastZoomOperation = null;
+    this.onBoot = true;
     this.currIndex = 0; // change to 0 if you want to go forwards
     this.visTopicIndex = 0;
     this.currViewedTopic;
@@ -14,79 +14,87 @@ export class Visualization {
     this.zoomStep = 0.02; // Step size for left/right arrow keys
     this.selfID = "Guest-1";
     
+    this.speakerColours = [
+      "#648FFF",
+      "#FFB000",
+      "#785EF0",
+      "#FE6100",
+      "#DC267F",
+    ];
 
     // the mapping we talked about in our convo
     this.zoomConfig = {
       "speechBubbles": {
         "selector": ".speechBubbleItem",
         "properties": {
-          // "position": [null, "15vw"],
           "transform": ["scale(1)", "scale(0.2)"],
           "color": ["white", "rgba(255,255,255,0.0)"],
-          "font-size": ["20px", "4px"],
-          "width": ["max-content", "max-content"],
-          "max-width": ["50%", "5%"],
+          "font-size": ["16px", "4px"],
+          "width": ["auto", "60px"],
+          "max-width": ["50%", "10%"],
           "height": ["auto", "20px"],
-          "overflow": ["visible", "hidden"],
-          "left": ["null", "10vw"]
+          "overflow": ["visible", "hidden"]
         }
       },
       "speechBubbleContainers": {
         "selector": ".speechBubble",
         "properties": {
-          "width": ["80vw", "5vw"],
-          // "margin-left": ["0", "0%"],
-          // "margin-right": ["0", "0%"],
-          // "position": [null, "absolute"],
-          // "right": [null, "12vw"],
-          "max-height": [null, "100%"],
-          // "max-width": ["100%", "10%"]
+          "width": ["70%", "15%"],
+          "margin-left": ["0", "85%"],
+          "margin-right": ["0", "0%"],
+        }
+      },
+      "speechBubbleItems": {
+        "selector": ".speechBubbleItem",
+        "properties": {
+          "padding": ["12px 18px", "12px 18px"],
+          "border-radius": ["20px", "20px"],
+          "margin-bottom": ["8px", "2px"],
+          "border-bottom-left-radius": ["5px", "20px"],
+          "max-width": ["70%", "70%"],
+          "word-wrap": ["break-word", "break-word"],
+          "color": ["white", "white"],
+          "font-weight": ["500", "500"],
+          "box-shadow": ["0 2px 8px rgba(0,0,0,0.15)", "0 2px 8px rgba(0,0,0,0.15)"],
+          "display": ["inline-block", "inline-block"],
         }
       },
       "speechBubbleSelf": {
         "selector": ".self",
         "properties": {
-          "margin": ["8px 0px 8px 50px", "1px 0px 0px 0px"]
+          "margin-left": ["80%", "0%"],
+          "border-bottom-right-radius": ["5px", "20px"],
+          "border-bottom-left-radius": ["20px", "20px"]
         }
       },
-      "speechBubbleOther": {
-        "selector": ".other",
-        "properties": {
-          "margin": ["8px 0px 8px 0px", "1px 0px 0px 0px"]
-        }
-      },
-      "topicBlock":{
-        "selector": ".entry",
-        "properties": {
-          "flex-grow": [0, 1],
-          "justify-content": [null, "center"],
-          "width": ["0vw", "40vw"]
-
-        }
-      },
-
       "topics": {
         "selector": ".topicSentences",
         "properties": {
-          "display": ["none", null],
           "opacity": [
-            0.0, 1.0
+            0.0, 0.05, 0.1, 0.2, 0.3, 0.4,
+            0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.0
           ],
           "transform": [
-            "translateX(-800px)", "translateX(0px)"
+            "translateX(-800px)", "translateX(-750px)", "translateX(-700px)",
+            "translateX(-650px)", "translateX(-600px)", "translateX(-550px)",
+            "translateX(-500px)", "translateX(-400px)", "translateX(-300px)",
+            "translateX(-200px)", "translateX(-100px)", "translateX(-25px)", "translateX(0px)"
           ],
-          "font-size": ["20px", "32px"]
+          "font-size": ["20px", "24px", "28px", "32px"]
         }
       },
       "repSentences": {
-        "selector": ".selected-entry",
+        "selector": ".repSentences",
         "properties": {
-          "display": ["none", null],
           "opacity": [
-            0.0, 1.0
+            0.0, 0.05, 0.1, 0.15, 0.2, 0.3,
+            0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.0
           ],
           "transform": [
-            "translateX(-800px)", "translateX(0px)"
+            "translateX(-800px)", "translateX(-750px)", "translateX(-700px)",
+            "translateX(-650px)", "translateX(-600px)", "translateX(-550px)",
+            "translateX(-500px)", "translateX(-400px)", "translateX(-300px)",
+            "translateX(-200px)", "translateX(-100px)", "translateX(-25px)", "translateX(0px)"
           ]
         }
       }
@@ -103,13 +111,6 @@ export class Visualization {
       "#A2E382",
       "#E3D282",
       "#E38B82",
-    ];
-    this.speakerColours = [
-      "#648FFF",
-      "#FFB000",
-      "#785EF0",
-      "#FE6100",
-      "#DC267F",
     ];
     //  font sizes
     this.topicSize = "";
@@ -183,7 +184,7 @@ export class Visualization {
 
       this.renderTimeline(this.visibleTopics);
       if (this.visibleTopics[this.visTopicIndex] != null) {
-        if (this.treeDepth>0) this.hideRepSentences(this.visibleTopics[this.visTopicIndex].id);
+        this.hideRepSentences(this.visibleTopics[this.visTopicIndex].id);
       }
     }
 
@@ -193,7 +194,7 @@ export class Visualization {
       this.showTopics();
     }
 
-    if (this.data.length > 0 && this.treeDepth>0) this.resizeFont(resize);
+    if (this.data.length > 0) this.resizeFont(resize);
     if (resize) {
       this.scrollDown(false);
       this.scrollUp(false);
@@ -248,12 +249,13 @@ export class Visualization {
     let line = enter
       .append("div")
       .attr("class", "line")
-      .style("flex-grow", 1)
-      .style("margin-bottom", "5%")
       .style("align-items", "center")
       .style("display", "flex")
       .style("position", "relative")
       .style("padding-right", "12vw");
+
+    let topicBlock = line.append("div").attr("class", "entry")
+      .style("flex-grow", "1");
     
     let time = line.append("div").attr("class", `timeDiv`)
       .style("position", "absolute")
@@ -268,44 +270,25 @@ export class Visualization {
       .attr("class", "time")
       .text((d) => d.time);
 
-    let topicBlock = line.append("div").attr("class", "entry")
-
-    // Create topic elements
-    if (this.treeDepth!=0) 
-      {
-
-      topicBlock
-      .style("diplay", "flex")
-      .style("justify-content", "flex-start")
-      .style("width", "0vw")
-
-      topicBlock
-        .append("h1")
-        .attr("class", "topicSentences")
-        .style("display", "none")
-        .text((d) => d.topic || `Topic ${d.id}`);
-        
-      
-      topicBlock
-        .append("p")
-        .attr("class", "repSentences")
-        .style("display", "none")
-        .text((d) => d.description || d.repSentence || "Representative sentence...");
-      }
-
     setTimeout(() => {
       line.attr("class", "line show");
       topicBlock.attr("class", "entry show");
     }, 10);
 
+    // Create topic elements
+    topicBlock
+      .append("h1")
+      .attr("class", "topicSentences")
+      .text((d) => d.topic || `Topic ${d.id}`);
+    
+    topicBlock
+      .append("p")
+      .attr("class", "repSentences")
+      .text((d) => d.description || d.repSentence || "Representative sentence...");
+
     // Create speech bubbles
-    line
+    topicBlock
       .append("div")
-      .style("flex-grow", "1")
-      .style("display", "flex")
-      .style("flex-direction", "column")
-      .style("min-height", "100%")
-      .style("justify-content", "space-around")
       .attr("class", "speechBubble")
       .each((d, i, nodes) => {
         const bubble = d3.select(nodes[i]);
@@ -316,14 +299,11 @@ export class Visualization {
   // Handle updates to existing elements in the DOM
   handleUpdate(update) {
     // Update topic text
-    if (this.treeDepth!=0) 
-    {
-      update.select(".topicSentences")
-        .text((d) => d.topic || `Topic ${d.id}`);
-      
-      update.select(".repSentences")
-        .text((d) => d.description || d.repSentence || "Representative sentence...");
-    }
+    update.select(".topicSentences")
+      .text((d) => d.topic || `Topic ${d.id}`);
+    
+    update.select(".repSentences")
+      .text((d) => d.description || d.repSentence || "Representative sentence...");
 
     // Update speech bubbles
     update.select(".speechBubble")
@@ -332,53 +312,6 @@ export class Visualization {
         bubble.selectAll("*").remove();
         this.renderSpeechBubbles(bubble, d);
       });
-  }
-
-  renderSpeechBubbles(bubble, data) {
-    bubble.attr("id", data.id)
-    if (data.speakerTurns && data.speakerTurns.turns) {
-
-      data.speakerTurns.turns.forEach((turn, index) => {
-        const speakerId = parseInt(turn.speakerId.charAt(turn.speakerId.length - 1)) - 1;  
-        //If speaker is self, align right
-        const alignRight = (turn.speakerId == this.selfID);
-        let speakerClass = "other";
-        if (alignRight) {
-          speakerClass = "self";
-        }
-        
-        const bubbleDiv = bubble.append("div")
-          .attr("class", "speechBubbleItem")
-          .classed(speakerClass, true)
-          .style("background-color", this.speakerColours[speakerId % 5])
-          .style("padding", "12px 18px")
-          .style("border-radius", "20px")
-          .style("position", "relative")
-          .style("max-width", "50%")
-          .style("width", "fit-content")
-          .style("word-wrap", "break-word")
-          .style("color", "white")
-          .style("font-weight", "500")
-          .style("box-shadow", "0 2px 8px rgba(0,0,0,0.15)")
-          .style("display", "inline-block");
-
-        if (alignRight) {
-          bubbleDiv.style("border-bottom-right-radius", "5px");
-          bubbleDiv.style("margin-left", "50%");
-        } else {
-          bubbleDiv.style("border-bottom-left-radius", "5px");
-        }
-
-        const processedText = this.processFillerWords(turn.speakerSeg);
-        bubbleDiv.html(processedText);
-      });
-      
-      // Apply zoom styling to newly created speech bubbles then see speaker colors are good
-      setTimeout(() => {
-        this.updateZoomStyles();
-        this.preserveSpeakerColors();
-      }, 10);
-    }
   }
 
   // Hide representative sentences for all topics except the selected one
@@ -401,7 +334,7 @@ export class Visualization {
       }
       
       if (selectedTopic === topicSentence.__data__.id) {
-        repSentence.style.display = "none";
+        repSentence.style.display = "block";
         repSentence.setAttribute("id", "selected-entry");
         topicSentence.setAttribute("id", "selected-entry");
         entry.setAttribute("id", "selected-entry");
@@ -697,6 +630,44 @@ export class Visualization {
     });
   }
 
+
+  renderSpeechBubbles(bubble, data) {
+    bubble.attr("id", data.id)
+    if (data.speakerTurns && data.speakerTurns.turns) {
+
+      data.speakerTurns.turns.forEach((turn, index) => {
+        const speakerId = parseInt(turn.speakerId.charAt(turn.speakerId.length - 1)) - 1;  
+        //If speaker is self, align right
+        const alignRight = (turn.speakerId == this.selfID);
+        
+        let speakerClass = ""
+        if (alignRight) {
+          speakerClass = "self"
+        }
+        
+        const bubbleContainer = bubble.append("div")
+          .attr("class", speakerClass)
+          .style("display", "flex");
+
+        console.log(turn)
+        console.log(alignRight)
+        
+        const bubbleDiv = bubbleContainer.append("div")
+          .attr("class", "speechBubbleItem")
+          .style("background-color", this.speakerColours[speakerId % 5]);
+
+        const processedText = this.processFillerWords(turn.speakerSeg);
+        bubbleDiv.html(processedText);
+      });
+      
+      // Apply zoom styling to newly created speech bubbles then see speaker colors are good
+      setTimeout(() => {
+        this.updateZoomStyles();
+        this.preserveSpeakerColors();
+      }, 10);
+    }
+  }
+
   processFillerWords(text) {
     const fillerWords = ["umm", "uhh", "uh", "um", "like", "you know", "well", "so", "basically", "actually", "literally"];
     let processedText = text;
@@ -724,52 +695,94 @@ export class Visualization {
     });
   }
 
-  animateObjects(selector, config, index, animationDuration, delay = 0) {
-      const selection = d3.selectAll(selector)
-          .transition()
-          .delay(delay)
-          .duration(animationDuration)
-          .ease(d3.easeLinear);
+  animateObjects(selector, config, index, animationDuration) {
+    const selection = d3.selectAll(selector)
+        .transition()
+        .duration(animationDuration);
 
+    if (this.treeDepth == 1){
       Object.entries(config).forEach(([property, values]) => {
+          selection.style(property, values[0]);
         if (values[index] !== undefined) {
-          console.log(values[index])
           selection.style(property, values[index]);
-
-          selection.on("end", function() {
-            d3.select(this).style(property, values[index]);
-          });
         }
       });
+    } else {
+      Object.entries(config).forEach(([property, values]) => {
+        if (values[index] !== undefined) {
+          selection.style(property, values[index]);
+        }
+      });
+    }
+      
   }
 
   // Update all CSS properties based on current zoom value
   updateZoomStyles() {
-    console.log(this.lastZoomOperation)
-
-    //********** Updating speech bubble/speaker turns
-
     let speechBubbleConfigIndex = (this.treeDepth==0) ? 0 : 1;
-    //Only show the animation if switching from 0 to 1
-    let animationDuration = ((this.lastZoomOperation!="+") || (this.treeDepth>1)) ? 0 : 1250;
+    let animationDuration = (this.onBoot || this.treeDepth>1) ? 0 : 1500;
+    this.onBoot = false;
+    if (true) {
+      let speechBubbleConfig = this.zoomConfig.speechBubbles.properties;
+      this.animateObjects(this.zoomConfig.speechBubbles.selector, speechBubbleConfig, speechBubbleConfigIndex, animationDuration)
 
-    let speechBubbleConfig = this.zoomConfig.speechBubbles;
-    this.animateObjects(speechBubbleConfig.selector, speechBubbleConfig.properties, speechBubbleConfigIndex, animationDuration)
-    speechBubbleConfig = this.zoomConfig.speechBubbleContainers;
-    this.animateObjects(speechBubbleConfig.selector, speechBubbleConfig.properties, speechBubbleConfigIndex, animationDuration)
-    speechBubbleConfig = this.zoomConfig.speechBubbleSelf;
-    this.animateObjects(speechBubbleConfig.selector, speechBubbleConfig.properties, speechBubbleConfigIndex, animationDuration)
-    speechBubbleConfig = this.zoomConfig.speechBubbleOther;
-    this.animateObjects(speechBubbleConfig.selector, speechBubbleConfig.properties, speechBubbleConfigIndex, animationDuration)
+      speechBubbleConfig = this.zoomConfig.speechBubbleContainers.properties;
+      this.animateObjects(this.zoomConfig.speechBubbleContainers.selector, speechBubbleConfig, speechBubbleConfigIndex, animationDuration)
     
-    //********** Updating topics/rep sentences
-    let topicConfig = this.zoomConfig.topics;
-    this.animateObjects(topicConfig.selector, topicConfig.properties, speechBubbleConfigIndex, animationDuration, animationDuration+500)
-    topicConfig = this.zoomConfig.repSentences;
-    this.animateObjects(topicConfig.selector, topicConfig.properties, speechBubbleConfigIndex, animationDuration, animationDuration+500)
-    topicConfig = this.zoomConfig.topicBlock;
-    this.animateObjects(topicConfig.selector, topicConfig.properties, speechBubbleConfigIndex, animationDuration, animationDuration+500)
+      speechBubbleConfig = this.zoomConfig.speechBubbleItems.properties;
+      this.animateObjects(this.zoomConfig.speechBubbleItems.selector, speechBubbleConfig, speechBubbleConfigIndex, animationDuration)
 
+      speechBubbleConfig = this.zoomConfig.speechBubbleSelf.properties;
+      this.animateObjects(this.zoomConfig.speechBubbleSelf.selector, speechBubbleConfig, speechBubbleConfigIndex, animationDuration)
+    }
+
+    // Object.keys(this.zoomConfig).forEach(elementType => {
+    //   const config = this.zoomConfig[elementType];
+    //   const elements = document.querySelectorAll(config.selector);
+    //   // console.log(`Found ${elements.length} elements for ${elementType} (${config.selector})`);
+      
+    //   elements.forEach(element => {
+    //     Object.keys(config.properties).forEach(property => {
+    //       const keyframes = config.properties[property];
+    //       const value = this.interpolateValue(keyframes, this.zoomValue);
+          
+    //       if (value !== null) {
+    //         if (property === 'transform') {
+    //           element.style.transform = value;
+    //         } else if (property === 'font-size') {
+    //           element.style.fontSize = value;
+    //         } else if (property === 'background-color') {
+    //           return;
+    //         } else if (property === 'margin-left') {
+    //           element.style.marginLeft = value;
+    //         } else if (property === 'margin-right') {
+    //           element.style.marginRight = value;
+    //         } else if (property === 'text-align') {
+    //           element.style.textAlign = value;
+    //         } else if (property === 'color') {
+    //           element.style.color = value;
+    //         } else if (property === 'justify-content') {
+    //           if (this.zoomValue>0.15) {
+    //             element.style.justifyContent = 'flex-end';
+    //           } else {
+    //             let isSelf = (element.getAttribute("class") == "self")
+    //             element.style.justifyContent = (isSelf) ? "flex-end" : "flex-start";
+    //           }
+    //         } else if (property === 'width') {
+    //           element.style.width = value;
+    //         } else if (property === 'height') {
+    //           element.style.height = value;
+    //         } else if (property === 'max-width') {
+    //           element.style.maxWidth = value;
+    //         } else if (property === 'overflow') {
+    //           element.style.overflow = value;
+    //         } else {
+    //           element.style[property] = value;
+    //         }
+    //       }
+    //     });
+    //   });
+    // });
   }
 
   // Set zoom value and update styles
@@ -782,6 +795,7 @@ export class Visualization {
       this.zoomValue = 0;
     }
     console.log(`Setting zoom value to: ${this.zoomValue}`);
+    this.updateZoomStyles();
     this.preserveSpeakerColors();
     
     // Update level indicator
@@ -814,7 +828,6 @@ export class Visualization {
     if (this.treeDepth<this.DataObj.getTreeSize())
     {
       this.treeDepth += 1;
-      this.lastZoomOperation = "+";
       this.updateScreen(this.DataObj)
       this.setZoomValue(this.zoomValue + this.zoomStep);
       window.slider.value([slider.value() - this.zoomStep]);
@@ -827,7 +840,6 @@ export class Visualization {
     if (this.treeDepth>=1)
     {
       this.treeDepth -= 1;
-      this.lastZoomOperation = "-";
       this.updateScreen(this.DataObj)
       this.setZoomValue(this.zoomValue - this.zoomStep);
       window.slider.value([slider.value() + this.zoomStep]);

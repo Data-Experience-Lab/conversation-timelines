@@ -29,11 +29,11 @@ d3.select("#jumpToCurrent").on("click", function () {
   speechController.jumpToCurr();
 });
 
-let slider = d3.sliderHorizontal()
+window.slider = d3.sliderHorizontal()
     .min(-1)
     .max(0)
     .ticks(0)
-    .step(0.0001)
+    .step(1)
     .width(700)
     .displayValue(false)
     .on('onchange', val => {
@@ -85,7 +85,6 @@ document.onkeydown = function (e) {
       // if (!hidden) {
         console.log("Left");
         console.log(slider.value())
-        slider.value([slider.value() + 0.02]);
         speechController.zoomOut();
       // }
       break;
