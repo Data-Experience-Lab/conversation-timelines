@@ -1264,7 +1264,7 @@ export class DataHandler {
                     "01234"
                 ]
             },
-            "segments": "2 3 4"
+            "segments": "3 4 5"
         },
         {
             "topic": "FOOD PREFERENCES",
@@ -1330,7 +1330,7 @@ export class DataHandler {
                     "23456"
                 ]
             },
-            "segments": "4 5 6"
+            "segments": "6 7 8"
         },
         {
             "topic": "UNUSUAL FOOD COMBINATIONS",
@@ -1391,7 +1391,7 @@ export class DataHandler {
                     "45678"
                 ]
             },
-            "segments": "6 7 8"
+            "segments": "9 10 11"
         },
         {
             "topic": "UNUSUAL FOODS",
@@ -1461,7 +1461,7 @@ export class DataHandler {
                     "678910"
                 ]
             },
-            "segments": "8 9 10"
+            "segments": "10 11 12"
         },
         {
             "topic": "EATING INSECTS",
