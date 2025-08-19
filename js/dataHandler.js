@@ -3,6 +3,7 @@ import { OpenAI } from "/conversation-timelines/js/openaiController.js";
 import mockData from "./mockData.js";
 
 export class DataHandler {
+  constructor() {  
     this.tree = this.initTree();
     this.openAI = new OpenAI();
   }
@@ -100,10 +101,8 @@ export class DataHandler {
         }
         result = await this.openAI.gptResult(transcript, "");
         parentNodes = {[node1.depth]: [node1.id]};
-        // speakerTurns = node1.speakerTurn;
     } else {
         parentNodes = (node1.depth==node2.depth) ?  {[node1.depth]: [node1.id, node2.id]} : {[node1.depth]: [node1.id], [node2.depth]: [node2.id]};
-        // speakerTurns = this.mergeSpeakerTurns(node1.speakerTurns, node2.speakerTurns);
     }
 
     // Ensure the layer exists in the tree
@@ -153,4 +152,3 @@ export class DataHandler {
         }
   }
 }
-
