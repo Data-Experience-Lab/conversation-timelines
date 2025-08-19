@@ -3,7 +3,6 @@ import { OpenAI } from "/conversation-timelines/js/openaiController.js";
 import mockData from "./mockData.js";
 
 export class DataHandler {
-  constructor() {  
     this.tree = this.initTree();
     this.openAI = new OpenAI();
   }
@@ -153,39 +152,5 @@ export class DataHandler {
           "segments": segments
         }
   }
-
-   mergeSpeakerTurns(speakerTurns1, speakerTurns2) {
-    let speakerTurns = [speakerTurns1, speakerTurns2]
-
-    let combinedTotal = 0;
-    // use an object to accumulate speaker lengths by speakerId
-    const combinedSpeakers = {};
-    const combinedTurns = [];
-
-    speakerTurns.forEach((segment) => {
-      combinedTotal += segment.total;
-      // process speakers
-      segment.speakers.forEach((sp) => {
-        if (combinedSpeakers[sp.speakerId] === undefined) {
-          combinedSpeakers[sp.speakerId] = sp.length;
-        } else {
-          combinedSpeakers[sp.speakerId] += sp.length;
-        }
-      });
-
-      // add turns (order is preserved by concatenation)
-      combinedTurns.push(...segment.turns);
-    });
-
-    // Convert combinedSpeakers object to an array
-    const speakersArray = Object.keys(combinedSpeakers).map((speakerId) => {
-      return { speakerId, length: combinedSpeakers[speakerId] };
-    });
-
-    return {
-      total: combinedTotal,
-      speakers: speakersArray,
-      turns: combinedTurns,
-    };
-  }
 }
+
