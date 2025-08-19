@@ -21,7 +21,6 @@ startRecognition.addEventListener("click", function () {
   speechController.startContinuousRecording();
   startRecognition.style.display = "none";
   // eventListeners();
-  document.querySelector("#slider").style.display = "block"
 });
 
 

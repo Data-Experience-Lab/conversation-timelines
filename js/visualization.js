@@ -108,7 +108,7 @@ export class Visualization {
       "topicBlock":{
         "selector": ".entry",
         "properties": {
-          "flex-grow": [0, 0.8],
+          "flex-grow": [0, 0.9],
           "display": ["flex"],
           "align-items": ["center"],
         }
@@ -190,10 +190,13 @@ export class Visualization {
     document.getElementById("jumpToCurrent").style.display = "none";
     document.getElementById("timeDetails").style.display = "none";
 
-    
     if (window.slider) {
       this.zoomStep = 1/(this.DataObj.getTreeSize()-1);
       window.slider.step(this.zoomStep); // Change step size
+    }
+
+    if (this.DataObj.getTreeSize()==2) {
+      document.querySelector("#slider").style.display = "block";
     }
 
     // Update UI elements based on the current state
@@ -253,7 +256,7 @@ export class Visualization {
         let [hours, minutes, seconds] = "";
 
         [hours, minutes, seconds] = this.getTimeDiff(time);
-        document.getElementById("jumpToCurrent").textContent = "↑ Jump to Now";
+        document.getElementById("jumpToCurrent").textContent = "↓ Jump to Now";
         document.getElementById("jumpToCurrent").style.display = "block";
         document.getElementById(
           "timeDetails"
@@ -289,20 +292,6 @@ export class Visualization {
       .style("display", "flex")
       .style("position", "relative")
       .style("padding-right", "12vw");
-    
-    
-    let time = line.append("div").attr("class", `timeDiv`)
-      .style("position", "absolute")
-      .style("right", "2vw")
-      .style("top", "0")
-      .style("z-index", "10")
-      .style("width", "10vw")
-      .style("text-align", "right");
-
-    time
-      .append("h1")
-      .attr("class", "time")
-      .text((d) => d.time);
 
     let topicBlock = line.append("div").attr("class", "entry")
 
@@ -343,6 +332,20 @@ export class Visualization {
         const bubble = d3.select(nodes[i]);
         this.renderSpeechBubbles(bubble, d);
       });
+
+    let time = line.append("div").attr("class", `timeDiv`)
+      // .style("margin-left", "4vw")
+      .style("position", "absolute")
+      .style("right", "3vw")
+      // .style("top", "0")
+      // .style("z-index", "10")
+      .style("width", "10vw")
+      // .style("text-align", "right");
+
+    time
+      .append("h1")
+      .attr("class", "time")
+      .text((d) => d.time);
   }
 
   // Handle updates to existing elements in the DOM
@@ -369,88 +372,60 @@ export class Visualization {
       this.updateZoomStyles();
   }
 
-  moveDivs(target, child, segment){
-    target.node().appendChild(child.node());
-    // console.log(this.lastBubbleLocations)
-    // console.log("Keys: ", Object.keys(this.lastBubbleLocations))
-    // console.log("segment: ", segment.id)
-    // let firstRect = this.lastBubbleLocations[`segment-${segment.id}`]
-    // let lastRect = child.node().getBoundingClientRect();
-    // console.log("firstRect: ", firstRect)
-    // console.log("lastRect: ", lastRect)
-
-    // const dx = firstRect.left - lastRect.left;
-    // const dy = firstRect.top - lastRect.top;
-    // // console.log("dx: ", dx)
-    // console.log("dy: ", dy)
-
-    // // Invert: jump back to old position
-    // child.style("transform", `translate(0px,${dy}px)`);
-
-    // // Play: animate to natural position
-    // child.transition()
-    //   .duration(1500) // adjust duration
-    //   .ease(d3.easeCubicOut)
-    //   .style("transform", "translate(0px, 0px)");
-  }
-
   renderSpeechBubbles(bubble, data) {
     let segments = data.segments.split(" ").map(Number);
 
-    if (data.speakerTurns && data.speakerTurns.turns) {
-
-      segments.forEach((int) => {
-        let segment = this.segments[int];
-        let segmentDiv = d3.select(`#segment-${int}`);
+    segments.forEach((int) => {
+      let segment = this.segments[int];
+      let segmentDiv = d3.select(`#segment-${int}`);
         
-        // If segment already exists move it to the right place
-        if (!segmentDiv.empty()) {
-          this.moveDivs(bubble, segmentDiv, segment);
+      // If segment already exists move it to the right place
+      if (!segmentDiv.empty()) {
+        bubble.node().appendChild(segmentDiv.node());
 
-        // Otherwise create segment
-        } else {
-          console.log(int)
-          segmentDiv = bubble.append("div")
-          .attr("id", `segment-${int}`)
-          .attr("class", "speechBubbleGroup")
-          .style("display", "flex")
-          .style("flex-direction", "column")
+      // Otherwise create segment
+      } else {
+        console.log(int)
+        segmentDiv = bubble.append("div")
+        .attr("id", `segment-${int}`)
+        .attr("class", "speechBubbleGroup")
+        .style("display", "flex")
+        .style("flex-direction", "column")
 
-          // Create new bubble for each speaker turn
-          segment.speakerTurns.turns.forEach((turn, index) => {
-            const speakerId = parseInt(turn.speakerId.charAt(turn.speakerId.length - 1)) - 1;  
-            //If speaker is self, align right
-            const alignRight = (turn.speakerId == this.selfID);
-            let speakerClass = "other";
-            if (alignRight) {
-              speakerClass = "self";
-            }
+        // Create new bubble for each speaker turn
+        segment.speakerTurns.turns.forEach((turn, index) => {
+          const speakerId = parseInt(turn.speakerId.charAt(turn.speakerId.length - 1)) - 1;  
+          //If speaker is self, align right
+          const alignRight = (turn.speakerId == this.selfID);
+          let speakerClass = "other";
+          if (alignRight) {
+            speakerClass = "self";
+          }
             
-            const bubbleDiv = segmentDiv.append("div")
-              .attr("class", "speechBubbleItem")
-              .classed(speakerClass, true)
-              .style("background-color", this.speakerColours[speakerId % 5])  
+          const bubbleDiv = segmentDiv.append("div")
+            .attr("class", "speechBubbleItem")
+            .classed(speakerClass, true)
+            .style("background-color", this.speakerColours[speakerId % 5])  
 
-            const processedText = this.processFillerWords(turn.speakerSeg);
-            bubbleDiv.append("p")
-              .attr("class", "bubbleText")
-              .html(processedText);
+          const processedText = this.processFillerWords(turn.speakerSeg);
+          bubbleDiv.append("p")
+            .attr("class", "bubbleText")
+            .html(processedText);
 
-            // Apply styles
-            Object.keys(this.bubbleConfig).forEach((key)=> {
-              let config = this.bubbleConfig[key];
-              this.animateObjects(config.selector, config.properties, 0)
-            });
+          // Apply styles
+          Object.keys(this.bubbleConfig).forEach((key)=> {
+            let config = this.bubbleConfig[key];
+            this.animateObjects(config.selector, config.properties, 0)
           });
-        }
-      });
+        });
+      }
+    });
       
-      // Apply zoom styling to newly created speech bubbles then see speaker colors are good
-      setTimeout(() => {
-        this.updateZoomStyles();
-        this.preserveSpeakerColors();
-      }, 10);
-    }
+    // Apply zoom styling to newly created speech bubbles then see speaker colors are good
+    setTimeout(() => {
+      this.updateZoomStyles();
+      this.preserveSpeakerColors();
+    }, 10);
   }
 
   animateObjects(selector, config, index, animationDuration, delay = 0) {
@@ -526,21 +501,22 @@ export class Visualization {
         entry.removeAttribute("id");
       }
     });
-    // // Apply styles
-    // console.log(this.lastZoomOperation)
-    // console.log(this.treeDepth)
-    // if (!(this.lastZoomOperation=="+" && this.treeDepth==1)) {
-    //   console.log("hi")
-    //   Object.keys(this.topicConfig).forEach((key)=> {
-    //     let config = this.topicConfig[key];
-    //     this.animateObjects(config.selector, config.properties, 1)
-    //   });
-    // }
+    // Apply styles
+    console.log(this.lastZoomOperation)
+    console.log(this.treeDepth)
+    if (!(this.lastZoomOperation=="+" && this.treeDepth==1)) {
+      console.log("hi")
+      Object.keys(this.topicConfig).forEach((key)=> {
+        let config = this.topicConfig[key];
+        this.animateObjects(config.selector, config.properties, 1)
+      });
+    }
   }
 
   // ************ Button click events ************
 
   jumpToCurr() {
+    this.lastZoomOperation = "";
     this.currIndex = this.maxIndex;
     this.visTopicIndex = 0;
     this.visibleTopics = this.data
@@ -635,8 +611,9 @@ export class Visualization {
     {
       this.treeDepth += 1;
       let newData = this.DataObj.getData(this.treeDepth);
-      if (!this.currViewedTopic.childNodes[this.treeDepth].length==0){
-        let targetId = this.currViewedTopic.childNodes[this.treeDepth][0];
+      console.log(this.currViewedTopic)
+      if (!(this.currViewedTopic.childNodes.length==0)){
+        let targetId = this.currViewedTopic.childNodes[0];
         this.currIndex = newData.findIndex(item => item.id === targetId);
       } else {
         this.currIndex = newData.length-1;
@@ -683,11 +660,8 @@ export class Visualization {
       value = 0;
     }
     let depth = parseInt(value/this.zoomStep);
-    console.log("aa", depth)
-    console.log("aa", this.treeDepth)
     if (depth!=this.treeDepth) {
-      console.log("aa hi")
-      this.lastZoomOperation = (this.treeDepth<depth) ? "-" : "+";
+      this.lastZoomOperation = (this.treeDepth<depth) ? "+" : "-";
       console.log(this.lastZoomOperation)
       let newData = this.DataObj.getData(depth);
 
@@ -696,8 +670,6 @@ export class Visualization {
           typeof item.segments === "string" && item.segments.includes(this.currViewedTopic.segments)
         ); 
       } else {
-        console.log(newData)
-        console.log(this.currViewedTopic)
         const target = this.currViewedTopic.segments.split(" ").map(Number);
         this.currIndex = newData.findIndex(item => {
           if (typeof item.segments !== "string") return false;
@@ -710,7 +682,6 @@ export class Visualization {
           }
           return false;
         });
-        console.log(this.currIndex)
       }
       this.visTopicIndex = 0;
       if (((this.currIndex+this.numTopicsShown)>newData.length)||(this.currIndex<0)){
@@ -802,45 +773,6 @@ export class Visualization {
     let seconds = diffSeconds % 60;
 
     return [hours, minutes, seconds];
-  }
-
-  resizeFont(checkSize = false) {
-    const lines = document.querySelectorAll(".line");
-    let entrySize = document.querySelector(".entry:not(#selected-entry)");
-    if (entrySize == null) entrySize = document.querySelector(".entry");
-    let levelText = document.getElementById("vis-level-text");
-    let jumpButton = document.getElementById("jumpToCurrent");
-    let jumpLabel = document.getElementById("timeDetails");
-    // console.log(entrySize.offsetHeight);
-
-    let window = document.getElementById("topics");
-
-    lines.forEach((line) => {
-      let repSentence = line.querySelector(".repSentences");
-      let topicSentence = line.querySelector(".topicSentences");
-      let time = line.querySelector(".time");
-      let totalTime = line.querySelector(".total-time");
-
-      if (checkSize) {
-        this.topicSize = `clamp(15px, ${
-          (window.offsetHeight / this.visibleTopics.length) * 0.4
-        }px, 4vmin)`;
-        this.repSize = `clamp(10px, ${
-          (window.offsetHeight / this.visibleTopics.length) * 0.3
-        }px, 2.5vmin)`;
-      }
-
-      topicSentence.style.fontSize = this.topicSize;
-      time.style.fontSize = this.repSize;
-      if (totalTime != null) {
-        let totalTime = line.querySelector(".total-time");
-        totalTime.style.fontSize = this.repSize;
-      }
-      levelText.style.fontSize = this.topicSize;
-      jumpButton.style.fontSize = this.repSize;
-      jumpLabel.style.fontSize = this.repSize;
-      repSentence.style.fontSize = this.repSize;
-    });
   }
 
   processFillerWords(text) {
