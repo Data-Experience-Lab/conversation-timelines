@@ -3,114 +3,165 @@ import { OpenAI } from "/conversation-timelines/js/openaiController.js";
 
 export class DataHandler {
   constructor() {
-    this.data = this.mockData2();
-    this.transcript = this.mockTranscript();
+    this.tree = this.mockData();
     this.openAI = new OpenAI();
     this.lastPostTurn = "";
     this.minSegWithLastTurn = "";
   }
 
-  // Initialize data structure
-  initData() {
-    return {
-      s10: [],
-      s30: [],
-      m1: [],
-      m5: [],
-      topics: [],
-    };
+  initTree() {
+    return {0: []};
+  }
+
+  // Get data for a specific level
+  getData(treeDepth = "0") {
+    console.log(this.tree)
+    return this.tree[treeDepth] || [];
+  }
+
+  getTreeSize(){
+    return Object.keys(this.tree).length;
   }
 
   // Update data and transcript with new transcription
   async update(transcription, speakerTurns, data) {
     await this.addToData(transcription, speakerTurns, data);
-    this.addToTranscript(transcription[0]);
-    console.log(this.data)
     return true;
   }
 
-  // Get data for a specific level
-  getData(level = "s10") {
-    return this.data[level] || [];
-  }
+    // Add new data to the appropriate levels
+  async addToData(transcription, time, speakerTurns, data) {
+    // When new 0 depth node is added
+    // Propogate up the last node in all levels
 
-  // Get the transcript
-  getTranscript() {
-    return this.transcript;
-  }
-
-  // Add a chunk to the transcript
-  addToTranscript(chunk) {
-    this.transcript.push(chunk);
-  }
-
-  // Add new data to the appropriate levels
-  async addToData(transcription, speakerTurns, data) {
-    const lastTopic =
-      this.data.s10.length > 0 ? this.data.s10.at(-1).topic : "";
-    const topic = await this.createTimedTopicObject(
-      transcription,
-      "s10",
-      lastTopic,
-      speakerTurns
-    );
-    console.log('updated')
-    
-    if (topic.topic) {
-      this.data.s10.push(topic);
-      const currData = structuredClone(this.data);
-
-      // Update s30 level
-      if (currData.s10.length % 3 === 0) {
-        const s30Topic = await this.mergeTopics(
-          currData,
-          3,
-          "s30",
-          this.data.s30.at(-1)?.topic || "",
-          speakerTurns
-        );
-        this.data.s30.push(s30Topic);
-      }
-
-      // Update m1 level
-      if (currData.s10.length % 6 === 0) {
-        const m1Topic = await this.mergeTopics(
-          currData,
-          6,
-          "m1",
-          this.data.m1.at(-1)?.topic || "",
-          speakerTurns
-        );
-        this.data.m1.push(m1Topic);
-
-        // Update topics level
-        console.log(m1Topic)
-        const newTopic =
-          this.data.topics.length === 0
-            ? await this.createTopicObjectFromM1(m1Topic)
-            : await this.createTopicObject(m1Topic);
-        console.log(newTopic)
-        if (newTopic) this.data.topics.push(newTopic);
-      }
-
-      // Update m5 level
-      if (currData.s10.length % 30 === 0) {
-        const m5Topic = await this.mergeTopics(
-          currData,
-          30,
-          "m5",
-          this.data.m5.at(-1)?.topic || "",
-          speakerTurns
-        );
-        this.data.m5.push(m5Topic);
-      }
+    // Turn transcript into new root node
+    let id = Object.keys(this.tree[0]).length
+    this.tree[0].push(this.createNode(null, null, transcription, time, speakerTurns, id, 0, null, String(id))) 
+        
+    // If this is the first node in the tree, return.
+    if (id==0) {
+        console.log("Tree:\t", this.tree)
+        return;
     }
-    return true;
+    
+    //***
+    // Create second layer nodes
+    // For each new node, check if left neighbour node has child in depth 1
+    // (Meaning it has already merged with a root layer node)
+    // If left node does not have a child attempt to create a child node
+
+    let treeHeight = Object.keys(this.tree).length -1;
+    for (let i = treeHeight; i >= 0; i--) {
+        console.log(i)
+        console.log(this.tree[i])
+
+        let depth = i+1;
+        console.log(this.tree)
+        let node1 = this.tree[i].at(-2);
+        let node2 = this.tree[i].at(-1);
+
+        console.log("Node 1\t", node1)
+        console.log("Node 2\t", node2)
+ 
+        // If both nodes exist
+        if ((node1!=null)&&(node2!=null)) {
+        // If node 1 does not already have a child at this depth
+            console.log(Object.keys(node1.childNodes[depth]))
+            if (Object.keys(node1.childNodes[depth]).length == 0) {
+                let node = await this.summarizeNodes(node1, node2, depth);
+                console.log("New node:\t", node)
+                if (node != null) {
+                    this.tree[depth].push(node);
+                }
+            }
+        }
+    } 
+
+    console.log("Tree:\t", this.tree)
   }
 
-  mergeSpeakerTurns(n) {
-    let speakerTurns = this.data.s10.slice(-n).map((item) => item.speakerTurns);
-    console.log(speakerTurns);
+  // Check if two nodes have similar topic. If so, merge into a child node.
+  async summarizeNodes(node1, node2, depth) {
+
+    let id, segments;
+    [id, segments] = this.getUniqueID(node1.segments + " " + node2.segments);
+    console.log(id)
+    console.log(segments)
+    let transcript = "";
+    let numStrings = String(segments).split(' '); // Split by whitespace
+    let numbers = numStrings.map(Number).filter(num => !isNaN(num));
+    for (let i=0; i<numbers.length; i++) {
+        transcript += this.tree[0][numbers[i]].segment;
+    }
+    
+    // OpenAI call
+    let parentNodes, speakerTurns;
+    let result = await this.openAI.gptResult(transcript, "");
+    console.log("OpenAI result:\t", result)
+    if (result == null) {
+        numStrings = String(node1.segments).split(' '); // Split by whitespace
+        numbers = numStrings.map(Number).filter(num => !isNaN(num));
+        for (let i=0; i<numbers.length; i++) {
+            transcript += this.tree[0][numbers[i]].segment;
+        }
+        result = await this.openAI.gptResult(transcript, "");
+        parentNodes = {[node1.depth]: [node1.id]};
+        speakerTurns = node1.speakerTurn;
+    } else {
+        parentNodes = (node1.depth==node2.depth) ?  {[node1.depth]: [node1.id, node2.id]} : {[node1.depth]: [node1.id], [node2.depth]: [node2.id]};
+        speakerTurns = this.mergeSpeakerTurns(node1.speakerTurns, node2.speakerTurns);
+    }
+
+    // Ensure the layer exists in the tree
+    if (!this.tree[depth]) {
+        this.tree[depth] = [];
+    }
+
+    // Create and return new node
+    // let parentNodes = (node1.depth==node2.depth) ?  {[node1.depth]: [node1.id, node2.id]} : {[node1.depth]: [node1.id], [node2.depth]: [node2.id]};
+    let node = 
+        this.createNode(result.topic.toUpperCase(), 
+                        result.sentence, 
+                        transcript, 
+                        node1.time,
+                        speakerTurns,
+                        id,
+                        depth,
+                        parentNodes,
+                        segments
+                        )
+
+    // Push child node to parent node children
+    node1.childNodes.push(node.id)
+    node2.childNodes.push(node.id)
+    return node;
+  }
+
+  getUniqueID(inputString) {
+    const numStrings = String(inputString).split(' '); // Split by whitespace
+    const numbers = numStrings.map(Number).filter(num => !isNaN(num));
+    const segments = [...new Set(numbers)];
+    segments.sort((a, b) => a - b);
+    let id = [...segments];
+    return [id.join(''), segments.join(' ')];
+  }
+
+  createNode(topic, description, segment, time, speakerTurns, id, depth, parentNodes, segments) {
+    return {"topic": topic,
+          "description": description,
+          "segment": segment,
+          "time": time,
+          "speakerTurns": speakerTurns,
+          "id": String(id),
+          "depth": depth,
+          "parentNodes": parentNodes,
+          "childNodes": [],
+          "segments": segments
+        }
+  }
+
+   mergeSpeakerTurns(speakerTurns1, speakerTurns2) {
+    let speakerTurns = [speakerTurns1, speakerTurns2]
 
     let combinedTotal = 0;
     // use an object to accumulate speaker lengths by speakerId
@@ -118,9 +169,7 @@ export class DataHandler {
     const combinedTurns = [];
 
     speakerTurns.forEach((segment) => {
-      console.log(segment);
       combinedTotal += segment.total;
-      console.log(combinedTotal);
       // process speakers
       segment.speakers.forEach((sp) => {
         if (combinedSpeakers[sp.speakerId] === undefined) {
@@ -132,15 +181,12 @@ export class DataHandler {
 
       // add turns (order is preserved by concatenation)
       combinedTurns.push(...segment.turns);
-      console.log(combinedTurns);
     });
 
     // Convert combinedSpeakers object to an array
     const speakersArray = Object.keys(combinedSpeakers).map((speakerId) => {
       return { speakerId, length: combinedSpeakers[speakerId] };
     });
-
-    console.log(speakersArray);
 
     return {
       total: combinedTotal,
@@ -149,611 +195,1207 @@ export class DataHandler {
     };
   }
 
-  // Merge topics for a given level
-  async mergeTopics(currData, n, level, lastTopic) {
-    console.log("Merging topics");
-    const zoomInIndex = currData.s10.length - 1;
-    const newSegment = currData.s10
-      .slice(-n)
-      .map((segment) => segment.segment)
-      .join(" ");
-    const time = currData.s10.at(-n).time;
-    let mergedSpeakerTurns = this.mergeSpeakerTurns(n);
-    console.log(mergedSpeakerTurns);
-    return await this.createTimedTopicObject(
-      [newSegment, time],
-      level,
-      lastTopic,
-      mergedSpeakerTurns
-    );
-  }
-
-  // Create a timed topic object
-  async createTimedTopicObject(chunk, level, lastTopic, speakerTurns) {
-    const result = await this.openAI.gptResult(chunk[0], lastTopic);
-    return {
-      topic: result.topic.toUpperCase(),
-      description: result.sentence,
-      segment: result.segment,
-      time: chunk[1],
-      speakerTurns: speakerTurns,
-      topicIndex: this.getData("topics").length,
-      zoomInIndex: this.getZoomLevel(level, "in"),
-      zoomOutIndex: this.getZoomLevel(level, "out"),
-      id: `${level}-${this.getData(level).length}`,
-    };
-  }
-
-  // Create a topic object from m1 data
-  async createTopicObjectFromM1(m1Topic) {
-    const subTopics = await this.openAI.getSubtopics(m1Topic.segment);
-    console.log(subTopics)
-    return {
-      topic: m1Topic.topic,
-      description: subTopics,
-      segment: m1Topic.segment,
-      time: m1Topic.time,
-      speakerTurns: m1Topic.speakerTurns,
-      totalSeconds: 60,
-      zoomInIndex: this.getZoomLevel("topics", "in"),
-      zoomOutIndex: this.getZoomLevel("topics", "out"),
-      id: `topics-${this.getData("topics").length}`,
-    };
-  }
-
-  combineSpeakerTurns(chunk, turnSentence = "", topicType = "new") {
-    let fullTurnsList = this.data.topics
-      .at(-1)
-      .speakerTurns.turns.concat(chunk.speakerTurns.turns);
-    if (topicType != "new") {
-      console.log(this.data.topics.at(-1).speakerTurns);
-      this.data.topics.at(-1).speakerTurns.turns = fullTurnsList;
-      this.data.topics.at(-1).speakerTurns.total += chunk.speakerTurns.total;
-      const result = {};
-
-      //Split turns for new topic
-    } else {
-      console.log(this.data.topics.at(-1).speakerTurns);
-      console.log(chunk.speakerTurns);
-
-      let newSpeakerTurns = {};
-      for (let i = 0; i < fullTurnsList.length; i++) {
-        let turn = fullTurnsList[i].speakerSeg;
-        console.log(turn);
-      }
-
-      // Look for the speaker turn containing the turn sentence
-      for (let i = 0; i < fullTurnsList.length; i++) {
-        let turn = fullTurnsList[i].speakerSeg;
-        console.log(i, turn);
-        console.log(turnSentence);
-
-        if (turnSentence.includes(turn) || turn.includes(turnSentence)) {
-          this.data.topics.at(-1).speakerTurns.turns = fullTurnsList.slice(
-            0,
-            i
-          );
-          newSpeakerTurns.turns = fullTurnsList.slice(i, fullTurnsList.length);
-          break;
-        }
-      }
-
-      let total = 0;
-      for (let i = 0; i < newSpeakerTurns.turns.length; i++) {
-        let length = newSpeakerTurns.turns[i].length;
-        console.log(length);
-        total += length;
-        console.log(total);
-      }
-      newSpeakerTurns.total = total;
-
-      total = 0;
-      for (let i = 0; i < this.data.topics.at(-1).speakerTurns.turns.length; i++) {
-        let length = this.data.topics.at(-1).speakerTurns.turns[i].length;
-        console.log(length);
-        total += length;
-        console.log(total);
-      }
-      this.data.topics.at(-1).speakerTurns.total = total;
-
-      console.log(newSpeakerTurns);
-      return newSpeakerTurns;
-    }
-  }
-
-  // Create a topic object
-  async createTopicObject(chunk) {
-    console.log("checking if new segent changed topic");
-    const segment = this.getSegmentForTopic(chunk);
-    const result = await this.openAI.gptResult(
-      segment,
-      this.data.m1.at(-1).topic,
-      "turn"
-    );
-
-    console.log(result);
-    // If no result is returned
-    // Then the topic has not changed, so add the
-    // new speech transcript to the topic transcript
-    // and set last postturn to empty (to indicate the postturn
-    // is not recent and using the whole current topic chunk
-    // might be too large)
-
-    if (!result) {
-      console.log("Same topic");
-      this.data.topics.at(-1).segment += chunk.segment;
-      this.data.topics.at(-1).totalSeconds += 60;
-      this.combineSpeakerTurns(chunk, "", "old");
-      this.lastPostTurn = "";
-      const subTopics = await this.openAI.getSubtopics(this.data.topics.at(-1).segment);
-      this.data.topics.at(-1).description = subTopics;
-      return null;
-    }
-
-    // Otherwise, store the recent postturn and create a new topic
-    this.lastPostTurn = result[0].segment;
-    if (result[1]) {
-      this.data.topics.at(-1).segment += result[1];
-    }
-
-    // Combine the new topic string with the last topic string
-    // To get indexOf turn sentence, and calculate proportional time
-    let fullSeg = this.data.topics.at(-1).segment + result[0].segment;
-    let topicTime = "";
-
-    //If the turn sentence can be found in the segment
-    //Find the proportional start time
-    if (fullSeg.toLowerCase().indexOf(result[0].sentence.toLowerCase()) >= 0) {
-      let indexPercent =
-        fullSeg.toLowerCase().indexOf(result[0].sentence.toLowerCase()) /
-        (fullSeg.length - 1);
-      console.log(indexPercent);
-      console.log(fullSeg.indexOf(result[0].sentence));
-      console.log(fullSeg.length - 1);
-      topicTime = this.getStringTime(indexPercent);
-      // If all else fails set start time to the last minute
-      // classification time
-    } else {
-      topicTime = this.data.m1.at(-1).time;
-    }
-    let seconds = this.getTopicSeconds(topicTime);
-
-    //Split the speaker turns
-    let newSpeakerTurns = this.combineSpeakerTurns(chunk, result[0].sentence);
-    const subTopics = await this.openAI.getSubtopics(result[0].segment);
-    console.log(subTopics)
-    
-    return {
-      topic: result[0].topic.toUpperCase(),
-      description: subTopics,
-      segment: result[0].segment,
-      time: topicTime,
-      totalSeconds: seconds,
-      speakerTurns: newSpeakerTurns,
-      zoomInIndex: this.getZoomLevel("topics", "in"),
-      zoomOutIndex: this.getZoomLevel("topics", "out"),
-      id: `topics-${this.getData("topics").length}`,
-    };
-  }
-
-  getStringTime(indexPercent) {
-    let currTime = new Date();
-    const [chours, cminutes, cseconds] = this.data.topics
-      .at(-1)
-      .time.split(":")
-      .map(Number);
-    let lastTime = new Date();
-    lastTime.setHours(chours, cminutes, cseconds, 0);
-    let diffMs = Math.abs(lastTime - currTime); // Use Math.abs to handle negative differences
-    let diffSeconds = Math.floor(diffMs / 1000);
-    let proportionSeconds = diffSeconds * indexPercent;
-    console.log(diffSeconds);
-    console.log(proportionSeconds);
-    console.log(lastTime.getSeconds());
-
-    lastTime.setSeconds(lastTime.getSeconds() + proportionSeconds);
-    console.log(lastTime);
-    const hours = String(lastTime.getHours()).padStart(2, "0");
-    const minutes = String(lastTime.getMinutes()).padStart(2, "0");
-    const seconds = String(lastTime.getSeconds()).padStart(2, "0");
-
-    return `${hours}:${minutes}:${seconds}`;
-  }
-
-  getTopicSeconds(startTime) {
-    let currTime = new Date();
-    const [chours, cminutes, cseconds] = startTime.split(":").map(Number);
-    startTime = new Date();
-    startTime.setHours(chours, cminutes, cseconds, 0);
-    let diffMs = Math.abs(startTime - currTime); // Use Math.abs to handle negative differences
-    let diffSeconds = Math.floor(diffMs / 1000);
-    return diffSeconds;
-  }
-
-  // Get the segment for topic creation
-  getSegmentForTopic(chunk) {
-    if (this.data.m1.length > 1) {
-      // If the last detected postturn is recent (exists), combine
-      // it with the new segment
-      // Otherwise using the transcript from the last postturn is
-      // too big, so just check the last two minutes.
-      return this.lastPostTurn
-        ? this.lastPostTurn + chunk.segment
-        : this.data.m1.at(-2).segment + chunk.segment;
-    }
-    return chunk.segment;
-  }
-
-  // Get the zoom level index
-  getZoomLevel(level, zoom) {
-    const zoomLevels = {
-      s10: { in: null, out: this.getData("s30").length },
-      s30: { in: this.getData("s10").length, out: this.getData("m1").length },
-      m1: { in: this.getData("s30").length, out: this.getData("m5").length },
-      m5: { in: this.getData("m1").length, out: null },
-      topics: { in: this.getData("m1").length, out: null },
-    };
-    return zoomLevels[level]?.[zoom] ?? null;
-  }
-
-  mockTranscript() {
-    let transcriptChunks = [
-      "So you're going to Stampede tomorrow. Are there any foods that you're are you going to try the foods or are you just going to I'm going to try some of them, but I don't know.",
-      "Are you going to try the cheeseburger, ice cream cheeseburger? I feel like I'm a little scared to like waste so much money because I mean, I can share $10.00 for it too.",
-      "Yeah, like $13. Like okay, in Japan like we had. It's like really, it's called creamy and it's like, I think it's like some sort of Marvel science where I don't know, I think that's a lot of food science.",
-    ];
-    return transcriptChunks;
-  }
-
-  mockData2() {
+  mockData() {
     let data = {
-      s10: [
+    "0": [
         {
-          topic: "READINESS FOR CHANGE",
-          description: "I was not ready when she was ready.",
-          segment:
-            "It's hard 💪 to mentally prepare. I was not ready when she was ready. Oh my gosh 😱.",
-          time: "00:59:36",
-          speakerTurns: {
-            total: 16,
-            speakers: [
-              {
-                speakerId: "Guest-1",
-                length: 16,
-              },
-            ],
-            turns: [
-              {
-                speakerId: "Guest-1",
-                speakerSeg:
-                  "It's hard 💪 to mentally prepare. I was not ready when she was ready. Oh my gosh 😱.",
-                length: 16,
-              },
-            ],
-          },
-          topicIndex: 0,
-          zoomInIndex: null,
-          zoomOutIndex: 0,
-          id: "s10-0",
+            "topic": null,
+            "description": null,
+            "segment": "Do you favorite life? I think try to bake like a chicken breast and then the the grease is just like watering everywhere. You get it best. ",
+            "time": "16:18:03",
+            "speakerTurns": {
+                "total": 27,
+                "speakers": [
+                    {
+                        "speakerId": "Guest-1",
+                        "length": 27
+                    }
+                ],
+                "turns": [
+                    {
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "Do you favorite life? I think try to bake like a chicken breast and then the the grease is just like watering everywhere. You get it best.",
+                        "length": 27
+                    }
+                ]
+            },
+            "id": "0",
+            "depth": 0,
+            "parentNodes": null,
+            "childNodes": {
+                "1": [
+                    "01"
+                ],
+                "2": []
+            },
+            "segments": "0"
         },
         {
-          topic: "SKYDIVING PROPOSAL",
-          description:
-            "Yeah, she was like, let's go skydiving, like right now.",
-          segment: "Yeah, she was like, let's go skydiving ✈️, like right now.",
-          time: "00:59:46",
-          speakerTurns: {
-            total: 10,
-            speakers: [
-              {
-                speakerId: "Guest-1",
-                length: 10,
-              },
-            ],
-            turns: [
-              {
-                speakerId: "Guest-1",
-                speakerSeg:
-                  "Yeah, she was like, let's go skydiving ✈️, like right now.",
-                length: 10,
-              },
-            ],
-          },
-          topicIndex: 0,
-          zoomInIndex: null,
-          zoomOutIndex: 0,
-          id: "s10-1",
+            "topic": null,
+            "description": null,
+            "segment": "So yes, let's just say not the best. Of cooking. That's kind of weird. She. Just she didn't mean it, but like. ",
+            "time": "16:18:25",
+            "speakerTurns": {
+                "total": 22,
+                "speakers": [
+                    {
+                        "speakerId": "Guest-1",
+                        "length": 8
+                    },
+                    {
+                        "speakerId": "Guest-2",
+                        "length": 14
+                    }
+                ],
+                "turns": [
+                    {
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "So yes, let's just say not the best.",
+                        "length": 8
+                    },
+                    {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "Of cooking. That's kind of weird. She.",
+                        "length": 7
+                    },
+                    {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "Just she didn't mean it, but like.",
+                        "length": 7
+                    }
+                ]
+            },
+            "id": "1",
+            "depth": 0,
+            "parentNodes": null,
+            "childNodes": {
+                "1": [
+                    "01"
+                ],
+                "2": []
+            },
+            "segments": "1"
         },
         {
-          topic: "TRAVEL PLANS",
-          description: "I thought that would be more time in between.",
-          segment:
-            "I've never even thought 🤔 about this before. What do you mean? Yeah, I thought she was like joking 😄 at first, or like by how soon she wanted to go, but then. Pictures of her. And I was like, Oh yeah, OK 👌, yeah, I thought. I thought that would be more time ⏰ in between.",
-          time: "00:59:57",
-          speakerTurns: {
-            total: 53,
-            speakers: [
-              {
-                speakerId: "Guest-1",
-                length: 53,
-              },
-            ],
-            turns: [
-              {
-                speakerId: "Guest-1",
-                speakerSeg:
-                  "I've never even thought 🤔 about this before. What do you mean? Yeah, I thought she was like joking 😄 at first, or like by how soon she wanted to go, but then.",
-                length: 31,
-              },
-              {
-                speakerId: "Guest-1",
-                speakerSeg:
-                  "Pictures of her. And I was like, Oh yeah, OK 👌, yeah, I thought. I thought that would be more time ⏰ in between.",
-                length: 22,
-              },
-            ],
-          },
-          topicIndex: 0,
-          zoomInIndex: null,
-          zoomOutIndex: 0,
-          id: "s10-2",
+            "topic": null,
+            "description": null,
+            "segment": "And then she's like, why don't you cook this like? ",
+            "time": "16:18:35",
+            "speakerTurns": {
+                "total": 10,
+                "speakers": [
+                    {
+                        "speakerId": "Guest-1",
+                        "length": 10
+                    }
+                ],
+                "turns": [
+                    {
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "And then she's like, why don't you cook this like?",
+                        "length": 10
+                    }
+                ]
+            },
+            "id": "2",
+            "depth": 0,
+            "parentNodes": null,
+            "childNodes": {
+                "1": [
+                    "23"
+                ],
+                "2": []
+            },
+            "segments": "2"
         },
         {
-          topic: "PERSONALITY DESCRIPTION",
-          description: "Yeah, like she's, she's very much like.",
-          segment: "Yeah, like she's, she's very much like 💯.",
-          time: "01:00:08",
-          speakerTurns: {
-            total: 7,
-            speakers: [
-              {
-                speakerId: "Guest-1",
-                length: 7,
-              },
-            ],
-            turns: [
-              {
-                speakerId: "Guest-1",
-                speakerSeg: "Yeah, like she's, she's very much like 💯.",
-                length: 7,
-              },
-            ],
-          },
-          topicIndex: 0,
-          zoomInIndex: null,
-          zoomOutIndex: 1,
-          id: "s10-3",
+            "topic": null,
+            "description": null,
+            "segment": "We're mad. OK, Mom. I'm trying to. ",
+            "time": "16:18:46",
+            "speakerTurns": {
+                "total": 7,
+                "speakers": [
+                    {
+                        "speakerId": "Guest-1",
+                        "length": 7
+                    }
+                ],
+                "turns": [
+                    {
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "We're mad.",
+                        "length": 2
+                    },
+                    {
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "OK, Mom.",
+                        "length": 2
+                    },
+                    {
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "I'm trying to.",
+                        "length": 3
+                    }
+                ]
+            },
+            "id": "3",
+            "depth": 0,
+            "parentNodes": null,
+            "childNodes": {
+                "1": [
+                    "23"
+                ],
+                "2": []
+            },
+            "segments": "3"
         },
         {
-          topic: "DECISION MAKING",
-          description: "She just went into this, which is crazy.",
-          segment:
-            "Couple times and I was always like, oh, like I'll think about it, whatever. And then she's like OK, enough is enough. And she just went into this, which is crazy. I was like, oh, do you think?",
-          time: "01:00:19",
-          speakerTurns: {
-            total: 38,
-            speakers: [
-              {
-                speakerId: "Guest-2",
-                length: 38,
-              },
-            ],
-            turns: [
-              {
-                speakerId: "Guest-2",
-                speakerSeg:
-                  "Couple times and I was always like, oh, like I'll think about it, whatever. And then she's like OK, enough is enough. And she just went into this, which is crazy. I was like, oh, do you think?",
-                length: 38,
-              },
-            ],
-          },
-          topicIndex: 0,
-          zoomInIndex: null,
-          zoomOutIndex: 1,
-          id: "s10-4",
+            "topic": null,
+            "description": null,
+            "segment": "Yeah, I started making them. ",
+            "time": "16:19:07",
+            "speakerTurns": {
+                "total": 5,
+                "speakers": [
+                    {
+                        "speakerId": "Guest-2",
+                        "length": 5
+                    }
+                ],
+                "turns": [
+                    {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "Yeah, I started making them.",
+                        "length": 5
+                    }
+                ]
+            },
+            "id": "4",
+            "depth": 0,
+            "parentNodes": null,
+            "childNodes": {
+                "1": [
+                    "45"
+                ],
+                "2": []
+            },
+            "segments": "4"
         },
         {
-          topic: "ADRENALINE ACTIVITY INTEREST",
-          description: "Like he really likes it.",
-          segment:
-            "Bro, I don't know, 'cause like he's I, I think he would 'cause he's definitely like an adrenaline junkie to a certain extent. Like he really likes it.",
-          time: "01:00:30",
-          speakerTurns: {
-            total: 28,
-            speakers: [
-              {
-                speakerId: "Guest-2",
-                length: 28,
-              },
-            ],
-            turns: [
-              {
-                speakerId: "Guest-2",
-                speakerSeg:
-                  "Bro, I don't know, 'cause like he's I, I think he would 'cause he's definitely like an adrenaline junkie to a certain extent. Like he really likes it.",
-                length: 28,
-              },
-            ],
-          },
-          topicIndex: 0,
-          zoomInIndex: null,
-          zoomOutIndex: 1,
-          id: "s10-5",
+            "topic": null,
+            "description": null,
+            "segment": "I I can't eat it, but it's. ",
+            "time": "16:19:40",
+            "speakerTurns": {
+                "total": 7,
+                "speakers": [
+                    {
+                        "speakerId": "Guest-2",
+                        "length": 7
+                    }
+                ],
+                "turns": [
+                    {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "I I can't eat it, but it's.",
+                        "length": 7
+                    }
+                ]
+            },
+            "id": "5",
+            "depth": 0,
+            "parentNodes": null,
+            "childNodes": {
+                "1": [
+                    "45"
+                ],
+                "2": []
+            },
+            "segments": "5"
         },
         {
-          topic: "READINESS FOR CHANGE",
-          description: "I was not ready when she was ready.",
-          segment:
-            "It's hard 💪 to mentally prepare. I was not ready when she was ready. Oh my gosh 😱.",
-          time: "00:59:36",
-          speakerTurns: {
-            total: 16,
-            speakers: [
-              {
-                speakerId: "Guest-1",
-                length: 16,
-              },
-            ],
-            turns: [
-              {
-                speakerId: "Guest-1",
-                speakerSeg:
-                  "It's hard 💪 to mentally prepare. I was not ready when she was ready. Oh my gosh 😱.",
-                length: 16,
-              },
-            ],
-          },
-          topicIndex: 0,
-          zoomInIndex: null,
-          zoomOutIndex: 0,
-          id: "s10-0",
+            "topic": null,
+            "description": null,
+            "segment": "I like eggs, and very specifically, but I don't like it, Yeah. ",
+            "time": "16:20:01",
+            "speakerTurns": {
+                "total": 12,
+                "speakers": [
+                    {
+                        "speakerId": "Guest-2",
+                        "length": 12
+                    }
+                ],
+                "turns": [
+                    {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "I like eggs, and very specifically, but I don't like it, Yeah.",
+                        "length": 12
+                    }
+                ]
+            },
+            "id": "6",
+            "depth": 0,
+            "parentNodes": null,
+            "childNodes": {
+                "1": [
+                    "67"
+                ],
+                "2": []
+            },
+            "segments": "6"
         },
         {
-          topic: "SKYDIVING PROPOSAL",
-          description:
-            "Yeah, she was like, let's go skydiving, like right now.",
-          segment: "Yeah, she was like, let's go skydiving ✈️, like right now.",
-          time: "00:59:46",
-          speakerTurns: {
-            total: 10,
-            speakers: [
-              {
-                speakerId: "Guest-1",
-                length: 10,
-              },
-            ],
-            turns: [
-              {
-                speakerId: "Guest-1",
-                speakerSeg:
-                  "Yeah, she was like, let's go skydiving ✈️, like right now.",
-                length: 10,
-              },
-            ],
-          },
-          topicIndex: 0,
-          zoomInIndex: null,
-          zoomOutIndex: 0,
-          id: "s10-1",
+            "topic": null,
+            "description": null,
+            "segment": "Lately. ",
+            "time": "16:20:55",
+            "speakerTurns": {
+                "total": 1,
+                "speakers": [
+                    {
+                        "speakerId": "Guest-3",
+                        "length": 1
+                    }
+                ],
+                "turns": [
+                    {
+                        "speakerId": "Guest-3",
+                        "speakerSeg": "Lately.",
+                        "length": 1
+                    }
+                ]
+            },
+            "id": "7",
+            "depth": 0,
+            "parentNodes": null,
+            "childNodes": {
+                "1": [
+                    "67"
+                ],
+                "2": []
+            },
+            "segments": "7"
         },
         {
-          topic: "TRAVEL PLANS",
-          description: "I thought that would be more time in between.",
-          segment:
-            "I've never even thought 🤔 about this before. What do you mean? Yeah, I thought she was like joking 😄 at first, or like by how soon she wanted to go, but then. Pictures of her. And I was like, Oh yeah, OK 👌, yeah, I thought. I thought that would be more time ⏰ in between.",
-          time: "00:59:57",
-          speakerTurns: {
-            total: 53,
-            speakers: [
-              {
-                speakerId: "Guest-1",
-                length: 53,
-              },
-            ],
-            turns: [
-              {
-                speakerId: "Guest-1",
-                speakerSeg:
-                  "I've never even thought 🤔 about this before. What do you mean? Yeah, I thought she was like joking 😄 at first, or like by how soon she wanted to go, but then.",
-                length: 31,
-              },
-              {
-                speakerId: "Guest-1",
-                speakerSeg:
-                  "Pictures of her. And I was like, Oh yeah, OK 👌, yeah, I thought. I thought that would be more time ⏰ in between.",
-                length: 22,
-              },
-            ],
-          },
-          topicIndex: 0,
-          zoomInIndex: null,
-          zoomOutIndex: 0,
-          id: "s10-2",
+            "topic": null,
+            "description": null,
+            "segment": "It's like, it's like impressive how much snow it can give off. Yeah, Oh my goodness. ",
+            "time": "16:21:06",
+            "speakerTurns": {
+                "total": 16,
+                "speakers": [
+                    {
+                        "speakerId": "Guest-3",
+                        "length": 16
+                    }
+                ],
+                "turns": [
+                    {
+                        "speakerId": "Guest-3",
+                        "speakerSeg": "It's like, it's like impressive how much snow it can give off. Yeah, Oh my goodness.",
+                        "length": 16
+                    }
+                ]
+            },
+            "id": "8",
+            "depth": 0,
+            "parentNodes": null,
+            "childNodes": {
+                "1": [
+                    "89"
+                ],
+                "2": []
+            },
+            "segments": "8"
         },
         {
-          topic: "PERSONALITY DESCRIPTION",
-          description: "Yeah, like she's, she's very much like.",
-          segment: "Yeah, like she's, she's very much like 💯.",
-          time: "01:00:08",
-          speakerTurns: {
-            total: 7,
-            speakers: [
-              {
-                speakerId: "Guest-1",
-                length: 7,
-              },
-            ],
-            turns: [
-              {
-                speakerId: "Guest-1",
-                speakerSeg: "Yeah, like she's, she's very much like 💯.",
-                length: 7,
-              },
-            ],
-          },
-          topicIndex: 0,
-          zoomInIndex: null,
-          zoomOutIndex: 1,
-          id: "s10-3",
+            "topic": null,
+            "description": null,
+            "segment": "Cedar of the sauce. Yeah. ",
+            "time": "16:21:27",
+            "speakerTurns": {
+                "total": 5,
+                "speakers": [
+                    {
+                        "speakerId": "Guest-1",
+                        "length": 5
+                    }
+                ],
+                "turns": [
+                    {
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "Cedar of the sauce.",
+                        "length": 4
+                    },
+                    {
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "Yeah.",
+                        "length": 1
+                    }
+                ]
+            },
+            "id": "9",
+            "depth": 0,
+            "parentNodes": null,
+            "childNodes": {
+                "1": [
+                    "89"
+                ],
+                "2": []
+            },
+            "segments": "9"
         },
         {
-          topic: "DECISION MAKING",
-          description: "She just went into this, which is crazy.",
-          segment:
-            "Couple times and I was always like, oh, like I'll think about it, whatever. And then she's like OK, enough is enough. And she just went into this, which is crazy. I was like, oh, do you think?",
-          time: "01:00:19",
-          speakerTurns: {
-            total: 38,
-            speakers: [
-              {
-                speakerId: "Guest-2",
-                length: 38,
-              },
-            ],
-            turns: [
-              {
-                speakerId: "Guest-2",
-                speakerSeg:
-                  "Couple times and I was always like, oh, like I'll think about it, whatever. And then she's like OK, enough is enough. And she just went into this, which is crazy. I was like, oh, do you think?",
-                length: 38,
-              },
-            ],
-          },
-          topicIndex: 0,
-          zoomInIndex: null,
-          zoomOutIndex: 1,
-          id: "s10-4",
+            "topic": null,
+            "description": null,
+            "segment": "They have a million types of hot socks like this. This is better for them like this and Sasha better for this and then. ",
+            "time": "16:21:38",
+            "speakerTurns": {
+                "total": 24,
+                "speakers": [
+                    {
+                        "speakerId": "Guest-3",
+                        "length": 24
+                    }
+                ],
+                "turns": [
+                    {
+                        "speakerId": "Guest-3",
+                        "speakerSeg": "They have a million types of hot socks like this. This is better for them like this and Sasha better for this and then.",
+                        "length": 24
+                    }
+                ]
+            },
+            "id": "10",
+            "depth": 0,
+            "parentNodes": null,
+            "childNodes": {
+                "1": [
+                    "1011"
+                ],
+                "2": []
+            },
+            "segments": "10"
         },
         {
-          topic: "ADRENALINE ACTIVITY INTEREST",
-          description: "Like he really likes it.",
-          segment:
-            "Bro, I don't know, 'cause like he's I, I think he would 'cause he's definitely like an adrenaline junkie to a certain extent. Like he really likes it.",
-          time: "01:00:30",
-          speakerTurns: {
-            total: 28,
-            speakers: [
-              {
-                speakerId: "Guest-2",
-                length: 28,
-              },
-            ],
-            turns: [
-              {
-                speakerId: "Guest-2",
-                speakerSeg:
-                  "Bro, I don't know, 'cause like he's I, I think he would 'cause he's definitely like an adrenaline junkie to a certain extent. Like he really likes it.",
-                length: 28,
-              },
-            ],
-          },
-          topicIndex: 0,
-          zoomInIndex: null,
-          zoomOutIndex: 1,
-          id: "s10-5",
+            "topic": null,
+            "description": null,
+            "segment": "Julius is better for this. Like I only saw the means. ",
+            "time": "16:21:48",
+            "speakerTurns": {
+                "total": 11,
+                "speakers": [
+                    {
+                        "speakerId": "Guest-1",
+                        "length": 11
+                    }
+                ],
+                "turns": [
+                    {
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "Julius is better for this.",
+                        "length": 5
+                    },
+                    {
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "Like I only saw the means.",
+                        "length": 6
+                    }
+                ]
+            },
+            "id": "11",
+            "depth": 0,
+            "parentNodes": null,
+            "childNodes": {
+                "1": [
+                    "1011"
+                ],
+                "2": []
+            },
+            "segments": "11"
         },
-      ]
-    };
+        {
+            "topic": null,
+            "description": null,
+            "segment": "And I need to have a chili boy with. That's good, I mean. ",
+            "time": "16:21:59",
+            "speakerTurns": {
+                "total": 13,
+                "speakers": [
+                    {
+                        "speakerId": "Guest-2",
+                        "length": 9
+                    },
+                    {
+                        "speakerId": "Guest-6",
+                        "length": 4
+                    }
+                ],
+                "turns": [
+                    {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "And I need to have a chili boy with.",
+                        "length": 9
+                    },
+                    {
+                        "speakerId": "Guest-6",
+                        "speakerSeg": "That's good, I mean.",
+                        "length": 4
+                    }
+                ]
+            },
+            "id": "12",
+            "depth": 0,
+            "parentNodes": null,
+            "childNodes": {
+                "1": [
+                    "1213"
+                ],
+                "2": []
+            },
+            "segments": "12"
+        },
+        {
+            "topic": null,
+            "description": null,
+            "segment": "We, I think we used to buy it too. So yeah. And I actually. Oh yeah. Yeah, he's my friend. ",
+            "time": "16:22:21",
+            "speakerTurns": {
+                "total": 20,
+                "speakers": [
+                    {
+                        "speakerId": "Guest-2",
+                        "length": 18
+                    },
+                    {
+                        "speakerId": "Guest-3",
+                        "length": 2
+                    }
+                ],
+                "turns": [
+                    {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "We, I think we used to buy it too. So yeah. And I actually.",
+                        "length": 14
+                    },
+                    {
+                        "speakerId": "Guest-3",
+                        "speakerSeg": "Oh yeah.",
+                        "length": 2
+                    },
+                    {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "Yeah, he's my friend.",
+                        "length": 4
+                    }
+                ]
+            },
+            "id": "13",
+            "depth": 0,
+            "parentNodes": null,
+            "childNodes": {
+                "1": [
+                    "1213"
+                ],
+                "2": []
+            },
+            "segments": "13"
+        },
+        {
+            "topic": null,
+            "description": null,
+            "segment": "Later. ",
+            "time": "16:22:42",
+            "speakerTurns": {
+                "total": 1,
+                "speakers": [
+                    {
+                        "speakerId": "Guest-2",
+                        "length": 1
+                    }
+                ],
+                "turns": [
+                    {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "Later.",
+                        "length": 1
+                    }
+                ]
+            },
+            "id": "14",
+            "depth": 0,
+            "parentNodes": null,
+            "childNodes": {
+                "1": [],
+                "2": []
+            },
+            "segments": "14"
+        }
+    ],
+    "1": [
+        {
+            "topic": "COOKING EXPERIMENT",
+            "description": "I think try to bake like a chicken breast and then the the grease is just like watering everywhere.",
+            "segment": "Do you favorite life? I think try to bake like a chicken breast and then the the grease is just like watering everywhere. You get it best. So yes, let's just say not the best. Of cooking. That's kind of weird. She. Just she didn't mean it, but like. ",
+            "time": "16:18:25",
+            "speakerTurns": {
+                "total": 49,
+                "speakers": [
+                    {
+                        "speakerId": "Guest-1",
+                        "length": 35
+                    },
+                    {
+                        "speakerId": "Guest-2",
+                        "length": 14
+                    }
+                ],
+                "turns": [
+                    {
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "So yes, let's just say not the best.",
+                        "length": 8
+                    },
+                    {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "Of cooking. That's kind of weird. She.",
+                        "length": 7
+                    },
+                    {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "Just she didn't mean it, but like.",
+                        "length": 7
+                    },
+                    {
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "Do you favorite life? I think try to bake like a chicken breast and then the the grease is just like watering everywhere. You get it best.",
+                        "length": 27
+                    }
+                ]
+            },
+            "id": "01",
+            "depth": 1,
+            "parentNodes": {
+                "0": [
+                    "1",
+                    "0"
+                ]
+            },
+            "childNodes": {
+                "2": [
+                    "0123"
+                ],
+                "3": []
+            },
+            "segments": "0 1"
+        },
+        {
+            "topic": "COOKING ADVICE",
+            "description": "And then she's like, why don't you cook this like?",
+            "segment": "And then she's like, why don't you cook this like? We're mad. OK, Mom. I'm trying to. ",
+            "time": "16:18:46",
+            "speakerTurns": {
+                "total": 17,
+                "speakers": [
+                    {
+                        "speakerId": "Guest-1",
+                        "length": 17
+                    }
+                ],
+                "turns": [
+                    {
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "We're mad.",
+                        "length": 2
+                    },
+                    {
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "OK, Mom.",
+                        "length": 2
+                    },
+                    {
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "I'm trying to.",
+                        "length": 3
+                    },
+                    {
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "And then she's like, why don't you cook this like?",
+                        "length": 10
+                    }
+                ]
+            },
+            "id": "23",
+            "depth": 1,
+            "parentNodes": {
+                "0": [
+                    "3",
+                    "2"
+                ]
+            },
+            "childNodes": {
+                "2": [
+                    "0123"
+                ],
+                "3": []
+            },
+            "segments": "2 3"
+        },
+        {
+            "topic": "MAKING FOOD",
+            "description": "Yeah, I started making them.",
+            "segment": "Yeah, I started making them. I I can't eat it, but it's. ",
+            "time": "16:19:40",
+            "speakerTurns": {
+                "total": 12,
+                "speakers": [
+                    {
+                        "speakerId": "Guest-2",
+                        "length": 12
+                    }
+                ],
+                "turns": [
+                    {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "I I can't eat it, but it's.",
+                        "length": 7
+                    },
+                    {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "Yeah, I started making them.",
+                        "length": 5
+                    }
+                ]
+            },
+            "id": "45",
+            "depth": 1,
+            "parentNodes": {
+                "0": [
+                    "5",
+                    "4"
+                ]
+            },
+            "childNodes": {
+                "2": [
+                    "4567"
+                ],
+                "3": []
+            },
+            "segments": "4 5"
+        },
+        {
+            "topic": "FOOD PREFERENCES",
+            "description": "I like eggs, and very specifically, but I don't like it.",
+            "segment": "I like eggs, and very specifically, but I don't like it, Yeah. Lately. ",
+            "time": "16:20:55",
+            "speakerTurns": {
+                "total": 13,
+                "speakers": [
+                    {
+                        "speakerId": "Guest-3",
+                        "length": 1
+                    },
+                    {
+                        "speakerId": "Guest-2",
+                        "length": 12
+                    }
+                ],
+                "turns": [
+                    {
+                        "speakerId": "Guest-3",
+                        "speakerSeg": "Lately.",
+                        "length": 1
+                    },
+                    {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "I like eggs, and very specifically, but I don't like it, Yeah.",
+                        "length": 12
+                    }
+                ]
+            },
+            "id": "67",
+            "depth": 1,
+            "parentNodes": {
+                "0": [
+                    "7",
+                    "6"
+                ]
+            },
+            "childNodes": {
+                "2": [
+                    "4567"
+                ],
+                "3": []
+            },
+            "segments": "6 7"
+        },
+        {
+            "topic": "SNOWFALL",
+            "description": "It's like impressive how much snow it can give off.",
+            "segment": "It's like, it's like impressive how much snow it can give off. Yeah, Oh my goodness. Cedar of the sauce. Yeah. ",
+            "time": "16:21:27",
+            "speakerTurns": {
+                "total": 21,
+                "speakers": [
+                    {
+                        "speakerId": "Guest-1",
+                        "length": 5
+                    },
+                    {
+                        "speakerId": "Guest-3",
+                        "length": 16
+                    }
+                ],
+                "turns": [
+                    {
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "Cedar of the sauce.",
+                        "length": 4
+                    },
+                    {
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "Yeah.",
+                        "length": 1
+                    },
+                    {
+                        "speakerId": "Guest-3",
+                        "speakerSeg": "It's like, it's like impressive how much snow it can give off. Yeah, Oh my goodness.",
+                        "length": 16
+                    }
+                ]
+            },
+            "id": "89",
+            "depth": 1,
+            "parentNodes": {
+                "0": [
+                    "9",
+                    "8"
+                ]
+            },
+            "childNodes": {
+                "2": [
+                    "891011"
+                ],
+                "3": []
+            },
+            "segments": "8 9"
+        },
+        {
+            "topic": "HOT SOCKS TYPES",
+            "description": "They have a million types of hot socks like this.",
+            "segment": "They have a million types of hot socks like this. This is better for them like this and Sasha better for this and then. Julius is better for this. Like I only saw the means. ",
+            "time": "16:21:48",
+            "speakerTurns": {
+                "total": 35,
+                "speakers": [
+                    {
+                        "speakerId": "Guest-1",
+                        "length": 11
+                    },
+                    {
+                        "speakerId": "Guest-3",
+                        "length": 24
+                    }
+                ],
+                "turns": [
+                    {
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "Julius is better for this.",
+                        "length": 5
+                    },
+                    {
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "Like I only saw the means.",
+                        "length": 6
+                    },
+                    {
+                        "speakerId": "Guest-3",
+                        "speakerSeg": "They have a million types of hot socks like this. This is better for them like this and Sasha better for this and then.",
+                        "length": 24
+                    }
+                ]
+            },
+            "id": "1011",
+            "depth": 1,
+            "parentNodes": {
+                "0": [
+                    "11",
+                    "10"
+                ]
+            },
+            "childNodes": {
+                "2": [
+                    "891011"
+                ],
+                "3": []
+            },
+            "segments": "10 11"
+        },
+        {
+            "topic": "CHILI BOY",
+            "description": "And I need to have a chili boy with.",
+            "segment": "And I need to have a chili boy with. That's good, I mean. We, I think we used to buy it too. So yeah. And I actually. Oh yeah. Yeah, he's my friend. ",
+            "time": "16:22:21",
+            "speakerTurns": {
+                "total": 33,
+                "speakers": [
+                    {
+                        "speakerId": "Guest-2",
+                        "length": 27
+                    },
+                    {
+                        "speakerId": "Guest-3",
+                        "length": 2
+                    },
+                    {
+                        "speakerId": "Guest-6",
+                        "length": 4
+                    }
+                ],
+                "turns": [
+                    {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "We, I think we used to buy it too. So yeah. And I actually.",
+                        "length": 14
+                    },
+                    {
+                        "speakerId": "Guest-3",
+                        "speakerSeg": "Oh yeah.",
+                        "length": 2
+                    },
+                    {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "Yeah, he's my friend.",
+                        "length": 4
+                    },
+                    {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "And I need to have a chili boy with.",
+                        "length": 9
+                    },
+                    {
+                        "speakerId": "Guest-6",
+                        "speakerSeg": "That's good, I mean.",
+                        "length": 4
+                    }
+                ]
+            },
+            "id": "1213",
+            "depth": 1,
+            "parentNodes": {
+                "0": [
+                    "13",
+                    "12"
+                ]
+            },
+            "childNodes": {
+                "2": [],
+                "3": []
+            },
+            "segments": "12 13"
+        }
+    ],
+    "2": [
+        {
+            "topic": "COOKING MISHAP",
+            "description": "I think try to bake like a chicken breast and then the the grease is just like watering everywhere.",
+            "segment": "Do you favorite life? I think try to bake like a chicken breast and then the the grease is just like watering everywhere. You get it best. So yes, let's just say not the best. Of cooking. That's kind of weird. She. Just she didn't mean it, but like. And then she's like, why don't you cook this like? We're mad. OK, Mom. I'm trying to. ",
+            "time": "16:18:46",
+            "speakerTurns": {
+                "total": 66,
+                "speakers": [
+                    {
+                        "speakerId": "Guest-1",
+                        "length": 52
+                    },
+                    {
+                        "speakerId": "Guest-2",
+                        "length": 14
+                    }
+                ],
+                "turns": [
+                    {
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "We're mad.",
+                        "length": 2
+                    },
+                    {
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "OK, Mom.",
+                        "length": 2
+                    },
+                    {
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "I'm trying to.",
+                        "length": 3
+                    },
+                    {
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "And then she's like, why don't you cook this like?",
+                        "length": 10
+                    },
+                    {
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "So yes, let's just say not the best.",
+                        "length": 8
+                    },
+                    {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "Of cooking. That's kind of weird. She.",
+                        "length": 7
+                    },
+                    {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "Just she didn't mean it, but like.",
+                        "length": 7
+                    },
+                    {
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "Do you favorite life? I think try to bake like a chicken breast and then the the grease is just like watering everywhere. You get it best.",
+                        "length": 27
+                    }
+                ]
+            },
+            "id": "0123",
+            "depth": 2,
+            "parentNodes": {
+                "1": [
+                    "23",
+                    "01"
+                ]
+            },
+            "childNodes": {
+                "3": [
+                    "01234567"
+                ],
+                "4": []
+            },
+            "segments": "0 1 2 3"
+        },
+        {
+            "topic": "EGG CRAVINGS",
+            "description": "I like eggs, and very specifically, but I don't like it, Yeah.",
+            "segment": "Yeah, I started making them. I I can't eat it, but it's. I like eggs, and very specifically, but I don't like it, Yeah. Lately. ",
+            "time": "16:20:55",
+            "speakerTurns": {
+                "total": 25,
+                "speakers": [
+                    {
+                        "speakerId": "Guest-3",
+                        "length": 1
+                    },
+                    {
+                        "speakerId": "Guest-2",
+                        "length": 24
+                    }
+                ],
+                "turns": [
+                    {
+                        "speakerId": "Guest-3",
+                        "speakerSeg": "Lately.",
+                        "length": 1
+                    },
+                    {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "I like eggs, and very specifically, but I don't like it, Yeah.",
+                        "length": 12
+                    },
+                    {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "I I can't eat it, but it's.",
+                        "length": 7
+                    },
+                    {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "Yeah, I started making them.",
+                        "length": 5
+                    }
+                ]
+            },
+            "id": "4567",
+            "depth": 2,
+            "parentNodes": {
+                "1": [
+                    "67",
+                    "45"
+                ]
+            },
+            "childNodes": {
+                "3": [
+                    "01234567"
+                ],
+                "4": []
+            },
+            "segments": "4 5 6 7"
+        },
+        {
+            "topic": "HOT SAUCE VARIETY",
+            "description": "They have a million types of hot socks like this.",
+            "segment": "It's like, it's like impressive how much snow it can give off. Yeah, Oh my goodness. Cedar of the sauce. Yeah. They have a million types of hot socks like this. This is better for them like this and Sasha better for this and then. Julius is better for this. Like I only saw the means. ",
+            "time": "16:21:48",
+            "speakerTurns": {
+                "total": 56,
+                "speakers": [
+                    {
+                        "speakerId": "Guest-1",
+                        "length": 16
+                    },
+                    {
+                        "speakerId": "Guest-3",
+                        "length": 40
+                    }
+                ],
+                "turns": [
+                    {
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "Julius is better for this.",
+                        "length": 5
+                    },
+                    {
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "Like I only saw the means.",
+                        "length": 6
+                    },
+                    {
+                        "speakerId": "Guest-3",
+                        "speakerSeg": "They have a million types of hot socks like this. This is better for them like this and Sasha better for this and then.",
+                        "length": 24
+                    },
+                    {
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "Cedar of the sauce.",
+                        "length": 4
+                    },
+                    {
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "Yeah.",
+                        "length": 1
+                    },
+                    {
+                        "speakerId": "Guest-3",
+                        "speakerSeg": "It's like, it's like impressive how much snow it can give off. Yeah, Oh my goodness.",
+                        "length": 16
+                    }
+                ]
+            },
+            "id": "891011",
+            "depth": 2,
+            "parentNodes": {
+                "1": [
+                    "1011",
+                    "89"
+                ]
+            },
+            "childNodes": {
+                "3": [],
+                "4": []
+            },
+            "segments": "8 9 10 11"
+        }
+    ],
+    "3": [
+        {
+            "topic": "COOKING EXPERIENCES",
+            "description": "I think try to bake like a chicken breast and then the grease is just like watering everywhere.",
+            "segment": "Do you favorite life? I think try to bake like a chicken breast and then the the grease is just like watering everywhere. You get it best. So yes, let's just say not the best. Of cooking. That's kind of weird. She. Just she didn't mean it, but like. And then she's like, why don't you cook this like? We're mad. OK, Mom. I'm trying to. Yeah, I started making them. I I can't eat it, but it's. I like eggs, and very specifically, but I don't like it, Yeah. Lately. ",
+            "time": "16:20:55",
+            "speakerTurns": {
+                "total": 91,
+                "speakers": [
+                    {
+                        "speakerId": "Guest-3",
+                        "length": 1
+                    },
+                    {
+                        "speakerId": "Guest-2",
+                        "length": 38
+                    },
+                    {
+                        "speakerId": "Guest-1",
+                        "length": 52
+                    }
+                ],
+                "turns": [
+                    {
+                        "speakerId": "Guest-3",
+                        "speakerSeg": "Lately.",
+                        "length": 1
+                    },
+                    {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "I like eggs, and very specifically, but I don't like it, Yeah.",
+                        "length": 12
+                    },
+                    {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "I I can't eat it, but it's.",
+                        "length": 7
+                    },
+                    {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "Yeah, I started making them.",
+                        "length": 5
+                    },
+                    {
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "We're mad.",
+                        "length": 2
+                    },
+                    {
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "OK, Mom.",
+                        "length": 2
+                    },
+                    {
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "I'm trying to.",
+                        "length": 3
+                    },
+                    {
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "And then she's like, why don't you cook this like?",
+                        "length": 10
+                    },
+                    {
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "So yes, let's just say not the best.",
+                        "length": 8
+                    },
+                    {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "Of cooking. That's kind of weird. She.",
+                        "length": 7
+                    },
+                    {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "Just she didn't mean it, but like.",
+                        "length": 7
+                    },
+                    {
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "Do you favorite life? I think try to bake like a chicken breast and then the the grease is just like watering everywhere. You get it best.",
+                        "length": 27
+                    }
+                ]
+            },
+            "id": "01234567",
+            "depth": 3,
+            "parentNodes": {
+                "2": [
+                    "4567",
+                    "0123"
+                ]
+            },
+            "childNodes": {
+                "4": [],
+                "5": []
+            },
+            "segments": "0 1 2 3 4 5 6 7"
+        }
+    ]
+    }
     return data;
   }
 }

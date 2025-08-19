@@ -64,7 +64,7 @@ export class OpenAI {
       return resultText;
   };
   
-  async checkForTopicTurn(speech, lastTopic) {
+  async checkForTopicTurn(speech) {
     // console.log("last topic:" + lastTopic);
       let resultText = "";
 
@@ -157,35 +157,41 @@ export class OpenAI {
     } else {
       try {
         // Check if the segment contains a turn sentence for a new topic
-        const value = await this.checkForTopicTurn(speech, lastTopic);
+        const turn = await this.checkForTopicTurn(speech);
+        if (!turn.has_turn) {
+          return null;
+        } else {
+          const value = await this.topicClassify(speech, lastTopic);
+          result = value;
+        }
 //         console.log("topic turn result");
 //         console.log(value);
         
-        // If a turn sentence is detected, split the segment into a preturn and a postturn
-        if (!(value.turn_sentence==null)){
-          const turnSentence = value.turn_sentence;
-          // console.log(`turn sentence: ${turnSentence}`);
-          // console.log(speech.indexOf(turnSentence))
+        // // If a turn sentence is detected, split the segment into a preturn and a postturn
+        // if (!(value.turn_sentence==null)){
+        //   const turnSentence = value.turn_sentence;
+        //   // console.log(`turn sentence: ${turnSentence}`);
+        //   // console.log(speech.indexOf(turnSentence))
           
-          const splitAtTurnSentence = (speech, turnSentence) =>
-            speech.includes(turnSentence)
-              ? [speech.slice(0, speech.indexOf(turnSentence)), speech.slice(speech.indexOf(turnSentence))]
-              : [speech, ""]; 
+        //   const splitAtTurnSentence = (speech, turnSentence) =>
+        //     speech.includes(turnSentence)
+        //       ? [speech.slice(0, speech.indexOf(turnSentence)), speech.slice(speech.indexOf(turnSentence))]
+        //       : [speech, ""]; 
           
-          const [preturn, postturn] = splitAtTurnSentence(speech.toLowerCase(), turnSentence.toLowerCase());
-          // console.log(`Preturn: ${preturn}`);
-          // console.log(`Postturn: ${postturn}`);
+        //   const [preturn, postturn] = splitAtTurnSentence(speech.toLowerCase(), turnSentence.toLowerCase());
+        //   // console.log(`Preturn: ${preturn}`);
+        //   // console.log(`Postturn: ${postturn}`);
           
-          //Only classify a new segment if the postturn and preturn is > 100 characters
-          if (postturn.length > 100 && preturn.length > 100) {
-            const topic = await this.topicClassify(postturn, lastTopic);
-            // console.log("topic result");
-            // console.log(topic);
-            topic.sentence = turnSentence;
-            console.log(topic)
-            result = [topic, preturn];
-          }
-        }
+        //   //Only classify a new segment if the postturn and preturn is > 100 characters
+        //   if (postturn.length > 100 && preturn.length > 100) {
+        //     const topic = await this.topicClassify(postturn, lastTopic);
+        //     // console.log("topic result");
+        //     // console.log(topic);
+        //     topic.sentence = turnSentence;
+        //     console.log(topic)
+        //     result = [topic, preturn];
+        //   }
+        // }
       } catch (error) {
         console.error("Error in turn mode:", error);
       }

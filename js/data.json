@@ -1,0 +1,992 @@
+{
+    "0": [
+        {
+            "topic": null,
+            "description": null,
+            "segment": "Especially because my mom can be really about it. Yeah. So when I speak, she's like, who's gonna eat this now when I'm like me? Yeah, I will. Yeah, I will see. My mom is like that too. ",
+            "time": "15:51:46",
+            "speakerTurns": {
+                "total": 38,
+                "speakers": [
+                    {
+                        "speakerId": "Guest-1",
+                        "length": 28
+                    },
+                    {
+                        "speakerId": "Guest-2",
+                        "length": 10
+                    }
+                ],
+                "turns": [
+                    {
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "Especially because my mom can be really about it. Yeah. So when I speak, she's like, who's gonna eat this now when I'm like me?",
+                        "length": 25
+                    },
+                    {
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "Yeah, I will.",
+                        "length": 3
+                    },
+                    {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "Yeah, I will see. My mom is like that too.",
+                        "length": 10
+                    }
+                ]
+            },
+            "id": "0",
+            "depth": 0,
+            "parentNodes": null,
+            "childNodes": {
+                "1": [
+                    "01"
+                ],
+                "2": []
+            },
+            "segments": "0"
+        },
+        {
+            "topic": null,
+            "description": null,
+            "segment": "Just make things that I. Eat with them, it's like. If it's just me, it's kind of offers, yeah. And then she will complain. About like what I use for like for. ",
+            "time": "15:51:58",
+            "speakerTurns": {
+                "total": 32,
+                "speakers": [
+                    {
+                        "speakerId": "Guest-2",
+                        "length": 5
+                    },
+                    {
+                        "speakerId": "Guest-1",
+                        "length": 5
+                    },
+                    {
+                        "speakerId": "Guest-3",
+                        "length": 14
+                    },
+                    {
+                        "speakerId": "Guest-4",
+                        "length": 8
+                    }
+                ],
+                "turns": [
+                    {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "Just make things that I.",
+                        "length": 5
+                    },
+                    {
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "Eat with them, it's like.",
+                        "length": 5
+                    },
+                    {
+                        "speakerId": "Guest-3",
+                        "speakerSeg": "If it's just me, it's kind of offers, yeah. And then she will complain.",
+                        "length": 14
+                    },
+                    {
+                        "speakerId": "Guest-4",
+                        "speakerSeg": "About like what I use for like for.",
+                        "length": 8
+                    }
+                ]
+            },
+            "id": "1",
+            "depth": 0,
+            "parentNodes": null,
+            "childNodes": {
+                "1": [
+                    "01"
+                ],
+                "2": []
+            },
+            "segments": "1"
+        },
+        {
+            "topic": null,
+            "description": null,
+            "segment": "Yeah, yeah. It's like. It's like when my brother got banned from the kitchen once. Why he's made like, I think he. ",
+            "time": "15:52:09",
+            "speakerTurns": {
+                "total": 22,
+                "speakers": [
+                    {
+                        "speakerId": "Guest-2",
+                        "length": 4
+                    },
+                    {
+                        "speakerId": "Guest-4",
+                        "length": 18
+                    }
+                ],
+                "turns": [
+                    {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "Yeah, yeah. It's like.",
+                        "length": 4
+                    },
+                    {
+                        "speakerId": "Guest-4",
+                        "speakerSeg": "It's like when my brother got banned from the kitchen once.",
+                        "length": 11
+                    },
+                    {
+                        "speakerId": "Guest-4",
+                        "speakerSeg": "Why he's made like, I think he.",
+                        "length": 7
+                    }
+                ]
+            },
+            "id": "2",
+            "depth": 0,
+            "parentNodes": null,
+            "childNodes": {
+                "1": [
+                    "23"
+                ],
+                "2": [
+                    "012"
+                ]
+            },
+            "segments": "2"
+        },
+        {
+            "topic": null,
+            "description": null,
+            "segment": "Chicken breast and then the the grease. Is just like splattering everywhere and you made it. Best and then did you not use a baking pan to use baking sheet, but it was still like. You know what the? ",
+            "time": "15:52:20",
+            "speakerTurns": {
+                "total": 39,
+                "speakers": [
+                    {
+                        "speakerId": "Guest-4",
+                        "length": 7
+                    },
+                    {
+                        "speakerId": "Guest-2",
+                        "length": 28
+                    },
+                    {
+                        "speakerId": "Guest-1",
+                        "length": 4
+                    }
+                ],
+                "turns": [
+                    {
+                        "speakerId": "Guest-4",
+                        "speakerSeg": "Chicken breast and then the the grease.",
+                        "length": 7
+                    },
+                    {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "Is just like splattering everywhere and you made it.",
+                        "length": 9
+                    },
+                    {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "Best and then did you not use a baking pan to use baking sheet, but it was still like.",
+                        "length": 19
+                    },
+                    {
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "You know what the?",
+                        "length": 4
+                    }
+                ]
+            },
+            "id": "3",
+            "depth": 0,
+            "parentNodes": null,
+            "childNodes": {
+                "1": [
+                    "23"
+                ],
+                "2": []
+            },
+            "segments": "3"
+        },
+        {
+            "topic": null,
+            "description": null,
+            "segment": "He was like flying everywhere 'cause it was really hot. Oh, he didn't cover it. Yeah. So he's. Let's just say not the best. ",
+            "time": "15:52:31",
+            "speakerTurns": {
+                "total": 24,
+                "speakers": [
+                    {
+                        "speakerId": "Guest-3",
+                        "length": 18
+                    },
+                    {
+                        "speakerId": "Guest-1",
+                        "length": 6
+                    }
+                ],
+                "turns": [
+                    {
+                        "speakerId": "Guest-3",
+                        "speakerSeg": "He was like flying everywhere 'cause it was really hot. Oh, he didn't cover it. Yeah. So he's.",
+                        "length": 18
+                    },
+                    {
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "Let's just say not the best.",
+                        "length": 6
+                    }
+                ]
+            },
+            "id": "4",
+            "depth": 0,
+            "parentNodes": null,
+            "childNodes": {
+                "1": [
+                    "45"
+                ],
+                "2": [
+                    "234"
+                ]
+            },
+            "segments": "4"
+        },
+        {
+            "topic": null,
+            "description": null,
+            "segment": "That's kind of funny. And then she just banned it from the kitchen. She didn't mean it. But like, at the time, we were just like, OK, mom. ",
+            "time": "15:52:42",
+            "speakerTurns": {
+                "total": 28,
+                "speakers": [
+                    {
+                        "speakerId": "Guest-3",
+                        "length": 28
+                    }
+                ],
+                "turns": [
+                    {
+                        "speakerId": "Guest-3",
+                        "speakerSeg": "That's kind of funny. And then she just banned it from the kitchen. She didn't mean it. But like, at the time, we were just like, OK, mom.",
+                        "length": 28
+                    }
+                ]
+            },
+            "id": "5",
+            "depth": 0,
+            "parentNodes": null,
+            "childNodes": {
+                "1": [
+                    "45"
+                ],
+                "2": []
+            },
+            "segments": "5"
+        }
+    ],
+    "1": [
+        {
+            "topic": "COOKING FOR FAMILY",
+            "description": "Who's gonna eat this now when I'm like me?",
+            "segment": "Especially because my mom can be really about it. Yeah. So when I speak, she's like, who's gonna eat this now when I'm like me? Yeah, I will. Yeah, I will see. My mom is like that too. Just make things that I. Eat with them, it's like. If it's just me, it's kind of offers, yeah. And then she will complain. About like what I use for like for. ",
+            "time": "15:51:46",
+            "speakerTurns": {
+                "total": 70,
+                "speakers": [
+                    {
+                        "speakerId": "Guest-1",
+                        "length": 33
+                    },
+                    {
+                        "speakerId": "Guest-2",
+                        "length": 15
+                    },
+                    {
+                        "speakerId": "Guest-3",
+                        "length": 14
+                    },
+                    {
+                        "speakerId": "Guest-4",
+                        "length": 8
+                    }
+                ],
+                "turns": [
+                    {
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "Especially because my mom can be really about it. Yeah. So when I speak, she's like, who's gonna eat this now when I'm like me?",
+                        "length": 25
+                    },
+                    {
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "Yeah, I will.",
+                        "length": 3
+                    },
+                    {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "Yeah, I will see. My mom is like that too.",
+                        "length": 10
+                    },
+                    {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "Just make things that I.",
+                        "length": 5
+                    },
+                    {
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "Eat with them, it's like.",
+                        "length": 5
+                    },
+                    {
+                        "speakerId": "Guest-3",
+                        "speakerSeg": "If it's just me, it's kind of offers, yeah. And then she will complain.",
+                        "length": 14
+                    },
+                    {
+                        "speakerId": "Guest-4",
+                        "speakerSeg": "About like what I use for like for.",
+                        "length": 8
+                    }
+                ]
+            },
+            "id": "01",
+            "depth": 1,
+            "parentNodes": {
+                "0": [
+                    "0",
+                    "1"
+                ]
+            },
+            "childNodes": {
+                "2": [
+                    "012"
+                ],
+                "3": []
+            },
+            "segments": "0 1"
+        },
+        {
+            "topic": "KITCHEN MISHAP",
+            "description": "It's like when my brother got banned from the kitchen once.",
+            "segment": "Yeah, yeah. It's like. It's like when my brother got banned from the kitchen once. Why he's made like, I think he. Chicken breast and then the the grease. Is just like splattering everywhere and you made it. Best and then did you not use a baking pan to use baking sheet, but it was still like. You know what the? ",
+            "time": "15:52:09",
+            "speakerTurns": {
+                "total": 61,
+                "speakers": [
+                    {
+                        "speakerId": "Guest-2",
+                        "length": 32
+                    },
+                    {
+                        "speakerId": "Guest-4",
+                        "length": 25
+                    },
+                    {
+                        "speakerId": "Guest-1",
+                        "length": 4
+                    }
+                ],
+                "turns": [
+                    {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "Yeah, yeah. It's like.",
+                        "length": 4
+                    },
+                    {
+                        "speakerId": "Guest-4",
+                        "speakerSeg": "It's like when my brother got banned from the kitchen once.",
+                        "length": 11
+                    },
+                    {
+                        "speakerId": "Guest-4",
+                        "speakerSeg": "Why he's made like, I think he.",
+                        "length": 7
+                    },
+                    {
+                        "speakerId": "Guest-4",
+                        "speakerSeg": "Chicken breast and then the the grease.",
+                        "length": 7
+                    },
+                    {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "Is just like splattering everywhere and you made it.",
+                        "length": 9
+                    },
+                    {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "Best and then did you not use a baking pan to use baking sheet, but it was still like.",
+                        "length": 19
+                    },
+                    {
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "You know what the?",
+                        "length": 4
+                    }
+                ]
+            },
+            "id": "23",
+            "depth": 1,
+            "parentNodes": {
+                "0": [
+                    "2",
+                    "3"
+                ]
+            },
+            "childNodes": {
+                "2": [
+                    "234"
+                ],
+                "3": [
+                    "0123"
+                ]
+            },
+            "segments": "2 3"
+        },
+        {
+            "topic": "KITCHEN MISHAP",
+            "description": "And then she just banned it from the kitchen.",
+            "segment": "He was like flying everywhere 'cause it was really hot. Oh, he didn't cover it. Yeah. So he's. Let's just say not the best. That's kind of funny. And then she just banned it from the kitchen. She didn't mean it. But like, at the time, we were just like, OK, mom. ",
+            "time": "15:52:31",
+            "speakerTurns": {
+                "total": 52,
+                "speakers": [
+                    {
+                        "speakerId": "Guest-3",
+                        "length": 46
+                    },
+                    {
+                        "speakerId": "Guest-1",
+                        "length": 6
+                    }
+                ],
+                "turns": [
+                    {
+                        "speakerId": "Guest-3",
+                        "speakerSeg": "He was like flying everywhere 'cause it was really hot. Oh, he didn't cover it. Yeah. So he's.",
+                        "length": 18
+                    },
+                    {
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "Let's just say not the best.",
+                        "length": 6
+                    },
+                    {
+                        "speakerId": "Guest-3",
+                        "speakerSeg": "That's kind of funny. And then she just banned it from the kitchen. She didn't mean it. But like, at the time, we were just like, OK, mom.",
+                        "length": 28
+                    }
+                ]
+            },
+            "id": "45",
+            "depth": 1,
+            "parentNodes": {
+                "0": [
+                    "4",
+                    "5"
+                ]
+            },
+            "childNodes": {
+                "2": [],
+                "3": []
+            },
+            "segments": "4 5"
+        }
+    ],
+    "2": [
+        {
+            "topic": "FAMILY COOKING HABITS",
+            "description": "My mom can be really about it.",
+            "segment": "Especially because my mom can be really about it. Yeah. So when I speak, she's like, who's gonna eat this now when I'm like me? Yeah, I will. Yeah, I will see. My mom is like that too. Just make things that I. Eat with them, it's like. If it's just me, it's kind of offers, yeah. And then she will complain. About like what I use for like for. Yeah, yeah. It's like. It's like when my brother got banned from the kitchen once. Why he's made like, I think he. ",
+            "time": "15:51:46",
+            "speakerTurns": {
+                "total": 92,
+                "speakers": [
+                    {
+                        "speakerId": "Guest-1",
+                        "length": 33
+                    },
+                    {
+                        "speakerId": "Guest-2",
+                        "length": 19
+                    },
+                    {
+                        "speakerId": "Guest-3",
+                        "length": 14
+                    },
+                    {
+                        "speakerId": "Guest-4",
+                        "length": 26
+                    }
+                ],
+                "turns": [
+                    {
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "Especially because my mom can be really about it. Yeah. So when I speak, she's like, who's gonna eat this now when I'm like me?",
+                        "length": 25
+                    },
+                    {
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "Yeah, I will.",
+                        "length": 3
+                    },
+                    {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "Yeah, I will see. My mom is like that too.",
+                        "length": 10
+                    },
+                    {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "Just make things that I.",
+                        "length": 5
+                    },
+                    {
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "Eat with them, it's like.",
+                        "length": 5
+                    },
+                    {
+                        "speakerId": "Guest-3",
+                        "speakerSeg": "If it's just me, it's kind of offers, yeah. And then she will complain.",
+                        "length": 14
+                    },
+                    {
+                        "speakerId": "Guest-4",
+                        "speakerSeg": "About like what I use for like for.",
+                        "length": 8
+                    },
+                    {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "Yeah, yeah. It's like.",
+                        "length": 4
+                    },
+                    {
+                        "speakerId": "Guest-4",
+                        "speakerSeg": "It's like when my brother got banned from the kitchen once.",
+                        "length": 11
+                    },
+                    {
+                        "speakerId": "Guest-4",
+                        "speakerSeg": "Why he's made like, I think he.",
+                        "length": 7
+                    }
+                ]
+            },
+            "id": "012",
+            "depth": 2,
+            "parentNodes": {
+                "0": [
+                    "2"
+                ],
+                "1": [
+                    "01"
+                ]
+            },
+            "childNodes": {
+                "3": [
+                    "0123"
+                ],
+                "4": []
+            },
+            "segments": "0 1 2"
+        },
+        {
+            "topic": "COOKING MISHAP",
+            "description": "It's like when my brother got banned from the kitchen once.",
+            "segment": "Yeah, yeah. It's like. It's like when my brother got banned from the kitchen once. Why he's made like, I think he. Chicken breast and then the the grease. Is just like splattering everywhere and you made it. Best and then did you not use a baking pan to use baking sheet, but it was still like. You know what the? He was like flying everywhere 'cause it was really hot. Oh, he didn't cover it. Yeah. So he's. Let's just say not the best. ",
+            "time": "15:52:09",
+            "speakerTurns": {
+                "total": 85,
+                "speakers": [
+                    {
+                        "speakerId": "Guest-2",
+                        "length": 32
+                    },
+                    {
+                        "speakerId": "Guest-4",
+                        "length": 25
+                    },
+                    {
+                        "speakerId": "Guest-1",
+                        "length": 10
+                    },
+                    {
+                        "speakerId": "Guest-3",
+                        "length": 18
+                    }
+                ],
+                "turns": [
+                    {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "Yeah, yeah. It's like.",
+                        "length": 4
+                    },
+                    {
+                        "speakerId": "Guest-4",
+                        "speakerSeg": "It's like when my brother got banned from the kitchen once.",
+                        "length": 11
+                    },
+                    {
+                        "speakerId": "Guest-4",
+                        "speakerSeg": "Why he's made like, I think he.",
+                        "length": 7
+                    },
+                    {
+                        "speakerId": "Guest-4",
+                        "speakerSeg": "Chicken breast and then the the grease.",
+                        "length": 7
+                    },
+                    {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "Is just like splattering everywhere and you made it.",
+                        "length": 9
+                    },
+                    {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "Best and then did you not use a baking pan to use baking sheet, but it was still like.",
+                        "length": 19
+                    },
+                    {
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "You know what the?",
+                        "length": 4
+                    },
+                    {
+                        "speakerId": "Guest-3",
+                        "speakerSeg": "He was like flying everywhere 'cause it was really hot. Oh, he didn't cover it. Yeah. So he's.",
+                        "length": 18
+                    },
+                    {
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "Let's just say not the best.",
+                        "length": 6
+                    }
+                ]
+            },
+            "id": "234",
+            "depth": 2,
+            "parentNodes": {
+                "0": [
+                    "4"
+                ],
+                "1": [
+                    "23"
+                ]
+            },
+            "childNodes": {
+                "3": [],
+                "4": [
+                    "01234"
+                ]
+            },
+            "segments": "2 3 4"
+        }
+    ],
+    "3": [
+        {
+            "topic": "COOKING MISTAKES",
+            "description": "It's like when my brother got banned from the kitchen once.",
+            "segment": "Especially because my mom can be really about it. Yeah. So when I speak, she's like, who's gonna eat this now when I'm like me? Yeah, I will. Yeah, I will see. My mom is like that too. Just make things that I. Eat with them, it's like. If it's just me, it's kind of offers, yeah. And then she will complain. About like what I use for like for. Yeah, yeah. It's like. It's like when my brother got banned from the kitchen once. Why he's made like, I think he. Chicken breast and then the the grease. Is just like splattering everywhere and you made it. Best and then did you not use a baking pan to use baking sheet, but it was still like. You know what the? ",
+            "time": "15:51:46",
+            "speakerTurns": {
+                "total": 153,
+                "speakers": [
+                    {
+                        "speakerId": "Guest-1",
+                        "length": 37
+                    },
+                    {
+                        "speakerId": "Guest-2",
+                        "length": 51
+                    },
+                    {
+                        "speakerId": "Guest-3",
+                        "length": 14
+                    },
+                    {
+                        "speakerId": "Guest-4",
+                        "length": 51
+                    }
+                ],
+                "turns": [
+                    {
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "Especially because my mom can be really about it. Yeah. So when I speak, she's like, who's gonna eat this now when I'm like me?",
+                        "length": 25
+                    },
+                    {
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "Yeah, I will.",
+                        "length": 3
+                    },
+                    {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "Yeah, I will see. My mom is like that too.",
+                        "length": 10
+                    },
+                    {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "Just make things that I.",
+                        "length": 5
+                    },
+                    {
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "Eat with them, it's like.",
+                        "length": 5
+                    },
+                    {
+                        "speakerId": "Guest-3",
+                        "speakerSeg": "If it's just me, it's kind of offers, yeah. And then she will complain.",
+                        "length": 14
+                    },
+                    {
+                        "speakerId": "Guest-4",
+                        "speakerSeg": "About like what I use for like for.",
+                        "length": 8
+                    },
+                    {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "Yeah, yeah. It's like.",
+                        "length": 4
+                    },
+                    {
+                        "speakerId": "Guest-4",
+                        "speakerSeg": "It's like when my brother got banned from the kitchen once.",
+                        "length": 11
+                    },
+                    {
+                        "speakerId": "Guest-4",
+                        "speakerSeg": "Why he's made like, I think he.",
+                        "length": 7
+                    },
+                    {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "Yeah, yeah. It's like.",
+                        "length": 4
+                    },
+                    {
+                        "speakerId": "Guest-4",
+                        "speakerSeg": "It's like when my brother got banned from the kitchen once.",
+                        "length": 11
+                    },
+                    {
+                        "speakerId": "Guest-4",
+                        "speakerSeg": "Why he's made like, I think he.",
+                        "length": 7
+                    },
+                    {
+                        "speakerId": "Guest-4",
+                        "speakerSeg": "Chicken breast and then the the grease.",
+                        "length": 7
+                    },
+                    {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "Is just like splattering everywhere and you made it.",
+                        "length": 9
+                    },
+                    {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "Best and then did you not use a baking pan to use baking sheet, but it was still like.",
+                        "length": 19
+                    },
+                    {
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "You know what the?",
+                        "length": 4
+                    }
+                ]
+            },
+            "id": "0123",
+            "depth": 3,
+            "parentNodes": {
+                "1": [
+                    "23"
+                ],
+                "2": [
+                    "012"
+                ]
+            },
+            "childNodes": {
+                "4": [
+                    "01234"
+                ],
+                "5": []
+            },
+            "segments": "0 1 2 3"
+        }
+    ],
+    "4": [
+        {
+            "topic": "COOKING MISHAPS",
+            "description": "It's like when my brother got banned from the kitchen once.",
+            "segment": "Especially because my mom can be really about it. Yeah. So when I speak, she's like, who's gonna eat this now when I'm like me? Yeah, I will. Yeah, I will see. My mom is like that too. Just make things that I. Eat with them, it's like. If it's just me, it's kind of offers, yeah. And then she will complain. About like what I use for like for. Yeah, yeah. It's like. It's like when my brother got banned from the kitchen once. Why he's made like, I think he. Chicken breast and then the the grease. Is just like splattering everywhere and you made it. Best and then did you not use a baking pan to use baking sheet, but it was still like. You know what the? He was like flying everywhere 'cause it was really hot. Oh, he didn't cover it. Yeah. So he's. Let's just say not the best. ",
+            "time": "15:51:46",
+            "speakerTurns": {
+                "total": 238,
+                "speakers": [
+                    {
+                        "speakerId": "Guest-1",
+                        "length": 47
+                    },
+                    {
+                        "speakerId": "Guest-2",
+                        "length": 83
+                    },
+                    {
+                        "speakerId": "Guest-3",
+                        "length": 32
+                    },
+                    {
+                        "speakerId": "Guest-4",
+                        "length": 76
+                    }
+                ],
+                "turns": [
+                    {
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "Especially because my mom can be really about it. Yeah. So when I speak, she's like, who's gonna eat this now when I'm like me?",
+                        "length": 25
+                    },
+                    {
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "Yeah, I will.",
+                        "length": 3
+                    },
+                    {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "Yeah, I will see. My mom is like that too.",
+                        "length": 10
+                    },
+                    {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "Just make things that I.",
+                        "length": 5
+                    },
+                    {
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "Eat with them, it's like.",
+                        "length": 5
+                    },
+                    {
+                        "speakerId": "Guest-3",
+                        "speakerSeg": "If it's just me, it's kind of offers, yeah. And then she will complain.",
+                        "length": 14
+                    },
+                    {
+                        "speakerId": "Guest-4",
+                        "speakerSeg": "About like what I use for like for.",
+                        "length": 8
+                    },
+                    {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "Yeah, yeah. It's like.",
+                        "length": 4
+                    },
+                    {
+                        "speakerId": "Guest-4",
+                        "speakerSeg": "It's like when my brother got banned from the kitchen once.",
+                        "length": 11
+                    },
+                    {
+                        "speakerId": "Guest-4",
+                        "speakerSeg": "Why he's made like, I think he.",
+                        "length": 7
+                    },
+                    {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "Yeah, yeah. It's like.",
+                        "length": 4
+                    },
+                    {
+                        "speakerId": "Guest-4",
+                        "speakerSeg": "It's like when my brother got banned from the kitchen once.",
+                        "length": 11
+                    },
+                    {
+                        "speakerId": "Guest-4",
+                        "speakerSeg": "Why he's made like, I think he.",
+                        "length": 7
+                    },
+                    {
+                        "speakerId": "Guest-4",
+                        "speakerSeg": "Chicken breast and then the the grease.",
+                        "length": 7
+                    },
+                    {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "Is just like splattering everywhere and you made it.",
+                        "length": 9
+                    },
+                    {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "Best and then did you not use a baking pan to use baking sheet, but it was still like.",
+                        "length": 19
+                    },
+                    {
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "You know what the?",
+                        "length": 4
+                    },
+                    {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "Yeah, yeah. It's like.",
+                        "length": 4
+                    },
+                    {
+                        "speakerId": "Guest-4",
+                        "speakerSeg": "It's like when my brother got banned from the kitchen once.",
+                        "length": 11
+                    },
+                    {
+                        "speakerId": "Guest-4",
+                        "speakerSeg": "Why he's made like, I think he.",
+                        "length": 7
+                    },
+                    {
+                        "speakerId": "Guest-4",
+                        "speakerSeg": "Chicken breast and then the the grease.",
+                        "length": 7
+                    },
+                    {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "Is just like splattering everywhere and you made it.",
+                        "length": 9
+                    },
+                    {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "Best and then did you not use a baking pan to use baking sheet, but it was still like.",
+                        "length": 19
+                    },
+                    {
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "You know what the?",
+                        "length": 4
+                    },
+                    {
+                        "speakerId": "Guest-3",
+                        "speakerSeg": "He was like flying everywhere 'cause it was really hot. Oh, he didn't cover it. Yeah. So he's.",
+                        "length": 18
+                    },
+                    {
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "Let's just say not the best.",
+                        "length": 6
+                    }
+                ]
+            },
+            "id": "01234",
+            "depth": 4,
+            "parentNodes": {
+                "2": [
+                    "234"
+                ],
+                "3": [
+                    "0123"
+                ]
+            },
+            "childNodes": {
+                "5": [],
+                "6": []
+            },
+            "segments": "0 1 2 3 4"
+        }
+    ]
+}

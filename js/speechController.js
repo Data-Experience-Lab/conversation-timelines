@@ -59,7 +59,7 @@ export class SpeechToTopic {
         const time = this.formatTime(new Date());
 
         if (this.transcript.length > 1) {
-          this.handleTranscription([this.transcript, time], this.speakerTurns);
+          this.handleTranscription(this.transcript, time, this.speakerTurns);
         }
 
         // Reset transcript and speaker turns
@@ -114,10 +114,10 @@ export class SpeechToTopic {
     }
   }
 
-  async handleTranscription(transcription, speakerTurns) {
+  async handleTranscription(transcription, time, speakerTurns) {
     console.log("analyzing speech");
     console.log(speakerTurns);
-    await this.data.update(transcription, speakerTurns, this.data);
+    await this.data.update(transcription, time, speakerTurns, this.data);
     // Call function for initial render of display
     console.log("updated screen")
     this.vis.updateScreen(this.data);
