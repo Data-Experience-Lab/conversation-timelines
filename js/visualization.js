@@ -3,18 +3,18 @@ export class Visualization {
     this.DataObj;
     this.segments = [];
     this.lastZoomOperation = null;
+    this.lastTopics;
     this.currIndex = 0; // change to 0 if you want to go forwards
     this.visTopicIndex = 0;
     this.currViewedTopic;
     this.maxIndex = 0;
     this.numTopicsShown = 3;
     this.data = "";
-    this.lastBubbleLocation = {};
-    this.lastData = "";
     this.navMode = false; // When true, this updates the timeline in real time with new topics
     this.treeDepth = 0;
     this.zoomValue = 0.0; // Start at speech bubble level
     this.zoomStep = 0.02; // Step size for left/right arrow keys
+    this.lastVisibleTopics = "";
     this.selfID = "Guest-1";
 
     //  font sizes
@@ -61,16 +61,16 @@ export class Visualization {
       "speechBubbles": {
         "selector": ".speechBubbleItem",
         "properties": {
-          "max-width": ["fit-content", "fit-content"],
-          "min-width": ["1.5vw", "1.5vw"],
-          "max-height": ["fit-content", "fit-content"],
-          "min-height": ["0.5vw", "0.5vw"],
+          "max-width": ["fit-content"],
+          "min-width": ["1.5vw"],
+          "max-height": ["fit-content"],
+          "min-height": ["0.5vw"],
           "overflow": ["visible", "hidden"],
-          "position": ["relative", "relative"],
-          "word-wrap": ["break-word", "break-word"],
+          "position": ["relative"],
+          "word-wrap": ["break-word"],
           "font-weight": ["500", "0"],
-          "box-shadow": ["0 2px 8px rgba(0,0,0,0.15)", "0 2px 8px rgba(0,0,0,0.15)"],
-          "display": ["inline-block", "inline-block"]
+          "box-shadow": ["0 2px 8px rgba(0,0,0,0.15)"],
+          "display": ["inline-block"]
         }
       },
       "bubbleText": {
@@ -109,7 +109,8 @@ export class Visualization {
         "selector": ".entry",
         "properties": {
           "flex-grow": [0, 0.8],
-          "justify-content": ["flex-start", "center"],
+          "display": ["flex"],
+          "align-items": ["center"],
         }
       },
 
@@ -117,6 +118,9 @@ export class Visualization {
         "selector": ".topicSentences",
         "properties": {
           "display": ["none", null],
+          "background": ["rgb(92 92 92 / 0%)", "rgb(92 92 92 / 35%)"],
+          "padding": ["15px"],
+          "width": ["fit-content"],
           "opacity": [
             0.0, 1.0
           ],
@@ -126,18 +130,27 @@ export class Visualization {
           "font-size": ["20px", "32px"]
         }
       },
-      // "repSentences": {
-      //   "selector": "#selected-entry",
-      //   "properties": {
-      //     "display": ["none", "block"],
-      //     "opacity": [
-      //       0.0, 1.0
-      //     ],
-      //     "transform": [
-      //       "translateX(-800px)", "translateX(0px)"
-      //     ]
-      //   }
-      // }
+      "repSentences": {
+        "selector": ".repSentences",
+        "properties": {
+          "display": ["none", "none"]
+        }
+      },
+      "repSentencesSelected": {
+        "selector": "#selected-entry",
+        "properties": {
+          "display": ["none", "block"],
+          "opacity": [
+            0.0, 1.0
+          ],
+        "background": ["rgb(92 92 92 / 0%)", "rgb(92 92 92 / 35%)"],
+        "padding": ["15px"],
+        "width": ["fit-content"],
+          "transform": [
+            "translateX(-800px)", "translateX(0px)"
+          ]
+        }
+      }
     };
   }
 
@@ -154,7 +167,7 @@ export class Visualization {
     this.currLevel = 0;
 
     // Only data at current tree depth
-    this.lastData = this.data;
+    this.lastVisibleTopics = this.visibleTopics;
     this.data = this.DataObj.getData(this.treeDepth);
     this.segments = this.DataObj.getData(0);
     console.log(this.data);
@@ -166,11 +179,12 @@ export class Visualization {
       this.visibleTopics = this.data
         .slice(this.currIndex, this.currIndex + this.numTopicsShown);
     } else {
-      console.log(this.currIndex)
-      // this.visibleTopics = this.data
-      //   .slice(this.currIndex, this.currIndex + this.numTopicsShown);
-      this.visibleTopics = this.data
-        .slice(0, 0 + this.numTopicsShown);
+      if (this.numTopicsShown>this.data.length-1) {
+        this.visibleTopics = this.data;
+      } else {
+        this.visibleTopics = this.data
+          .slice(this.currIndex, this.currIndex + this.numTopicsShown);
+      }
     }
 
     document.getElementById("jumpToCurrent").style.display = "none";
@@ -188,6 +202,9 @@ export class Visualization {
         this.visTopicIndex = this.visibleTopics.length - 1;
       }
       this.currViewedTopic = this.visibleTopics[this.visTopicIndex];
+
+      console.log(this.currViewedTopic)
+      console.log(this.currViewedTopic.time)
       this.handleNavigation(
         this.visibleTopics,
         lastMax,
@@ -195,8 +212,9 @@ export class Visualization {
       );
 
       this.renderTimeline(this.visibleTopics);
+      console.log(this.currViewedTopic)
       if (this.visibleTopics[this.visTopicIndex] != null) {
-        if (this.treeDepth>0) this.hideRepSentences(this.visibleTopics[this.visTopicIndex].id);
+        if (this.treeDepth>0) this.hideRepSentences(this.currViewedTopic.id);
       }
     }
 
@@ -206,11 +224,19 @@ export class Visualization {
       this.showTopics();
     }
 
-    // if (this.data.length > 0 && this.treeDepth>0) this.resizeFont(resize);
-    // if (resize) {
-    //   this.scrollDown(false);
-    //   this.scrollUp(false);
-    // }
+    this.lastBubbleLocations = {};
+    d3.selectAll(".speechBubbleGroup").each((d, i, nodes) => {
+      const node = nodes[i];
+      const rect = node.getBoundingClientRect();
+      // Store the position and size
+      this.lastBubbleLocations[node.id] = {
+        left: rect.left,
+        top: rect.top,
+        width: rect.width,
+        height: rect.height
+      };
+    });
+    console.log(this.lastBubbleLocations)
   }
 
 
@@ -241,8 +267,7 @@ export class Visualization {
 
   // Render the timeline using D3.js
   renderTimeline(visibleTopics) {
-    console.log(visibleTopics)
-    let container = d3
+    let container = d3  
       .select(".main-container")
       .selectAll(".line")
       .data(visibleTopics, (d) => d.id)
@@ -257,7 +282,7 @@ export class Visualization {
   handleEnter(enter) {
     let line = enter
       .append("div")
-      .attr("class", "line")
+      .attr("class", "line") 
       .style("flex-grow", 1)
       .style("margin-bottom", "5%")
       .style("align-items", "center")
@@ -289,6 +314,7 @@ export class Visualization {
 
       topicBlock
       .style("width", "0vw")
+      .attr("id", (d)=>d.id)
 
       topicBlock
         .append("h1")
@@ -324,6 +350,9 @@ export class Visualization {
     // Update topic text
     if (this.treeDepth!=0) 
     {
+      update.select(".line")
+        .attr("id", (d) => d.id);
+
       update.select(".topicSentences")
         .text((d) => d.topic || `Topic ${d.id}`);
       
@@ -342,15 +371,21 @@ export class Visualization {
 
   moveDivs(target, child, segment){
     target.node().appendChild(child.node());
-
-    // let firstRect = this.lastBubbleLocation[segment]
+    // console.log(this.lastBubbleLocations)
+    // console.log("Keys: ", Object.keys(this.lastBubbleLocations))
+    // console.log("segment: ", segment.id)
+    // let firstRect = this.lastBubbleLocations[`segment-${segment.id}`]
     // let lastRect = child.node().getBoundingClientRect();
+    // console.log("firstRect: ", firstRect)
+    // console.log("lastRect: ", lastRect)
 
     // const dx = firstRect.left - lastRect.left;
     // const dy = firstRect.top - lastRect.top;
+    // // console.log("dx: ", dx)
+    // console.log("dy: ", dy)
 
     // // Invert: jump back to old position
-    // child.style("transform", `translate(${dx}px, ${dy}px)`);
+    // child.style("transform", `translate(0px,${dy}px)`);
 
     // // Play: animate to natural position
     // child.transition()
@@ -370,15 +405,14 @@ export class Visualization {
         
         // If segment already exists move it to the right place
         if (!segmentDiv.empty()) {
-          // console.log(int)
           this.moveDivs(bubble, segmentDiv, segment);
-          this.lastBubbleLocation[segment] = segmentDiv.node().getBoundingClientRect();
 
         // Otherwise create segment
         } else {
           console.log(int)
           segmentDiv = bubble.append("div")
           .attr("id", `segment-${int}`)
+          .attr("class", "speechBubbleGroup")
           .style("display", "flex")
           .style("flex-direction", "column")
 
@@ -405,10 +439,8 @@ export class Visualization {
             // Apply styles
             Object.keys(this.bubbleConfig).forEach((key)=> {
               let config = this.bubbleConfig[key];
-              this.animateObjects(config.selector, config.properties, 0, 0)
+              this.animateObjects(config.selector, config.properties, 0)
             });
-
-            this.lastBubbleLocation[segment] = segmentDiv.node().getBoundingClientRect();
           });
         }
       });
@@ -430,9 +462,10 @@ export class Visualization {
       .duration(animationDuration)
 
     Object.entries(config).forEach(([property, values]) => {
-      if (values[index] !== undefined) {
-        transition.style(property, values[index]).on("end", function() {
-          d3.select(this).style(property, values[index]);
+      let style = (values.length>index) ? index : 0;
+      if (values[style] !== undefined) {
+        transition.style(property, values[style]).on("end", function() {
+          d3.select(this).style(property, values[style]);
         });
       }
     });
@@ -451,9 +484,10 @@ export class Visualization {
     });
 
     //********** Updating topics/rep sentences
-    let delay = (this.lastZoomOperation!="-" && this.treeDepth==1) ? 1600 : 0;
+    let delay = (this.lastZoomOperation=="+" && this.treeDepth==1) ? 1600 : 0;
 
-    console.log(this.topicConfig)
+    console.log(this.lastZoomOperation)
+    console.log(this.treeDepth)
     Object.keys(this.topicConfig).forEach((key)=> {
       let config = this.topicConfig[key];
       this.animateObjects(config.selector, config.properties, speechBubbleConfigIndex, animationDuration, delay)
@@ -462,37 +496,25 @@ export class Visualization {
 
   // Hide representative sentences for all topics except the selected one
   hideRepSentences(selectedTopic) {
+    console.log(this.currViewedTopic)
     const entries = document.querySelectorAll(".line");
     entries.forEach((entry, i) => {
       const repSentence = entry.querySelector(".repSentences");
       const topicSentence = entry.querySelector(".topicSentences");
       const time = entry.querySelector(".time");
       const totalTime = entry.querySelector(".total-time");
-      // const bar = entry.querySelector(".turnBlock");
 
-      if (this.currLevel == 4) {
-        repSentence.style.color = this.topicsColours[i % 8];
-        topicSentence.style.color = this.topicsColours[i % 8];
-      } else {
-        topicSentence.style.color = "#bfbfbf";
-      }
-      
       if (selectedTopic === topicSentence.__data__.id) {
         repSentence.style.display = "none";
         repSentence.setAttribute("id", "selected-entry");
-        // topicSentence.setAttribute("id", "selected-entry");
-        // entry.setAttribute("id", "selected-entry");
-        // time.setAttribute("id", "selected-entry");
         time.style.color = "white";
         if (totalTime != null) {
           totalTime.setAttribute("id", "selected-entry");
           totalTime.style.color = "white";
         }
-        // bar.style.border = "0.3vw solid white";
         repSentence.style.color = "white";
         topicSentence.style.color = "white";
       } else {
-        repSentence.style.display = "none";
         repSentence.removeAttribute("id");
         topicSentence.removeAttribute("id");
         if (totalTime != null) {
@@ -504,6 +526,16 @@ export class Visualization {
         entry.removeAttribute("id");
       }
     });
+    // // Apply styles
+    // console.log(this.lastZoomOperation)
+    // console.log(this.treeDepth)
+    // if (!(this.lastZoomOperation=="+" && this.treeDepth==1)) {
+    //   console.log("hi")
+    //   Object.keys(this.topicConfig).forEach((key)=> {
+    //     let config = this.topicConfig[key];
+    //     this.animateObjects(config.selector, config.properties, 1)
+    //   });
+    // }
   }
 
   // ************ Button click events ************
@@ -521,14 +553,24 @@ export class Visualization {
   }
 
   scrollUp(log = true) {
-    if (this.visTopicIndex == 0 && this.currIndex < this.maxIndex) {
-      this.currIndex = (this.currIndex + 1) % this.data.length;
+    this.lastZoomOperation = "";
+    console.log("Before")
+    console.log("CVT: ", this.currViewedTopic)
+    console.log("CI: ", this.currIndex)
+    console.log("VT: ", this.visibleTopics)
+    console.log("VTI: ", this.visTopicIndex)
+    if (this.visTopicIndex == 0 && this.currIndex == 0){
+      return;
+    }
+    if (this.visTopicIndex == 0 && this.currIndex > 0) {
+      this.currIndex = this.currIndex - 1;
+      console.log("New data")
     } else {
       if (this.visTopicIndex > 0) {
         this.visTopicIndex -= 1;
       }
     }
-    if (this.currViewedTopic != this.data.at(-1)) {
+    if (this.currViewedTopic != this.data.at(0)) {
       this.visibleTopics = this.data
         .slice(this.currIndex, this.currIndex + this.numTopicsShown);
 
@@ -537,22 +579,38 @@ export class Visualization {
         this.log += `${timeOnly}.Action.↑\n`;
         console.log(this.log);
       }
+      console.log("After")
+      console.log("CVT: ", this.currViewedTopic)
+      console.log("CI: ", this.currIndex)
+      console.log("VT: ", this.visibleTopics)
+      console.log("VTI: ", this.visTopicIndex)
       this.updateScreen(this.DataObj);
     }
   }
 
   scrollDown(log = true) {
-    if (this.visTopicIndex == this.numTopicsShown - 1 && this.currIndex > 0) {
-      this.currIndex = (this.currIndex - 1) % this.data.length;
+    this.lastZoomOperation = "";
+    console.log("Before")
+      console.log("CVT: ", this.currViewedTopic)
+      console.log("CI: ", this.currIndex)
+      console.log("VT: ", this.visibleTopics)
+      console.log("VTI: ", this.visTopicIndex)
+    if (this.visTopicIndex == this.numTopicsShown - 1 && this.currIndex == this.maxIndex){
+      return;
+    }
+    // If at the bottom of visible topics, load new topic
+    if (this.visTopicIndex == this.numTopicsShown - 1 && this.currIndex < this.maxIndex){
+      this.currIndex = this.currIndex + 1;
+    // If there is more than one topic in the list
     } else if (this.DataObj.getData(this.treeDepth).length > 1) {
-      if (
-        this.visTopicIndex < this.numTopicsShown - 1 &&
-        this.visTopicIndex <
-          this.DataObj.getData(this.treeDepth).length - 1
-      )
+      // if (
+      //   this.visTopicIndex < this.numTopicsShown - 1 &&
+      //   this.visTopicIndex <
+      //     this.DataObj.getData(this.treeDepth).length - 1
+      // )
         this.visTopicIndex += 1;
     }
-    if (this.currViewedTopic != this.data.at(0)) {
+    if (this.currViewedTopic != this.data.at(-1)) {
       this.visibleTopics = this.data
         .slice(this.currIndex, this.currIndex + this.numTopicsShown);
 
@@ -561,6 +619,11 @@ export class Visualization {
         this.log += `${timeOnly}.Action.↓\n`;
         console.log(this.log);
       }
+      console.log("After")
+      console.log("CVT: ", this.currViewedTopic)
+      console.log("CI: ", this.currIndex)
+      console.log("VT: ", this.visibleTopics)
+      console.log("VTI: ", this.visTopicIndex)
       this.updateScreen(this.DataObj);
     }
   }
@@ -571,10 +634,22 @@ export class Visualization {
     if (this.treeDepth<this.DataObj.getTreeSize())
     {
       this.treeDepth += 1;
+      let newData = this.DataObj.getData(this.treeDepth);
+      if (!this.currViewedTopic.childNodes[this.treeDepth].length==0){
+        let targetId = this.currViewedTopic.childNodes[this.treeDepth][0];
+        this.currIndex = newData.findIndex(item => item.id === targetId);
+      } else {
+        this.currIndex = newData.length-1;
+      }
+      // Ensure currIndex will allow for all topics to be shown
+      if ((this.currIndex+this.numTopicsShown)>newData.length){
+        let tempIndex = newData.length-this.numTopicsShown;
+        this.currIndex = (tempIndex>=0) ? tempIndex : 0;
+      }
       this.lastZoomOperation = "+";
-      this.updateScreen(this.DataObj)
       this.setZoomValue(this.zoomValue + this.zoomStep);
       window.slider.value([slider.value() - this.zoomStep]);
+      this.updateScreen(this.DataObj)
     }
   }
 
@@ -584,32 +659,69 @@ export class Visualization {
     if (this.treeDepth>=1)
     {
       this.treeDepth -= 1;
+      let newData = this.DataObj.getData(this.treeDepth);
+      if (!this.currViewedTopic.parentNodes[this.treeDepth].length==0){
+        let targetId = this.currViewedTopic.parentNodes[this.treeDepth][1];
+        this.currIndex = newData.findIndex(item => item.id === targetId);
+      } else {
+        this.currIndex = newData.length-1;
+      }
+      // Ensure currIndex will allow for all topics to be
+      if ((this.currIndex+this.numTopicsShown)>newData.length){
+        let tempIndex = newData.length-this.numTopicsShown;
+        this.currIndex = ((tempIndex)>=0) ? tempIndex : 0;
+      }
       this.lastZoomOperation = "-";
-      this.updateScreen(this.DataObj)
       this.setZoomValue(this.zoomValue - this.zoomStep);
       window.slider.value([slider.value() + this.zoomStep]);
+      this.updateScreen(this.DataObj)
     }
   }
 
-  download() {
-    const timeOnly = this.formatTime(new Date());
-    this.log += `End Time: ${timeOnly}`;
-    const blob = new Blob([this.log], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
-    try {
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "sample.txt"; // Change the file name and extension as needed
-      document.body.appendChild(a);
-      a.click();
-      navigator.clipboard.writeText(this.log);
-      document.body.removeChild(a);
-    } catch (err) {
-      console.log(err);
-      document.querySelector(".repSentences").textContent = err;
+  setSliderZoom(value) {
+    if (value<0.01){
+      value = 0;
     }
-    // Clean up the URL object
-    URL.revokeObjectURL(url);
+    let depth = parseInt(value/this.zoomStep);
+    console.log("aa", depth)
+    console.log("aa", this.treeDepth)
+    if (depth!=this.treeDepth) {
+      console.log("aa hi")
+      this.lastZoomOperation = (this.treeDepth<depth) ? "-" : "+";
+      console.log(this.lastZoomOperation)
+      let newData = this.DataObj.getData(depth);
+
+      if (this.lastZoomOperation=="+"){
+        this.currIndex = newData.findIndex(item => 
+          typeof item.segments === "string" && item.segments.includes(this.currViewedTopic.segments)
+        ); 
+      } else {
+        console.log(newData)
+        console.log(this.currViewedTopic)
+        const target = this.currViewedTopic.segments.split(" ").map(Number);
+        this.currIndex = newData.findIndex(item => {
+          if (typeof item.segments !== "string") return false;
+          const segments = item.segments.split(" ").map(Number);
+          // Scan segments to see if target appears as a contiguous subsequence
+          for (let i = 0; i <= target.length - segments.length; i++) {
+            if (segments.every((val, j) => target[i + j] === val)) {
+              return true;
+            }
+          }
+          return false;
+        });
+        console.log(this.currIndex)
+      }
+      this.visTopicIndex = 0;
+      if (((this.currIndex+this.numTopicsShown)>newData.length)||(this.currIndex<0)){
+        let tempIndex = newData.length-this.numTopicsShown;
+        this.currIndex = ((tempIndex)>=0) ? tempIndex : 0;
+      }
+
+      this.treeDepth = depth;
+      this.updateScreen(this.DataObj);
+    }
+    this.setZoomValue(value);
   }
 
   toggleVis() {
@@ -785,12 +897,5 @@ export class Visualization {
         levelText.textContent = "5m Topics";
       }
     }
-  }
-
-  setSliderZoom(value) {
-    if (value<0.01){
-      value = 0;
-    }
-    this.setZoomValue(value);
   }
 }

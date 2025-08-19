@@ -3,9 +3,7 @@ import { OpenAI } from "/conversation-timelines/js/openaiController.js";
 
 export class DataHandler {
   constructor() {
-    // this.data = this.mockData();
     this.tree = this.mockData();
-    // this.transcript = "";
     this.openAI = new OpenAI();
     this.lastPostTurn = "";
     this.minSegWithLastTurn = "";
@@ -28,14 +26,8 @@ export class DataHandler {
   // Update data and transcript with new transcription
   async update(transcription, speakerTurns, data) {
     await this.addToData(transcription, speakerTurns, data);
-    // this.addToTranscript(transcription[0]);
     return true;
   }
-
-//   // Add a chunk to the transcript
-//   addToTranscript(chunk) {
-//     this.transcript.push(chunk);
-//   }
 
     // Add new data to the appropriate levels
   async addToData(transcription, time, speakerTurns, data) {
@@ -64,14 +56,9 @@ export class DataHandler {
         console.log(this.tree[i])
 
         let depth = i+1;
-        let node1, node2;
         console.log(this.tree)
-        if (depth === 1) {
-            node1 = this.tree[0][id - 1];
-            node2 = this.tree[0][id];
-        } else {
-            [node1, node2] = this.getParentNodes(i, id);
-        }
+        let node1 = this.tree[i].at(-2);
+        let node2 = this.tree[i].at(-1);
 
         console.log("Node 1\t", node1)
         console.log("Node 2\t", node2)
@@ -79,41 +66,18 @@ export class DataHandler {
         // If both nodes exist
         if ((node1!=null)&&(node2!=null)) {
         // If node 1 does not already have a child at this depth
+            console.log(Object.keys(node1.childNodes[depth]))
             if (Object.keys(node1.childNodes[depth]).length == 0) {
                 let node = await this.summarizeNodes(node1, node2, depth);
                 console.log("New node:\t", node)
                 if (node != null) {
                     this.tree[depth].push(node);
-                    // this.tree[0].push(this.createNode(null, null, transcription, time, speakerTurns, id, 0, null)) 
-        
                 }
             }
         }
     } 
 
     console.log("Tree:\t", this.tree)
-  }
-
-  getParentNodes(depth) {
-    // Get the last node in the current depth
-    let node1 = this.tree[depth].at(-1);
-
-    let keys = Object.keys(node1.parentNodes);
-    let parentNodeDepth = keys.at(-1);
-    let parentNodeID = node1.parentNodes[parentNodeDepth].at(-1);
-
-    keys = Object.keys(this.tree[parentNodeDepth]);
-    let index;
-    for (let i=0; i<keys.length; i++){
-        if (this.tree[parentNodeDepth][keys[i]].id == parentNodeID) {
-            index = i;
-            break;
-        }
-    }
-    let rightKey = keys[index + 1];
-    let node2 = rightKey !== undefined ? this.tree[parentNodeDepth][rightKey] : undefined;
-
-    return [node1, node2];
   }
 
   // Check if two nodes have similar topic. If so, merge into a child node.
@@ -123,19 +87,29 @@ export class DataHandler {
     [id, segments] = this.getUniqueID(node1.segments + " " + node2.segments);
     console.log(id)
     console.log(segments)
-    // let transcript = node1.segment + node2.segment;
     let transcript = "";
-    const numStrings = String(segments).split(' '); // Split by whitespace
-    const numbers = numStrings.map(Number).filter(num => !isNaN(num));
+    let numStrings = String(segments).split(' '); // Split by whitespace
+    let numbers = numStrings.map(Number).filter(num => !isNaN(num));
     for (let i=0; i<numbers.length; i++) {
         transcript += this.tree[0][numbers[i]].segment;
     }
     
     // OpenAI call
-    const result = await this.openAI.gptResult(transcript, "");
+    let parentNodes, speakerTurns;
+    let result = await this.openAI.gptResult(transcript, "");
     console.log("OpenAI result:\t", result)
     if (result == null) {
-        return null;
+        numStrings = String(node1.segments).split(' '); // Split by whitespace
+        numbers = numStrings.map(Number).filter(num => !isNaN(num));
+        for (let i=0; i<numbers.length; i++) {
+            transcript += this.tree[0][numbers[i]].segment;
+        }
+        result = await this.openAI.gptResult(transcript, "");
+        parentNodes = {[node1.depth]: [node1.id]};
+        speakerTurns = node1.speakerTurn;
+    } else {
+        parentNodes = (node1.depth==node2.depth) ?  {[node1.depth]: [node1.id, node2.id]} : {[node1.depth]: [node1.id], [node2.depth]: [node2.id]};
+        speakerTurns = this.mergeSpeakerTurns(node1.speakerTurns, node2.speakerTurns);
     }
 
     // Ensure the layer exists in the tree
@@ -144,13 +118,13 @@ export class DataHandler {
     }
 
     // Create and return new node
-    let parentNodes = (node1.depth==node2.depth) ?  {[node1.depth]: [node1.id, node2.id]} : {[node1.depth]: [node1.id], [node2.depth]: [node2.id]};
+    // let parentNodes = (node1.depth==node2.depth) ?  {[node1.depth]: [node1.id, node2.id]} : {[node1.depth]: [node1.id], [node2.depth]: [node2.id]};
     let node = 
         this.createNode(result.topic.toUpperCase(), 
                         result.sentence, 
                         transcript, 
                         node1.time,
-                        this.mergeSpeakerTurns(node1.speakerTurns, node2.speakerTurns),
+                        speakerTurns,
                         id,
                         depth,
                         parentNodes,
@@ -158,8 +132,8 @@ export class DataHandler {
                         )
 
     // Push child node to parent node children
-    node1.childNodes[depth].push(node.id)
-    node2.childNodes[depth].push(node.id)
+    node1.childNodes.push(node.id)
+    node2.childNodes.push(node.id)
     return node;
   }
 
@@ -181,7 +155,7 @@ export class DataHandler {
           "id": String(id),
           "depth": depth,
           "parentNodes": parentNodes,
-          "childNodes": {[depth+1]: [], [depth+2]: []},
+          "childNodes": [],
           "segments": segments
         }
   }
@@ -227,30 +201,21 @@ export class DataHandler {
         {
             "topic": null,
             "description": null,
-            "segment": "It's going to. Shanti Kumar, are there any? ",
-            "time": "12:52:18",
+            "segment": "Do you favorite life? I think try to bake like a chicken breast and then the the grease is just like watering everywhere. You get it best. ",
+            "time": "16:18:03",
             "speakerTurns": {
-                "total": 8,
+                "total": 27,
                 "speakers": [
                     {
                         "speakerId": "Guest-1",
-                        "length": 3
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "length": 5
+                        "length": 27
                     }
                 ],
                 "turns": [
                     {
                         "speakerId": "Guest-1",
-                        "speakerSeg": "It's going to.",
-                        "length": 3
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Shanti Kumar, are there any?",
-                        "length": 5
+                        "speakerSeg": "Do you favorite life? I think try to bake like a chicken breast and then the the grease is just like watering everywhere. You get it best.",
+                        "length": 27
                     }
                 ]
             },
@@ -268,26 +233,35 @@ export class DataHandler {
         {
             "topic": null,
             "description": null,
-            "segment": "Are you gonna check the foods or are you just gonna? I'm gonna try some of them, but I don't know. Are you gonna try the cheeseburger? I'm a little scared. ",
-            "time": "12:52:29",
+            "segment": "So yes, let's just say not the best. Of cooking. That's kind of weird. She. Just she didn't mean it, but like. ",
+            "time": "16:18:25",
             "speakerTurns": {
-                "total": 31,
+                "total": 22,
                 "speakers": [
                     {
+                        "speakerId": "Guest-1",
+                        "length": 8
+                    },
+                    {
                         "speakerId": "Guest-2",
-                        "length": 31
+                        "length": 14
                     }
                 ],
                 "turns": [
                     {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Are you gonna check the foods or are you just gonna? I'm gonna try some of them, but I don't know. Are you gonna try the cheeseburger?",
-                        "length": 27
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "So yes, let's just say not the best.",
+                        "length": 8
                     },
                     {
                         "speakerId": "Guest-2",
-                        "speakerSeg": "I'm a little scared.",
-                        "length": 4
+                        "speakerSeg": "Of cooking. That's kind of weird. She.",
+                        "length": 7
+                    },
+                    {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "Just she didn't mean it, but like.",
+                        "length": 7
                     }
                 ]
             },
@@ -305,31 +279,21 @@ export class DataHandler {
         {
             "topic": null,
             "description": null,
-            "segment": "Share dollars, right? Yeah, like $15 like OK. I mean, it's called premium. It's like. I think it's like. ",
-            "time": "12:52:40",
+            "segment": "And then she's like, why don't you cook this like? ",
+            "time": "16:18:35",
             "speakerTurns": {
-                "total": 19,
+                "total": 10,
                 "speakers": [
                     {
-                        "speakerId": "Guest-2",
-                        "length": 19
+                        "speakerId": "Guest-1",
+                        "length": 10
                     }
                 ],
                 "turns": [
                     {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Share dollars, right? Yeah, like $15 like OK.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, it's called premium. It's like.",
-                        "length": 7
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think it's like.",
-                        "length": 4
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "And then she's like, why don't you cook this like?",
+                        "length": 10
                     }
                 ]
             },
@@ -340,35 +304,38 @@ export class DataHandler {
                 "1": [
                     "23"
                 ],
-                "2": [
-                    "012"
-                ]
+                "2": []
             },
             "segments": "2"
         },
         {
             "topic": null,
             "description": null,
-            "segment": "Marvel Science where, I don't know, they have, there's a lot of food science they gotta like. Extra creamy. I don't know the science. I don't know scientists. ",
-            "time": "12:52:51",
+            "segment": "We're mad. OK, Mom. I'm trying to. ",
+            "time": "16:18:46",
             "speakerTurns": {
-                "total": 28,
+                "total": 7,
                 "speakers": [
                     {
-                        "speakerId": "Guest-2",
-                        "length": 28
+                        "speakerId": "Guest-1",
+                        "length": 7
                     }
                 ],
                 "turns": [
                     {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Marvel Science where, I don't know, they have, there's a lot of food science they gotta like.",
-                        "length": 17
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "We're mad.",
+                        "length": 2
                     },
                     {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Extra creamy. I don't know the science. I don't know scientists.",
-                        "length": 11
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "OK, Mom.",
+                        "length": 2
+                    },
+                    {
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "I'm trying to.",
+                        "length": 3
                     }
                 ]
             },
@@ -386,26 +353,21 @@ export class DataHandler {
         {
             "topic": null,
             "description": null,
-            "segment": "It it was like, like I give you that much or a hot dog. But not Yeah, I. ",
-            "time": "12:53:02",
+            "segment": "Yeah, I started making them. ",
+            "time": "16:19:07",
             "speakerTurns": {
-                "total": 18,
+                "total": 5,
                 "speakers": [
                     {
                         "speakerId": "Guest-2",
-                        "length": 18
+                        "length": 5
                     }
                 ],
                 "turns": [
                     {
                         "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
+                        "speakerSeg": "Yeah, I started making them.",
+                        "length": 5
                     }
                 ]
             },
@@ -416,40 +378,28 @@ export class DataHandler {
                 "1": [
                     "45"
                 ],
-                "2": [
-                    "234"
-                ]
+                "2": []
             },
             "segments": "4"
         },
         {
             "topic": null,
             "description": null,
-            "segment": "Cheeseburger ice cream. Apparently it tastes like meat. Makes me sound comfortable. And like it's got like. ",
-            "time": "12:53:13",
+            "segment": "I I can't eat it, but it's. ",
+            "time": "16:19:40",
             "speakerTurns": {
-                "total": 17,
+                "total": 7,
                 "speakers": [
                     {
                         "speakerId": "Guest-2",
-                        "length": 17
+                        "length": 7
                     }
                 ],
                 "turns": [
                     {
                         "speakerId": "Guest-2",
-                        "speakerSeg": "Cheeseburger ice cream. Apparently it tastes like meat.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Makes me sound comfortable.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "And like it's got like.",
-                        "length": 5
+                        "speakerSeg": "I I can't eat it, but it's.",
+                        "length": 7
                     }
                 ]
             },
@@ -467,21 +417,21 @@ export class DataHandler {
         {
             "topic": null,
             "description": null,
-            "segment": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like. ",
-            "time": "12:53:24",
+            "segment": "I like eggs, and very specifically, but I don't like it, Yeah. ",
+            "time": "16:20:01",
             "speakerTurns": {
-                "total": 30,
+                "total": 12,
                 "speakers": [
                     {
                         "speakerId": "Guest-2",
-                        "length": 30
+                        "length": 12
                     }
                 ],
                 "turns": [
                     {
                         "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
+                        "speakerSeg": "I like eggs, and very specifically, but I don't like it, Yeah.",
+                        "length": 12
                     }
                 ]
             },
@@ -492,35 +442,28 @@ export class DataHandler {
                 "1": [
                     "67"
                 ],
-                "2": [
-                    "456"
-                ]
+                "2": []
             },
             "segments": "6"
         },
         {
             "topic": null,
             "description": null,
-            "segment": "Is cheese powders fine? I like ice cream. I like. They do not. They burgers. They do not belong together. Not. Ice cream No. ",
-            "time": "12:53:34",
+            "segment": "Lately. ",
+            "time": "16:20:55",
             "speakerTurns": {
-                "total": 24,
+                "total": 1,
                 "speakers": [
                     {
-                        "speakerId": "Guest-2",
-                        "length": 24
+                        "speakerId": "Guest-3",
+                        "length": 1
                     }
                 ],
                 "turns": [
                     {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Is cheese powders fine? I like ice cream. I like. They do not. They burgers. They do not belong together. Not.",
-                        "length": 21
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Ice cream No.",
-                        "length": 3
+                        "speakerId": "Guest-3",
+                        "speakerSeg": "Lately.",
+                        "length": 1
                     }
                 ]
             },
@@ -538,47 +481,8 @@ export class DataHandler {
         {
             "topic": null,
             "description": null,
-            "segment": "I think the ice cream part makes it a sin. I mean, like, even though the alligator sounds funny, I I saw, I don't know, I don't know. ",
-            "time": "12:53:45",
-            "speakerTurns": {
-                "total": 28,
-                "speakers": [
-                    {
-                        "speakerId": "Guest-2",
-                        "length": 28
-                    }
-                ],
-                "turns": [
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think the ice cream part makes it a sin.",
-                        "length": 10
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, like, even though the alligator sounds funny, I I saw, I don't know, I don't know.",
-                        "length": 18
-                    }
-                ]
-            },
-            "id": "8",
-            "depth": 0,
-            "parentNodes": null,
-            "childNodes": {
-                "1": [
-                    "89"
-                ],
-                "2": [
-                    "678"
-                ]
-            },
-            "segments": "8"
-        },
-        {
-            "topic": null,
-            "description": null,
-            "segment": "Remember the scorpion pizza? I'm making someone uncomfortable. That's actually gross. How to get so many? ",
-            "time": "12:53:55",
+            "segment": "It's like, it's like impressive how much snow it can give off. Yeah, Oh my goodness. ",
+            "time": "16:21:06",
             "speakerTurns": {
                 "total": 16,
                 "speakers": [
@@ -590,13 +494,45 @@ export class DataHandler {
                 "turns": [
                     {
                         "speakerId": "Guest-3",
-                        "speakerSeg": "Remember the scorpion pizza?",
+                        "speakerSeg": "It's like, it's like impressive how much snow it can give off. Yeah, Oh my goodness.",
+                        "length": 16
+                    }
+                ]
+            },
+            "id": "8",
+            "depth": 0,
+            "parentNodes": null,
+            "childNodes": {
+                "1": [
+                    "89"
+                ],
+                "2": []
+            },
+            "segments": "8"
+        },
+        {
+            "topic": null,
+            "description": null,
+            "segment": "Cedar of the sauce. Yeah. ",
+            "time": "16:21:27",
+            "speakerTurns": {
+                "total": 5,
+                "speakers": [
+                    {
+                        "speakerId": "Guest-1",
+                        "length": 5
+                    }
+                ],
+                "turns": [
+                    {
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "Cedar of the sauce.",
                         "length": 4
                     },
                     {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "I'm making someone uncomfortable. That's actually gross. How to get so many?",
-                        "length": 12
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "Yeah.",
+                        "length": 1
                     }
                 ]
             },
@@ -614,26 +550,21 @@ export class DataHandler {
         {
             "topic": null,
             "description": null,
-            "segment": "There's no scorpions here. Oh my gosh, I don't want to think about it. One time when my dad works in Texas, he brought back. ",
-            "time": "12:54:06",
+            "segment": "They have a million types of hot socks like this. This is better for them like this and Sasha better for this and then. ",
+            "time": "16:21:38",
             "speakerTurns": {
-                "total": 25,
+                "total": 24,
                 "speakers": [
                     {
                         "speakerId": "Guest-3",
-                        "length": 25
+                        "length": 24
                     }
                 ],
                 "turns": [
                     {
                         "speakerId": "Guest-3",
-                        "speakerSeg": "There's no scorpions here.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "Oh my gosh, I don't want to think about it. One time when my dad works in Texas, he brought back.",
-                        "length": 21
+                        "speakerSeg": "They have a million types of hot socks like this. This is better for them like this and Sasha better for this and then.",
+                        "length": 24
                     }
                 ]
             },
@@ -644,40 +575,33 @@ export class DataHandler {
                 "1": [
                     "1011"
                 ],
-                "2": [
-                    "8910"
-                ]
+                "2": []
             },
             "segments": "10"
         },
         {
             "topic": null,
             "description": null,
-            "segment": "Like Lollipop for us. Him and my brother ate it. Like those, have you seen those? Like cricket like. ",
-            "time": "12:54:17",
+            "segment": "Julius is better for this. Like I only saw the means. ",
+            "time": "16:21:48",
             "speakerTurns": {
-                "total": 19,
+                "total": 11,
                 "speakers": [
                     {
-                        "speakerId": "Guest-3",
-                        "length": 19
+                        "speakerId": "Guest-1",
+                        "length": 11
                     }
                 ],
                 "turns": [
                     {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "Like Lollipop for us.",
-                        "length": 4
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "Julius is better for this.",
+                        "length": 5
                     },
                     {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "Him and my brother ate it.",
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "Like I only saw the means.",
                         "length": 6
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "Like those, have you seen those? Like cricket like.",
-                        "length": 9
                     }
                 ]
             },
@@ -695,31 +619,30 @@ export class DataHandler {
         {
             "topic": null,
             "description": null,
-            "segment": "Yeah, I've never tried. Yeah, I refuse. Yeah, me too. ",
-            "time": "12:54:27",
+            "segment": "And I need to have a chili boy with. That's good, I mean. ",
+            "time": "16:21:59",
             "speakerTurns": {
-                "total": 10,
+                "total": 13,
                 "speakers": [
                     {
-                        "speakerId": "Guest-3",
-                        "length": 10
+                        "speakerId": "Guest-2",
+                        "length": 9
+                    },
+                    {
+                        "speakerId": "Guest-6",
+                        "length": 4
                     }
                 ],
                 "turns": [
                     {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "Yeah, I've never tried.",
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "And I need to have a chili boy with.",
+                        "length": 9
+                    },
+                    {
+                        "speakerId": "Guest-6",
+                        "speakerSeg": "That's good, I mean.",
                         "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "Yeah, I refuse.",
-                        "length": 3
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "Yeah, me too.",
-                        "length": 3
                     }
                 ]
             },
@@ -727,45 +650,45 @@ export class DataHandler {
             "depth": 0,
             "parentNodes": null,
             "childNodes": {
-                "1": [],
-                "2": [
-                    "101112"
-                ]
+                "1": [
+                    "1213"
+                ],
+                "2": []
             },
             "segments": "12"
         },
         {
             "topic": null,
             "description": null,
-            "segment": "I'm like, always curious people. Always. Say it actually doesn't taste that bad. But like, I'm not, I don't really like books in the 1st place. No, that's actually like, you know. ",
-            "time": "12:54:38",
+            "segment": "We, I think we used to buy it too. So yeah. And I actually. Oh yeah. Yeah, he's my friend. ",
+            "time": "16:22:21",
             "speakerTurns": {
-                "total": 32,
+                "total": 20,
                 "speakers": [
                     {
-                        "speakerId": "Guest-3",
-                        "length": 6
+                        "speakerId": "Guest-2",
+                        "length": 18
                     },
                     {
-                        "speakerId": "Guest-2",
-                        "length": 26
+                        "speakerId": "Guest-3",
+                        "length": 2
                     }
                 ],
                 "turns": [
                     {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "We, I think we used to buy it too. So yeah. And I actually.",
+                        "length": 14
+                    },
+                    {
                         "speakerId": "Guest-3",
-                        "speakerSeg": "I'm like, always curious people. Always.",
-                        "length": 6
+                        "speakerSeg": "Oh yeah.",
+                        "length": 2
                     },
                     {
                         "speakerId": "Guest-2",
-                        "speakerSeg": "Say it actually doesn't taste that bad.",
-                        "length": 7
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But like, I'm not, I don't really like books in the 1st place. No, that's actually like, you know.",
-                        "length": 19
+                        "speakerSeg": "Yeah, he's my friend.",
+                        "length": 4
                     }
                 ]
             },
@@ -773,50 +696,82 @@ export class DataHandler {
             "depth": 0,
             "parentNodes": null,
             "childNodes": {
-                "1": [],
+                "1": [
+                    "1213"
+                ],
                 "2": []
             },
             "segments": "13"
+        },
+        {
+            "topic": null,
+            "description": null,
+            "segment": "Later. ",
+            "time": "16:22:42",
+            "speakerTurns": {
+                "total": 1,
+                "speakers": [
+                    {
+                        "speakerId": "Guest-2",
+                        "length": 1
+                    }
+                ],
+                "turns": [
+                    {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "Later.",
+                        "length": 1
+                    }
+                ]
+            },
+            "id": "14",
+            "depth": 0,
+            "parentNodes": null,
+            "childNodes": {
+                "1": [],
+                "2": []
+            },
+            "segments": "14"
         }
     ],
     "1": [
         {
-            "topic": "TRYING NEW FOODS",
-            "description": "Are you gonna try the cheeseburger?",
-            "segment": "It's going to. Shanti Kumar, are there any? Are you gonna check the foods or are you just gonna? I'm gonna try some of them, but I don't know. Are you gonna try the cheeseburger? I'm a little scared. ",
-            "time": "12:52:18",
+            "topic": "COOKING EXPERIMENT",
+            "description": "I think try to bake like a chicken breast and then the the grease is just like watering everywhere.",
+            "segment": "Do you favorite life? I think try to bake like a chicken breast and then the the grease is just like watering everywhere. You get it best. So yes, let's just say not the best. Of cooking. That's kind of weird. She. Just she didn't mean it, but like. ",
+            "time": "16:18:25",
             "speakerTurns": {
-                "total": 39,
+                "total": 49,
                 "speakers": [
                     {
                         "speakerId": "Guest-1",
-                        "length": 3
+                        "length": 35
                     },
                     {
                         "speakerId": "Guest-2",
-                        "length": 36
+                        "length": 14
                     }
                 ],
                 "turns": [
                     {
                         "speakerId": "Guest-1",
-                        "speakerSeg": "It's going to.",
-                        "length": 3
+                        "speakerSeg": "So yes, let's just say not the best.",
+                        "length": 8
                     },
                     {
                         "speakerId": "Guest-2",
-                        "speakerSeg": "Shanti Kumar, are there any?",
-                        "length": 5
+                        "speakerSeg": "Of cooking. That's kind of weird. She.",
+                        "length": 7
                     },
                     {
                         "speakerId": "Guest-2",
-                        "speakerSeg": "Are you gonna check the foods or are you just gonna? I'm gonna try some of them, but I don't know. Are you gonna try the cheeseburger?",
+                        "speakerSeg": "Just she didn't mean it, but like.",
+                        "length": 7
+                    },
+                    {
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "Do you favorite life? I think try to bake like a chicken breast and then the the grease is just like watering everywhere. You get it best.",
                         "length": 27
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm a little scared.",
-                        "length": 4
                     }
                 ]
             },
@@ -824,56 +779,51 @@ export class DataHandler {
             "depth": 1,
             "parentNodes": {
                 "0": [
-                    "0",
-                    "1"
+                    "1",
+                    "0"
                 ]
             },
             "childNodes": {
                 "2": [
-                    "012"
+                    "0123"
                 ],
                 "3": []
             },
             "segments": "0 1"
         },
         {
-            "topic": "FOOD SCIENCE",
-            "description": "There's a lot of food science they gotta like.",
-            "segment": "Share dollars, right? Yeah, like $15 like OK. I mean, it's called premium. It's like. I think it's like. Marvel Science where, I don't know, they have, there's a lot of food science they gotta like. Extra creamy. I don't know the science. I don't know scientists. ",
-            "time": "12:52:40",
+            "topic": "COOKING ADVICE",
+            "description": "And then she's like, why don't you cook this like?",
+            "segment": "And then she's like, why don't you cook this like? We're mad. OK, Mom. I'm trying to. ",
+            "time": "16:18:46",
             "speakerTurns": {
-                "total": 47,
+                "total": 17,
                 "speakers": [
                     {
-                        "speakerId": "Guest-2",
-                        "length": 47
+                        "speakerId": "Guest-1",
+                        "length": 17
                     }
                 ],
                 "turns": [
                     {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Share dollars, right? Yeah, like $15 like OK.",
-                        "length": 8
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "We're mad.",
+                        "length": 2
                     },
                     {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, it's called premium. It's like.",
-                        "length": 7
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "OK, Mom.",
+                        "length": 2
                     },
                     {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think it's like.",
-                        "length": 4
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "I'm trying to.",
+                        "length": 3
                     },
                     {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Marvel Science where, I don't know, they have, there's a lot of food science they gotta like.",
-                        "length": 17
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Extra creamy. I don't know the science. I don't know scientists.",
-                        "length": 11
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "And then she's like, why don't you cook this like?",
+                        "length": 10
                     }
                 ]
             },
@@ -881,57 +831,40 @@ export class DataHandler {
             "depth": 1,
             "parentNodes": {
                 "0": [
-                    "2",
-                    "3"
+                    "3",
+                    "2"
                 ]
             },
             "childNodes": {
                 "2": [
-                    "234"
-                ],
-                "3": [
                     "0123"
-                ]
+                ],
+                "3": []
             },
             "segments": "2 3"
         },
         {
-            "topic": "MEAT-FLAVORED ICE CREAM",
-            "description": "Cheeseburger ice cream, apparently it tastes like meat.",
-            "segment": "It it was like, like I give you that much or a hot dog. But not Yeah, I. Cheeseburger ice cream. Apparently it tastes like meat. Makes me sound comfortable. And like it's got like. ",
-            "time": "12:53:02",
+            "topic": "MAKING FOOD",
+            "description": "Yeah, I started making them.",
+            "segment": "Yeah, I started making them. I I can't eat it, but it's. ",
+            "time": "16:19:40",
             "speakerTurns": {
-                "total": 35,
+                "total": 12,
                 "speakers": [
                     {
                         "speakerId": "Guest-2",
-                        "length": 35
+                        "length": 12
                     }
                 ],
                 "turns": [
                     {
                         "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
+                        "speakerSeg": "I I can't eat it, but it's.",
+                        "length": 7
                     },
                     {
                         "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Cheeseburger ice cream. Apparently it tastes like meat.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Makes me sound comfortable.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "And like it's got like.",
+                        "speakerSeg": "Yeah, I started making them.",
                         "length": 5
                     }
                 ]
@@ -940,48 +873,45 @@ export class DataHandler {
             "depth": 1,
             "parentNodes": {
                 "0": [
-                    "4",
-                    "5"
+                    "5",
+                    "4"
                 ]
             },
             "childNodes": {
                 "2": [
-                    "456"
+                    "4567"
                 ],
-                "3": [
-                    "2345"
-                ]
+                "3": []
             },
             "segments": "4 5"
         },
         {
             "topic": "FOOD PREFERENCES",
-            "description": "They do not belong together.",
-            "segment": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like. Is cheese powders fine? I like ice cream. I like. They do not. They burgers. They do not belong together. Not. Ice cream No. ",
-            "time": "12:53:24",
+            "description": "I like eggs, and very specifically, but I don't like it.",
+            "segment": "I like eggs, and very specifically, but I don't like it, Yeah. Lately. ",
+            "time": "16:20:55",
             "speakerTurns": {
-                "total": 54,
+                "total": 13,
                 "speakers": [
                     {
+                        "speakerId": "Guest-3",
+                        "length": 1
+                    },
+                    {
                         "speakerId": "Guest-2",
-                        "length": 54
+                        "length": 12
                     }
                 ],
                 "turns": [
                     {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
+                        "speakerId": "Guest-3",
+                        "speakerSeg": "Lately.",
+                        "length": 1
                     },
                     {
                         "speakerId": "Guest-2",
-                        "speakerSeg": "Is cheese powders fine? I like ice cream. I like. They do not. They burgers. They do not belong together. Not.",
-                        "length": 21
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Ice cream No.",
-                        "length": 3
+                        "speakerSeg": "I like eggs, and very specifically, but I don't like it, Yeah.",
+                        "length": 12
                     }
                 ]
             },
@@ -989,31 +919,29 @@ export class DataHandler {
             "depth": 1,
             "parentNodes": {
                 "0": [
-                    "6",
-                    "7"
+                    "7",
+                    "6"
                 ]
             },
             "childNodes": {
                 "2": [
-                    "678"
-                ],
-                "3": [
                     "4567"
-                ]
+                ],
+                "3": []
             },
             "segments": "6 7"
         },
         {
-            "topic": "UNUSUAL FOODS",
-            "description": "Remember the scorpion pizza?",
-            "segment": "I think the ice cream part makes it a sin. I mean, like, even though the alligator sounds funny, I I saw, I don't know, I don't know. Remember the scorpion pizza? I'm making someone uncomfortable. That's actually gross. How to get so many? ",
-            "time": "12:53:45",
+            "topic": "SNOWFALL",
+            "description": "It's like impressive how much snow it can give off.",
+            "segment": "It's like, it's like impressive how much snow it can give off. Yeah, Oh my goodness. Cedar of the sauce. Yeah. ",
+            "time": "16:21:27",
             "speakerTurns": {
-                "total": 44,
+                "total": 21,
                 "speakers": [
                     {
-                        "speakerId": "Guest-2",
-                        "length": 28
+                        "speakerId": "Guest-1",
+                        "length": 5
                     },
                     {
                         "speakerId": "Guest-3",
@@ -1022,24 +950,19 @@ export class DataHandler {
                 ],
                 "turns": [
                     {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think the ice cream part makes it a sin.",
-                        "length": 10
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, like, even though the alligator sounds funny, I I saw, I don't know, I don't know.",
-                        "length": 18
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "Remember the scorpion pizza?",
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "Cedar of the sauce.",
                         "length": 4
                     },
                     {
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "Yeah.",
+                        "length": 1
+                    },
+                    {
                         "speakerId": "Guest-3",
-                        "speakerSeg": "I'm making someone uncomfortable. That's actually gross. How to get so many?",
-                        "length": 12
+                        "speakerSeg": "It's like, it's like impressive how much snow it can give off. Yeah, Oh my goodness.",
+                        "length": 16
                     }
                 ]
             },
@@ -1047,58 +970,50 @@ export class DataHandler {
             "depth": 1,
             "parentNodes": {
                 "0": [
-                    "8",
-                    "9"
+                    "9",
+                    "8"
                 ]
             },
             "childNodes": {
                 "2": [
-                    "8910"
+                    "891011"
                 ],
-                "3": [
-                    "6789"
-                ]
+                "3": []
             },
             "segments": "8 9"
         },
         {
-            "topic": "SCORPIONS IN TEXAS",
-            "description": "One time when my dad works in Texas, he brought back.",
-            "segment": "There's no scorpions here. Oh my gosh, I don't want to think about it. One time when my dad works in Texas, he brought back. Like Lollipop for us. Him and my brother ate it. Like those, have you seen those? Like cricket like. ",
-            "time": "12:54:06",
+            "topic": "HOT SOCKS TYPES",
+            "description": "They have a million types of hot socks like this.",
+            "segment": "They have a million types of hot socks like this. This is better for them like this and Sasha better for this and then. Julius is better for this. Like I only saw the means. ",
+            "time": "16:21:48",
             "speakerTurns": {
-                "total": 44,
+                "total": 35,
                 "speakers": [
                     {
+                        "speakerId": "Guest-1",
+                        "length": 11
+                    },
+                    {
                         "speakerId": "Guest-3",
-                        "length": 44
+                        "length": 24
                     }
                 ],
                 "turns": [
                     {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "There's no scorpions here.",
-                        "length": 4
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "Julius is better for this.",
+                        "length": 5
                     },
                     {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "Oh my gosh, I don't want to think about it. One time when my dad works in Texas, he brought back.",
-                        "length": 21
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "Like Lollipop for us.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "Him and my brother ate it.",
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "Like I only saw the means.",
                         "length": 6
                     },
                     {
                         "speakerId": "Guest-3",
-                        "speakerSeg": "Like those, have you seen those? Like cricket like.",
-                        "length": 9
+                        "speakerSeg": "They have a million types of hot socks like this. This is better for them like this and Sasha better for this and then.",
+                        "length": 24
                     }
                 ]
             },
@@ -1106,5896 +1021,381 @@ export class DataHandler {
             "depth": 1,
             "parentNodes": {
                 "0": [
-                    "10",
-                    "11"
+                    "11",
+                    "10"
                 ]
             },
             "childNodes": {
                 "2": [
-                    "101112"
-                ],
-                "3": [
                     "891011"
-                ]
+                ],
+                "3": []
             },
             "segments": "10 11"
+        },
+        {
+            "topic": "CHILI BOY",
+            "description": "And I need to have a chili boy with.",
+            "segment": "And I need to have a chili boy with. That's good, I mean. We, I think we used to buy it too. So yeah. And I actually. Oh yeah. Yeah, he's my friend. ",
+            "time": "16:22:21",
+            "speakerTurns": {
+                "total": 33,
+                "speakers": [
+                    {
+                        "speakerId": "Guest-2",
+                        "length": 27
+                    },
+                    {
+                        "speakerId": "Guest-3",
+                        "length": 2
+                    },
+                    {
+                        "speakerId": "Guest-6",
+                        "length": 4
+                    }
+                ],
+                "turns": [
+                    {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "We, I think we used to buy it too. So yeah. And I actually.",
+                        "length": 14
+                    },
+                    {
+                        "speakerId": "Guest-3",
+                        "speakerSeg": "Oh yeah.",
+                        "length": 2
+                    },
+                    {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "Yeah, he's my friend.",
+                        "length": 4
+                    },
+                    {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "And I need to have a chili boy with.",
+                        "length": 9
+                    },
+                    {
+                        "speakerId": "Guest-6",
+                        "speakerSeg": "That's good, I mean.",
+                        "length": 4
+                    }
+                ]
+            },
+            "id": "1213",
+            "depth": 1,
+            "parentNodes": {
+                "0": [
+                    "13",
+                    "12"
+                ]
+            },
+            "childNodes": {
+                "2": [],
+                "3": []
+            },
+            "segments": "12 13"
         }
     ],
     "2": [
         {
-            "topic": "TRYING NEW FOODS",
-            "description": "Are you gonna try the cheeseburger?",
-            "segment": "It's going to. Shanti Kumar, are there any? Are you gonna check the foods or are you just gonna? I'm gonna try some of them, but I don't know. Are you gonna try the cheeseburger? I'm a little scared. Share dollars, right? Yeah, like $15 like OK. I mean, it's called premium. It's like. I think it's like. ",
-            "time": "12:52:18",
+            "topic": "COOKING MISHAP",
+            "description": "I think try to bake like a chicken breast and then the the grease is just like watering everywhere.",
+            "segment": "Do you favorite life? I think try to bake like a chicken breast and then the the grease is just like watering everywhere. You get it best. So yes, let's just say not the best. Of cooking. That's kind of weird. She. Just she didn't mean it, but like. And then she's like, why don't you cook this like? We're mad. OK, Mom. I'm trying to. ",
+            "time": "16:18:46",
             "speakerTurns": {
-                "total": 58,
+                "total": 66,
                 "speakers": [
                     {
                         "speakerId": "Guest-1",
-                        "length": 3
+                        "length": 52
                     },
                     {
                         "speakerId": "Guest-2",
-                        "length": 55
+                        "length": 14
                     }
                 ],
                 "turns": [
                     {
                         "speakerId": "Guest-1",
-                        "speakerSeg": "It's going to.",
+                        "speakerSeg": "We're mad.",
+                        "length": 2
+                    },
+                    {
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "OK, Mom.",
+                        "length": 2
+                    },
+                    {
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "I'm trying to.",
                         "length": 3
                     },
                     {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Shanti Kumar, are there any?",
-                        "length": 5
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "And then she's like, why don't you cook this like?",
+                        "length": 10
                     },
                     {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Are you gonna check the foods or are you just gonna? I'm gonna try some of them, but I don't know. Are you gonna try the cheeseburger?",
-                        "length": 27
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm a little scared.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Share dollars, right? Yeah, like $15 like OK.",
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "So yes, let's just say not the best.",
                         "length": 8
                     },
                     {
                         "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, it's called premium. It's like.",
+                        "speakerSeg": "Of cooking. That's kind of weird. She.",
                         "length": 7
                     },
                     {
                         "speakerId": "Guest-2",
-                        "speakerSeg": "I think it's like.",
-                        "length": 4
+                        "speakerSeg": "Just she didn't mean it, but like.",
+                        "length": 7
+                    },
+                    {
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "Do you favorite life? I think try to bake like a chicken breast and then the the grease is just like watering everywhere. You get it best.",
+                        "length": 27
                     }
                 ]
             },
-            "id": "012",
+            "id": "0123",
             "depth": 2,
             "parentNodes": {
-                "0": [
-                    "2"
-                ],
                 "1": [
+                    "23",
                     "01"
                 ]
             },
             "childNodes": {
                 "3": [
-                    "0123"
+                    "01234567"
                 ],
                 "4": []
             },
-            "segments": "0 1 2"
+            "segments": "0 1 2 3"
         },
         {
-            "topic": "FOOD SCIENCE",
-            "description": "There's a lot of food science they gotta like.",
-            "segment": "Share dollars, right? Yeah, like $15 like OK. I mean, it's called premium. It's like. I think it's like. Marvel Science where, I don't know, they have, there's a lot of food science they gotta like. Extra creamy. I don't know the science. I don't know scientists. It it was like, like I give you that much or a hot dog. But not Yeah, I. ",
-            "time": "12:52:40",
+            "topic": "EGG CRAVINGS",
+            "description": "I like eggs, and very specifically, but I don't like it, Yeah.",
+            "segment": "Yeah, I started making them. I I can't eat it, but it's. I like eggs, and very specifically, but I don't like it, Yeah. Lately. ",
+            "time": "16:20:55",
             "speakerTurns": {
-                "total": 65,
+                "total": 25,
                 "speakers": [
                     {
+                        "speakerId": "Guest-3",
+                        "length": 1
+                    },
+                    {
                         "speakerId": "Guest-2",
-                        "length": 65
+                        "length": 24
                     }
                 ],
                 "turns": [
                     {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Share dollars, right? Yeah, like $15 like OK.",
-                        "length": 8
+                        "speakerId": "Guest-3",
+                        "speakerSeg": "Lately.",
+                        "length": 1
                     },
                     {
                         "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, it's called premium. It's like.",
+                        "speakerSeg": "I like eggs, and very specifically, but I don't like it, Yeah.",
+                        "length": 12
+                    },
+                    {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "I I can't eat it, but it's.",
                         "length": 7
                     },
                     {
                         "speakerId": "Guest-2",
-                        "speakerSeg": "I think it's like.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Marvel Science where, I don't know, they have, there's a lot of food science they gotta like.",
-                        "length": 17
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Extra creamy. I don't know the science. I don't know scientists.",
-                        "length": 11
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    }
-                ]
-            },
-            "id": "234",
-            "depth": 2,
-            "parentNodes": {
-                "0": [
-                    "4"
-                ],
-                "1": [
-                    "23"
-                ]
-            },
-            "childNodes": {
-                "3": [
-                    "2345"
-                ],
-                "4": [
-                    "01234"
-                ]
-            },
-            "segments": "3 4 5"
-        },
-        {
-            "topic": "FOOD PREFERENCES",
-            "description": "Apparently it tastes like meat.",
-            "segment": "It it was like, like I give you that much or a hot dog. But not Yeah, I. Cheeseburger ice cream. Apparently it tastes like meat. Makes me sound comfortable. And like it's got like. I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like. ",
-            "time": "12:53:02",
-            "speakerTurns": {
-                "total": 65,
-                "speakers": [
-                    {
-                        "speakerId": "Guest-2",
-                        "length": 65
-                    }
-                ],
-                "turns": [
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Cheeseburger ice cream. Apparently it tastes like meat.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Makes me sound comfortable.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "And like it's got like.",
+                        "speakerSeg": "Yeah, I started making them.",
                         "length": 5
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
                     }
                 ]
             },
-            "id": "456",
+            "id": "4567",
             "depth": 2,
             "parentNodes": {
-                "0": [
-                    "6"
-                ],
                 "1": [
+                    "67",
                     "45"
                 ]
             },
             "childNodes": {
                 "3": [
-                    "4567"
+                    "01234567"
                 ],
-                "4": [
-                    "23456"
-                ]
+                "4": []
             },
-            "segments": "6 7 8"
+            "segments": "4 5 6 7"
         },
         {
-            "topic": "UNUSUAL FOOD COMBINATIONS",
-            "description": "I like onion rings, I like cheese powders. They do not belong together with ice cream.",
-            "segment": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like. Is cheese powders fine? I like ice cream. I like. They do not. They burgers. They do not belong together. Not. Ice cream No. I think the ice cream part makes it a sin. I mean, like, even though the alligator sounds funny, I I saw, I don't know, I don't know. ",
-            "time": "12:53:24",
+            "topic": "HOT SAUCE VARIETY",
+            "description": "They have a million types of hot socks like this.",
+            "segment": "It's like, it's like impressive how much snow it can give off. Yeah, Oh my goodness. Cedar of the sauce. Yeah. They have a million types of hot socks like this. This is better for them like this and Sasha better for this and then. Julius is better for this. Like I only saw the means. ",
+            "time": "16:21:48",
             "speakerTurns": {
-                "total": 82,
+                "total": 56,
                 "speakers": [
                     {
-                        "speakerId": "Guest-2",
-                        "length": 82
+                        "speakerId": "Guest-1",
+                        "length": 16
+                    },
+                    {
+                        "speakerId": "Guest-3",
+                        "length": 40
                     }
                 ],
                 "turns": [
                     {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "Julius is better for this.",
+                        "length": 5
                     },
                     {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Is cheese powders fine? I like ice cream. I like. They do not. They burgers. They do not belong together. Not.",
-                        "length": 21
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Ice cream No.",
-                        "length": 3
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think the ice cream part makes it a sin.",
-                        "length": 10
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, like, even though the alligator sounds funny, I I saw, I don't know, I don't know.",
-                        "length": 18
-                    }
-                ]
-            },
-            "id": "678",
-            "depth": 2,
-            "parentNodes": {
-                "0": [
-                    "8"
-                ],
-                "1": [
-                    "67"
-                ]
-            },
-            "childNodes": {
-                "3": [
-                    "6789"
-                ],
-                "4": [
-                    "45678"
-                ]
-            },
-            "segments": "9 10 11"
-        },
-        {
-            "topic": "UNUSUAL FOODS",
-            "description": "Remember the scorpion pizza?",
-            "segment": "I think the ice cream part makes it a sin. I mean, like, even though the alligator sounds funny, I I saw, I don't know, I don't know. Remember the scorpion pizza? I'm making someone uncomfortable. That's actually gross. How to get so many? There's no scorpions here. Oh my gosh, I don't want to think about it. One time when my dad works in Texas, he brought back. ",
-            "time": "12:53:45",
-            "speakerTurns": {
-                "total": 69,
-                "speakers": [
-                    {
-                        "speakerId": "Guest-2",
-                        "length": 28
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "length": 41
-                    }
-                ],
-                "turns": [
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think the ice cream part makes it a sin.",
-                        "length": 10
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, like, even though the alligator sounds funny, I I saw, I don't know, I don't know.",
-                        "length": 18
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "Remember the scorpion pizza?",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "I'm making someone uncomfortable. That's actually gross. How to get so many?",
-                        "length": 12
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "There's no scorpions here.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "Oh my gosh, I don't want to think about it. One time when my dad works in Texas, he brought back.",
-                        "length": 21
-                    }
-                ]
-            },
-            "id": "8910",
-            "depth": 2,
-            "parentNodes": {
-                "0": [
-                    "10"
-                ],
-                "1": [
-                    "89"
-                ]
-            },
-            "childNodes": {
-                "3": [
-                    "891011"
-                ],
-                "4": [
-                    "678910"
-                ]
-            },
-            "segments": "10 11 12"
-        },
-        {
-            "topic": "EATING INSECTS",
-            "description": "Him and my brother ate it.",
-            "segment": "There's no scorpions here. Oh my gosh, I don't want to think about it. One time when my dad works in Texas, he brought back. Like Lollipop for us. Him and my brother ate it. Like those, have you seen those? Like cricket like. Yeah, I've never tried. Yeah, I refuse. Yeah, me too. ",
-            "time": "12:54:06",
-            "speakerTurns": {
-                "total": 54,
-                "speakers": [
-                    {
-                        "speakerId": "Guest-3",
-                        "length": 54
-                    }
-                ],
-                "turns": [
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "There's no scorpions here.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "Oh my gosh, I don't want to think about it. One time when my dad works in Texas, he brought back.",
-                        "length": 21
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "Like Lollipop for us.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "Him and my brother ate it.",
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "Like I only saw the means.",
                         "length": 6
                     },
                     {
                         "speakerId": "Guest-3",
-                        "speakerSeg": "Like those, have you seen those? Like cricket like.",
-                        "length": 9
+                        "speakerSeg": "They have a million types of hot socks like this. This is better for them like this and Sasha better for this and then.",
+                        "length": 24
                     },
                     {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "Yeah, I've never tried.",
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "Cedar of the sauce.",
                         "length": 4
                     },
                     {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "Yeah, I refuse.",
-                        "length": 3
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "Yeah.",
+                        "length": 1
                     },
                     {
                         "speakerId": "Guest-3",
-                        "speakerSeg": "Yeah, me too.",
-                        "length": 3
+                        "speakerSeg": "It's like, it's like impressive how much snow it can give off. Yeah, Oh my goodness.",
+                        "length": 16
                     }
                 ]
             },
-            "id": "101112",
+            "id": "891011",
             "depth": 2,
             "parentNodes": {
-                "0": [
-                    "12"
-                ],
                 "1": [
-                    "1011"
+                    "1011",
+                    "89"
                 ]
             },
             "childNodes": {
                 "3": [],
                 "4": []
             },
-            "segments": "10 11 12"
+            "segments": "8 9 10 11"
         }
     ],
     "3": [
         {
-            "topic": "TRYING A NEW CHEESEBURGER",
-            "description": "Are you gonna try the cheeseburger?",
-            "segment": "It's going to. Shanti Kumar, are there any? Are you gonna check the foods or are you just gonna? I'm gonna try some of them, but I don't know. Are you gonna try the cheeseburger? I'm a little scared. Share dollars, right? Yeah, like $15 like OK. I mean, it's called premium. It's like. I think it's like. Marvel Science where, I don't know, they have, there's a lot of food science they gotta like. Extra creamy. I don't know the science. I don't know scientists. ",
-            "time": "12:52:18",
+            "topic": "COOKING EXPERIENCES",
+            "description": "I think try to bake like a chicken breast and then the grease is just like watering everywhere.",
+            "segment": "Do you favorite life? I think try to bake like a chicken breast and then the the grease is just like watering everywhere. You get it best. So yes, let's just say not the best. Of cooking. That's kind of weird. She. Just she didn't mean it, but like. And then she's like, why don't you cook this like? We're mad. OK, Mom. I'm trying to. Yeah, I started making them. I I can't eat it, but it's. I like eggs, and very specifically, but I don't like it, Yeah. Lately. ",
+            "time": "16:20:55",
             "speakerTurns": {
-                "total": 105,
+                "total": 91,
                 "speakers": [
                     {
-                        "speakerId": "Guest-1",
-                        "length": 3
+                        "speakerId": "Guest-3",
+                        "length": 1
                     },
                     {
                         "speakerId": "Guest-2",
-                        "length": 102
+                        "length": 38
+                    },
+                    {
+                        "speakerId": "Guest-1",
+                        "length": 52
                     }
                 ],
                 "turns": [
                     {
-                        "speakerId": "Guest-1",
-                        "speakerSeg": "It's going to.",
-                        "length": 3
+                        "speakerId": "Guest-3",
+                        "speakerSeg": "Lately.",
+                        "length": 1
                     },
                     {
                         "speakerId": "Guest-2",
-                        "speakerSeg": "Shanti Kumar, are there any?",
+                        "speakerSeg": "I like eggs, and very specifically, but I don't like it, Yeah.",
+                        "length": 12
+                    },
+                    {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "I I can't eat it, but it's.",
+                        "length": 7
+                    },
+                    {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "Yeah, I started making them.",
                         "length": 5
                     },
                     {
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "We're mad.",
+                        "length": 2
+                    },
+                    {
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "OK, Mom.",
+                        "length": 2
+                    },
+                    {
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "I'm trying to.",
+                        "length": 3
+                    },
+                    {
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "And then she's like, why don't you cook this like?",
+                        "length": 10
+                    },
+                    {
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "So yes, let's just say not the best.",
+                        "length": 8
+                    },
+                    {
                         "speakerId": "Guest-2",
-                        "speakerSeg": "Are you gonna check the foods or are you just gonna? I'm gonna try some of them, but I don't know. Are you gonna try the cheeseburger?",
+                        "speakerSeg": "Of cooking. That's kind of weird. She.",
+                        "length": 7
+                    },
+                    {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "Just she didn't mean it, but like.",
+                        "length": 7
+                    },
+                    {
+                        "speakerId": "Guest-1",
+                        "speakerSeg": "Do you favorite life? I think try to bake like a chicken breast and then the the grease is just like watering everywhere. You get it best.",
                         "length": 27
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm a little scared.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Share dollars, right? Yeah, like $15 like OK.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, it's called premium. It's like.",
-                        "length": 7
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think it's like.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Share dollars, right? Yeah, like $15 like OK.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, it's called premium. It's like.",
-                        "length": 7
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think it's like.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Marvel Science where, I don't know, they have, there's a lot of food science they gotta like.",
-                        "length": 17
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Extra creamy. I don't know the science. I don't know scientists.",
-                        "length": 11
                     }
                 ]
             },
-            "id": "0123",
+            "id": "01234567",
             "depth": 3,
             "parentNodes": {
-                "1": [
-                    "23"
-                ],
                 "2": [
-                    "012"
-                ]
-            },
-            "childNodes": {
-                "4": [
-                    "01234"
-                ],
-                "5": []
-            },
-            "segments": "0 1 2 3"
-        },
-        {
-            "topic": "FOOD SCIENCE",
-            "description": "Cheeseburger ice cream.",
-            "segment": "Share dollars, right? Yeah, like $15 like OK. I mean, it's called premium. It's like. I think it's like. Marvel Science where, I don't know, they have, there's a lot of food science they gotta like. Extra creamy. I don't know the science. I don't know scientists. It it was like, like I give you that much or a hot dog. But not Yeah, I. Cheeseburger ice cream. Apparently it tastes like meat. Makes me sound comfortable. And like it's got like. ",
-            "time": "12:52:40",
-            "speakerTurns": {
-                "total": 100,
-                "speakers": [
-                    {
-                        "speakerId": "Guest-2",
-                        "length": 100
-                    }
-                ],
-                "turns": [
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Share dollars, right? Yeah, like $15 like OK.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, it's called premium. It's like.",
-                        "length": 7
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think it's like.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Marvel Science where, I don't know, they have, there's a lot of food science they gotta like.",
-                        "length": 17
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Extra creamy. I don't know the science. I don't know scientists.",
-                        "length": 11
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Cheeseburger ice cream. Apparently it tastes like meat.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Makes me sound comfortable.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "And like it's got like.",
-                        "length": 5
-                    }
-                ]
-            },
-            "id": "2345",
-            "depth": 3,
-            "parentNodes": {
-                "1": [
-                    "45"
-                ],
-                "2": [
-                    "234"
-                ]
-            },
-            "childNodes": {
-                "4": [
-                    "23456"
-                ],
-                "5": [
-                    "012345"
-                ]
-            },
-            "segments": "2 3 4 5"
-        },
-        {
-            "topic": "ICE CREAM CHEESEBURGER",
-            "description": "Cheeseburger ice cream.",
-            "segment": "It it was like, like I give you that much or a hot dog. But not Yeah, I. Cheeseburger ice cream. Apparently it tastes like meat. Makes me sound comfortable. And like it's got like. I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like. Is cheese powders fine? I like ice cream. I like. They do not. They burgers. They do not belong together. Not. Ice cream No. ",
-            "time": "12:53:02",
-            "speakerTurns": {
-                "total": 119,
-                "speakers": [
-                    {
-                        "speakerId": "Guest-2",
-                        "length": 119
-                    }
-                ],
-                "turns": [
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Cheeseburger ice cream. Apparently it tastes like meat.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Makes me sound comfortable.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "And like it's got like.",
-                        "length": 5
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Is cheese powders fine? I like ice cream. I like. They do not. They burgers. They do not belong together. Not.",
-                        "length": 21
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Ice cream No.",
-                        "length": 3
-                    }
-                ]
-            },
-            "id": "4567",
-            "depth": 3,
-            "parentNodes": {
-                "1": [
-                    "67"
-                ],
-                "2": [
-                    "456"
-                ]
-            },
-            "childNodes": {
-                "4": [
-                    "45678"
-                ],
-                "5": [
-                    "234567"
-                ]
-            },
-            "segments": "4 5 6 7"
-        },
-        {
-            "topic": "FOOD COMBINATIONS",
-            "description": "They do not belong together.",
-            "segment": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like. Is cheese powders fine? I like ice cream. I like. They do not. They burgers. They do not belong together. Not. Ice cream No. I think the ice cream part makes it a sin. I mean, like, even though the alligator sounds funny, I I saw, I don't know, I don't know. Remember the scorpion pizza? I'm making someone uncomfortable. That's actually gross. How to get so many? ",
-            "time": "12:53:24",
-            "speakerTurns": {
-                "total": 126,
-                "speakers": [
-                    {
-                        "speakerId": "Guest-2",
-                        "length": 110
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "length": 16
-                    }
-                ],
-                "turns": [
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Is cheese powders fine? I like ice cream. I like. They do not. They burgers. They do not belong together. Not.",
-                        "length": 21
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Ice cream No.",
-                        "length": 3
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think the ice cream part makes it a sin.",
-                        "length": 10
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, like, even though the alligator sounds funny, I I saw, I don't know, I don't know.",
-                        "length": 18
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think the ice cream part makes it a sin.",
-                        "length": 10
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, like, even though the alligator sounds funny, I I saw, I don't know, I don't know.",
-                        "length": 18
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "Remember the scorpion pizza?",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "I'm making someone uncomfortable. That's actually gross. How to get so many?",
-                        "length": 12
-                    }
-                ]
-            },
-            "id": "6789",
-            "depth": 3,
-            "parentNodes": {
-                "1": [
-                    "89"
-                ],
-                "2": [
-                    "678"
-                ]
-            },
-            "childNodes": {
-                "4": [
-                    "678910"
-                ],
-                "5": [
-                    "456789"
-                ]
-            },
-            "segments": "6 7 8 9"
-        },
-        {
-            "topic": "EXOTIC FOODS",
-            "description": "Remember the scorpion pizza?",
-            "segment": "I think the ice cream part makes it a sin. I mean, like, even though the alligator sounds funny, I I saw, I don't know, I don't know. Remember the scorpion pizza? I'm making someone uncomfortable. That's actually gross. How to get so many? There's no scorpions here. Oh my gosh, I don't want to think about it. One time when my dad works in Texas, he brought back. Like Lollipop for us. Him and my brother ate it. Like those, have you seen those? Like cricket like. ",
-            "time": "12:53:45",
-            "speakerTurns": {
-                "total": 113,
-                "speakers": [
-                    {
-                        "speakerId": "Guest-2",
-                        "length": 28
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "length": 85
-                    }
-                ],
-                "turns": [
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think the ice cream part makes it a sin.",
-                        "length": 10
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, like, even though the alligator sounds funny, I I saw, I don't know, I don't know.",
-                        "length": 18
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "Remember the scorpion pizza?",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "I'm making someone uncomfortable. That's actually gross. How to get so many?",
-                        "length": 12
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "There's no scorpions here.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "Oh my gosh, I don't want to think about it. One time when my dad works in Texas, he brought back.",
-                        "length": 21
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "There's no scorpions here.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "Oh my gosh, I don't want to think about it. One time when my dad works in Texas, he brought back.",
-                        "length": 21
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "Like Lollipop for us.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "Him and my brother ate it.",
-                        "length": 6
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "Like those, have you seen those? Like cricket like.",
-                        "length": 9
-                    }
-                ]
-            },
-            "id": "891011",
-            "depth": 3,
-            "parentNodes": {
-                "1": [
-                    "1011"
-                ],
-                "2": [
-                    "8910"
+                    "4567",
+                    "0123"
                 ]
             },
             "childNodes": {
                 "4": [],
                 "5": []
             },
-            "segments": "8 9 10 11"
-        }
-    ],
-    "4": [
-        {
-            "topic": "PREMIUM FOOD SCIENCE",
-            "description": "I think it's like Marvel Science where, I don't know, they have, there's a lot of food science they gotta like.",
-            "segment": "It's going to. Shanti Kumar, are there any? Are you gonna check the foods or are you just gonna? I'm gonna try some of them, but I don't know. Are you gonna try the cheeseburger? I'm a little scared. Share dollars, right? Yeah, like $15 like OK. I mean, it's called premium. It's like. I think it's like. Marvel Science where, I don't know, they have, there's a lot of food science they gotta like. Extra creamy. I don't know the science. I don't know scientists. It it was like, like I give you that much or a hot dog. But not Yeah, I. ",
-            "time": "12:52:18",
-            "speakerTurns": {
-                "total": 170,
-                "speakers": [
-                    {
-                        "speakerId": "Guest-1",
-                        "length": 3
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "length": 167
-                    }
-                ],
-                "turns": [
-                    {
-                        "speakerId": "Guest-1",
-                        "speakerSeg": "It's going to.",
-                        "length": 3
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Shanti Kumar, are there any?",
-                        "length": 5
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Are you gonna check the foods or are you just gonna? I'm gonna try some of them, but I don't know. Are you gonna try the cheeseburger?",
-                        "length": 27
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm a little scared.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Share dollars, right? Yeah, like $15 like OK.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, it's called premium. It's like.",
-                        "length": 7
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think it's like.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Share dollars, right? Yeah, like $15 like OK.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, it's called premium. It's like.",
-                        "length": 7
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think it's like.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Marvel Science where, I don't know, they have, there's a lot of food science they gotta like.",
-                        "length": 17
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Extra creamy. I don't know the science. I don't know scientists.",
-                        "length": 11
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Share dollars, right? Yeah, like $15 like OK.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, it's called premium. It's like.",
-                        "length": 7
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think it's like.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Marvel Science where, I don't know, they have, there's a lot of food science they gotta like.",
-                        "length": 17
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Extra creamy. I don't know the science. I don't know scientists.",
-                        "length": 11
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    }
-                ]
-            },
-            "id": "01234",
-            "depth": 4,
-            "parentNodes": {
-                "2": [
-                    "234"
-                ],
-                "3": [
-                    "0123"
-                ]
-            },
-            "childNodes": {
-                "5": [
-                    "012345"
-                ],
-                "6": []
-            },
-            "segments": "0 1 2 3 4"
-        },
-        {
-            "topic": "UNIQUE FOOD FLAVORS",
-            "description": "Cheeseburger ice cream, apparently it tastes like meat.",
-            "segment": "Share dollars, right? Yeah, like $15 like OK. I mean, it's called premium. It's like. I think it's like. Marvel Science where, I don't know, they have, there's a lot of food science they gotta like. Extra creamy. I don't know the science. I don't know scientists. It it was like, like I give you that much or a hot dog. But not Yeah, I. Cheeseburger ice cream. Apparently it tastes like meat. Makes me sound comfortable. And like it's got like. I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like. ",
-            "time": "12:52:40",
-            "speakerTurns": {
-                "total": 165,
-                "speakers": [
-                    {
-                        "speakerId": "Guest-2",
-                        "length": 165
-                    }
-                ],
-                "turns": [
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Share dollars, right? Yeah, like $15 like OK.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, it's called premium. It's like.",
-                        "length": 7
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think it's like.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Marvel Science where, I don't know, they have, there's a lot of food science they gotta like.",
-                        "length": 17
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Extra creamy. I don't know the science. I don't know scientists.",
-                        "length": 11
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Cheeseburger ice cream. Apparently it tastes like meat.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Makes me sound comfortable.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "And like it's got like.",
-                        "length": 5
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Cheeseburger ice cream. Apparently it tastes like meat.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Makes me sound comfortable.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "And like it's got like.",
-                        "length": 5
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    }
-                ]
-            },
-            "id": "23456",
-            "depth": 4,
-            "parentNodes": {
-                "2": [
-                    "456"
-                ],
-                "3": [
-                    "2345"
-                ]
-            },
-            "childNodes": {
-                "5": [
-                    "234567"
-                ],
-                "6": [
-                    "0123456"
-                ]
-            },
-            "segments": "2 3 4 5 6"
-        },
-        {
-            "topic": "ICE CREAM BURGER",
-            "description": "I think the ice cream part makes it a sin.",
-            "segment": "It it was like, like I give you that much or a hot dog. But not Yeah, I. Cheeseburger ice cream. Apparently it tastes like meat. Makes me sound comfortable. And like it's got like. I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like. Is cheese powders fine? I like ice cream. I like. They do not. They burgers. They do not belong together. Not. Ice cream No. I think the ice cream part makes it a sin. I mean, like, even though the alligator sounds funny, I I saw, I don't know, I don't know. ",
-            "time": "12:53:02",
-            "speakerTurns": {
-                "total": 201,
-                "speakers": [
-                    {
-                        "speakerId": "Guest-2",
-                        "length": 201
-                    }
-                ],
-                "turns": [
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Cheeseburger ice cream. Apparently it tastes like meat.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Makes me sound comfortable.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "And like it's got like.",
-                        "length": 5
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Is cheese powders fine? I like ice cream. I like. They do not. They burgers. They do not belong together. Not.",
-                        "length": 21
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Ice cream No.",
-                        "length": 3
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Is cheese powders fine? I like ice cream. I like. They do not. They burgers. They do not belong together. Not.",
-                        "length": 21
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Ice cream No.",
-                        "length": 3
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think the ice cream part makes it a sin.",
-                        "length": 10
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, like, even though the alligator sounds funny, I I saw, I don't know, I don't know.",
-                        "length": 18
-                    }
-                ]
-            },
-            "id": "45678",
-            "depth": 4,
-            "parentNodes": {
-                "2": [
-                    "678"
-                ],
-                "3": [
-                    "4567"
-                ]
-            },
-            "childNodes": {
-                "5": [
-                    "456789"
-                ],
-                "6": [
-                    "2345678"
-                ]
-            },
-            "segments": "4 5 6 7 8"
-        },
-        {
-            "topic": "UNUSUAL FOOD COMBINATIONS",
-            "description": "They do not belong together.",
-            "segment": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like. Is cheese powders fine? I like ice cream. I like. They do not. They burgers. They do not belong together. Not. Ice cream No. I think the ice cream part makes it a sin. I mean, like, even though the alligator sounds funny, I I saw, I don't know, I don't know. Remember the scorpion pizza? I'm making someone uncomfortable. That's actually gross. How to get so many? There's no scorpions here. Oh my gosh, I don't want to think about it. One time when my dad works in Texas, he brought back. ",
-            "time": "12:53:24",
-            "speakerTurns": {
-                "total": 195,
-                "speakers": [
-                    {
-                        "speakerId": "Guest-2",
-                        "length": 138
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "length": 57
-                    }
-                ],
-                "turns": [
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Is cheese powders fine? I like ice cream. I like. They do not. They burgers. They do not belong together. Not.",
-                        "length": 21
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Ice cream No.",
-                        "length": 3
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think the ice cream part makes it a sin.",
-                        "length": 10
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, like, even though the alligator sounds funny, I I saw, I don't know, I don't know.",
-                        "length": 18
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think the ice cream part makes it a sin.",
-                        "length": 10
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, like, even though the alligator sounds funny, I I saw, I don't know, I don't know.",
-                        "length": 18
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "Remember the scorpion pizza?",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "I'm making someone uncomfortable. That's actually gross. How to get so many?",
-                        "length": 12
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think the ice cream part makes it a sin.",
-                        "length": 10
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, like, even though the alligator sounds funny, I I saw, I don't know, I don't know.",
-                        "length": 18
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "Remember the scorpion pizza?",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "I'm making someone uncomfortable. That's actually gross. How to get so many?",
-                        "length": 12
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "There's no scorpions here.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "Oh my gosh, I don't want to think about it. One time when my dad works in Texas, he brought back.",
-                        "length": 21
-                    }
-                ]
-            },
-            "id": "678910",
-            "depth": 4,
-            "parentNodes": {
-                "2": [
-                    "8910"
-                ],
-                "3": [
-                    "6789"
-                ]
-            },
-            "childNodes": {
-                "5": [],
-                "6": [
-                    "45678910"
-                ]
-            },
-            "segments": "6 7 8 9 10"
-        }
-    ],
-    "5": [
-        {
-            "topic": "TRYING NEW FOODS",
-            "description": "Are you gonna try the cheeseburger?",
-            "segment": "It's going to. Shanti Kumar, are there any? Are you gonna check the foods or are you just gonna? I'm gonna try some of them, but I don't know. Are you gonna try the cheeseburger? I'm a little scared. Share dollars, right? Yeah, like $15 like OK. I mean, it's called premium. It's like. I think it's like. Marvel Science where, I don't know, they have, there's a lot of food science they gotta like. Extra creamy. I don't know the science. I don't know scientists. It it was like, like I give you that much or a hot dog. But not Yeah, I. Cheeseburger ice cream. Apparently it tastes like meat. Makes me sound comfortable. And like it's got like. ",
-            "time": "12:52:18",
-            "speakerTurns": {
-                "total": 270,
-                "speakers": [
-                    {
-                        "speakerId": "Guest-1",
-                        "length": 3
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "length": 267
-                    }
-                ],
-                "turns": [
-                    {
-                        "speakerId": "Guest-1",
-                        "speakerSeg": "It's going to.",
-                        "length": 3
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Shanti Kumar, are there any?",
-                        "length": 5
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Are you gonna check the foods or are you just gonna? I'm gonna try some of them, but I don't know. Are you gonna try the cheeseburger?",
-                        "length": 27
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm a little scared.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Share dollars, right? Yeah, like $15 like OK.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, it's called premium. It's like.",
-                        "length": 7
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think it's like.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Share dollars, right? Yeah, like $15 like OK.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, it's called premium. It's like.",
-                        "length": 7
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think it's like.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Marvel Science where, I don't know, they have, there's a lot of food science they gotta like.",
-                        "length": 17
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Extra creamy. I don't know the science. I don't know scientists.",
-                        "length": 11
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Share dollars, right? Yeah, like $15 like OK.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, it's called premium. It's like.",
-                        "length": 7
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think it's like.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Marvel Science where, I don't know, they have, there's a lot of food science they gotta like.",
-                        "length": 17
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Extra creamy. I don't know the science. I don't know scientists.",
-                        "length": 11
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Share dollars, right? Yeah, like $15 like OK.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, it's called premium. It's like.",
-                        "length": 7
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think it's like.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Marvel Science where, I don't know, they have, there's a lot of food science they gotta like.",
-                        "length": 17
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Extra creamy. I don't know the science. I don't know scientists.",
-                        "length": 11
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Cheeseburger ice cream. Apparently it tastes like meat.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Makes me sound comfortable.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "And like it's got like.",
-                        "length": 5
-                    }
-                ]
-            },
-            "id": "012345",
-            "depth": 5,
-            "parentNodes": {
-                "3": [
-                    "2345"
-                ],
-                "4": [
-                    "01234"
-                ]
-            },
-            "childNodes": {
-                "6": [
-                    "0123456"
-                ],
-                "7": []
-            },
-            "segments": "0 1 2 3 4 5"
-        },
-        {
-            "topic": "UNUSUAL FOOD FLAVORS",
-            "description": "Cheeseburger ice cream apparently tastes like meat.",
-            "segment": "Share dollars, right? Yeah, like $15 like OK. I mean, it's called premium. It's like. I think it's like. Marvel Science where, I don't know, they have, there's a lot of food science they gotta like. Extra creamy. I don't know the science. I don't know scientists. It it was like, like I give you that much or a hot dog. But not Yeah, I. Cheeseburger ice cream. Apparently it tastes like meat. Makes me sound comfortable. And like it's got like. I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like. Is cheese powders fine? I like ice cream. I like. They do not. They burgers. They do not belong together. Not. Ice cream No. ",
-            "time": "12:52:40",
-            "speakerTurns": {
-                "total": 284,
-                "speakers": [
-                    {
-                        "speakerId": "Guest-2",
-                        "length": 284
-                    }
-                ],
-                "turns": [
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Share dollars, right? Yeah, like $15 like OK.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, it's called premium. It's like.",
-                        "length": 7
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think it's like.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Marvel Science where, I don't know, they have, there's a lot of food science they gotta like.",
-                        "length": 17
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Extra creamy. I don't know the science. I don't know scientists.",
-                        "length": 11
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Cheeseburger ice cream. Apparently it tastes like meat.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Makes me sound comfortable.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "And like it's got like.",
-                        "length": 5
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Cheeseburger ice cream. Apparently it tastes like meat.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Makes me sound comfortable.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "And like it's got like.",
-                        "length": 5
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Cheeseburger ice cream. Apparently it tastes like meat.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Makes me sound comfortable.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "And like it's got like.",
-                        "length": 5
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Is cheese powders fine? I like ice cream. I like. They do not. They burgers. They do not belong together. Not.",
-                        "length": 21
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Ice cream No.",
-                        "length": 3
-                    }
-                ]
-            },
-            "id": "234567",
-            "depth": 5,
-            "parentNodes": {
-                "3": [
-                    "4567"
-                ],
-                "4": [
-                    "23456"
-                ]
-            },
-            "childNodes": {
-                "6": [
-                    "2345678"
-                ],
-                "7": [
-                    "01234567"
-                ]
-            },
-            "segments": "2 3 4 5 6 7"
-        },
-        {
-            "topic": "UNUSUAL FOOD COMBINATIONS",
-            "description": "Cheeseburger ice cream apparently it tastes like meat.",
-            "segment": "It it was like, like I give you that much or a hot dog. But not Yeah, I. Cheeseburger ice cream. Apparently it tastes like meat. Makes me sound comfortable. And like it's got like. I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like. Is cheese powders fine? I like ice cream. I like. They do not. They burgers. They do not belong together. Not. Ice cream No. I think the ice cream part makes it a sin. I mean, like, even though the alligator sounds funny, I I saw, I don't know, I don't know. Remember the scorpion pizza? I'm making someone uncomfortable. That's actually gross. How to get so many? ",
-            "time": "12:53:02",
-            "speakerTurns": {
-                "total": 327,
-                "speakers": [
-                    {
-                        "speakerId": "Guest-2",
-                        "length": 311
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "length": 16
-                    }
-                ],
-                "turns": [
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Cheeseburger ice cream. Apparently it tastes like meat.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Makes me sound comfortable.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "And like it's got like.",
-                        "length": 5
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Is cheese powders fine? I like ice cream. I like. They do not. They burgers. They do not belong together. Not.",
-                        "length": 21
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Ice cream No.",
-                        "length": 3
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Is cheese powders fine? I like ice cream. I like. They do not. They burgers. They do not belong together. Not.",
-                        "length": 21
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Ice cream No.",
-                        "length": 3
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think the ice cream part makes it a sin.",
-                        "length": 10
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, like, even though the alligator sounds funny, I I saw, I don't know, I don't know.",
-                        "length": 18
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Is cheese powders fine? I like ice cream. I like. They do not. They burgers. They do not belong together. Not.",
-                        "length": 21
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Ice cream No.",
-                        "length": 3
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think the ice cream part makes it a sin.",
-                        "length": 10
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, like, even though the alligator sounds funny, I I saw, I don't know, I don't know.",
-                        "length": 18
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think the ice cream part makes it a sin.",
-                        "length": 10
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, like, even though the alligator sounds funny, I I saw, I don't know, I don't know.",
-                        "length": 18
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "Remember the scorpion pizza?",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "I'm making someone uncomfortable. That's actually gross. How to get so many?",
-                        "length": 12
-                    }
-                ]
-            },
-            "id": "456789",
-            "depth": 5,
-            "parentNodes": {
-                "3": [
-                    "6789"
-                ],
-                "4": [
-                    "45678"
-                ]
-            },
-            "childNodes": {
-                "6": [
-                    "45678910"
-                ],
-                "7": [
-                    "23456789"
-                ]
-            },
-            "segments": "4 5 6 7 8 9"
-        }
-    ],
-    "6": [
-        {
-            "topic": "TRYING CHEESEBURGER ICE CREAM",
-            "description": "Cheeseburger ice cream apparently it tastes like meat.",
-            "segment": "It's going to. Shanti Kumar, are there any? Are you gonna check the foods or are you just gonna? I'm gonna try some of them, but I don't know. Are you gonna try the cheeseburger? I'm a little scared. Share dollars, right? Yeah, like $15 like OK. I mean, it's called premium. It's like. I think it's like. Marvel Science where, I don't know, they have, there's a lot of food science they gotta like. Extra creamy. I don't know the science. I don't know scientists. It it was like, like I give you that much or a hot dog. But not Yeah, I. Cheeseburger ice cream. Apparently it tastes like meat. Makes me sound comfortable. And like it's got like. I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like. ",
-            "time": "12:52:18",
-            "speakerTurns": {
-                "total": 435,
-                "speakers": [
-                    {
-                        "speakerId": "Guest-1",
-                        "length": 3
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "length": 432
-                    }
-                ],
-                "turns": [
-                    {
-                        "speakerId": "Guest-1",
-                        "speakerSeg": "It's going to.",
-                        "length": 3
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Shanti Kumar, are there any?",
-                        "length": 5
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Are you gonna check the foods or are you just gonna? I'm gonna try some of them, but I don't know. Are you gonna try the cheeseburger?",
-                        "length": 27
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm a little scared.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Share dollars, right? Yeah, like $15 like OK.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, it's called premium. It's like.",
-                        "length": 7
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think it's like.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Share dollars, right? Yeah, like $15 like OK.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, it's called premium. It's like.",
-                        "length": 7
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think it's like.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Marvel Science where, I don't know, they have, there's a lot of food science they gotta like.",
-                        "length": 17
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Extra creamy. I don't know the science. I don't know scientists.",
-                        "length": 11
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Share dollars, right? Yeah, like $15 like OK.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, it's called premium. It's like.",
-                        "length": 7
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think it's like.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Marvel Science where, I don't know, they have, there's a lot of food science they gotta like.",
-                        "length": 17
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Extra creamy. I don't know the science. I don't know scientists.",
-                        "length": 11
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Share dollars, right? Yeah, like $15 like OK.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, it's called premium. It's like.",
-                        "length": 7
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think it's like.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Marvel Science where, I don't know, they have, there's a lot of food science they gotta like.",
-                        "length": 17
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Extra creamy. I don't know the science. I don't know scientists.",
-                        "length": 11
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Cheeseburger ice cream. Apparently it tastes like meat.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Makes me sound comfortable.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "And like it's got like.",
-                        "length": 5
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Share dollars, right? Yeah, like $15 like OK.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, it's called premium. It's like.",
-                        "length": 7
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think it's like.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Marvel Science where, I don't know, they have, there's a lot of food science they gotta like.",
-                        "length": 17
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Extra creamy. I don't know the science. I don't know scientists.",
-                        "length": 11
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Cheeseburger ice cream. Apparently it tastes like meat.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Makes me sound comfortable.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "And like it's got like.",
-                        "length": 5
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Cheeseburger ice cream. Apparently it tastes like meat.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Makes me sound comfortable.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "And like it's got like.",
-                        "length": 5
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    }
-                ]
-            },
-            "id": "0123456",
-            "depth": 6,
-            "parentNodes": {
-                "4": [
-                    "23456"
-                ],
-                "5": [
-                    "012345"
-                ]
-            },
-            "childNodes": {
-                "7": [
-                    "01234567"
-                ],
-                "8": []
-            },
-            "segments": "0 1 2 3 4 5 6"
-        },
-        {
-            "topic": "UNUSUAL FOOD COMBINATIONS",
-            "description": "Apparently it tastes like meat.",
-            "segment": "Share dollars, right? Yeah, like $15 like OK. I mean, it's called premium. It's like. I think it's like. Marvel Science where, I don't know, they have, there's a lot of food science they gotta like. Extra creamy. I don't know the science. I don't know scientists. It it was like, like I give you that much or a hot dog. But not Yeah, I. Cheeseburger ice cream. Apparently it tastes like meat. Makes me sound comfortable. And like it's got like. I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like. Is cheese powders fine? I like ice cream. I like. They do not. They burgers. They do not belong together. Not. Ice cream No. I think the ice cream part makes it a sin. I mean, like, even though the alligator sounds funny, I I saw, I don't know, I don't know. ",
-            "time": "12:52:40",
-            "speakerTurns": {
-                "total": 485,
-                "speakers": [
-                    {
-                        "speakerId": "Guest-2",
-                        "length": 485
-                    }
-                ],
-                "turns": [
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Share dollars, right? Yeah, like $15 like OK.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, it's called premium. It's like.",
-                        "length": 7
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think it's like.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Marvel Science where, I don't know, they have, there's a lot of food science they gotta like.",
-                        "length": 17
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Extra creamy. I don't know the science. I don't know scientists.",
-                        "length": 11
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Cheeseburger ice cream. Apparently it tastes like meat.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Makes me sound comfortable.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "And like it's got like.",
-                        "length": 5
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Cheeseburger ice cream. Apparently it tastes like meat.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Makes me sound comfortable.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "And like it's got like.",
-                        "length": 5
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Cheeseburger ice cream. Apparently it tastes like meat.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Makes me sound comfortable.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "And like it's got like.",
-                        "length": 5
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Is cheese powders fine? I like ice cream. I like. They do not. They burgers. They do not belong together. Not.",
-                        "length": 21
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Ice cream No.",
-                        "length": 3
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Cheeseburger ice cream. Apparently it tastes like meat.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Makes me sound comfortable.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "And like it's got like.",
-                        "length": 5
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Is cheese powders fine? I like ice cream. I like. They do not. They burgers. They do not belong together. Not.",
-                        "length": 21
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Ice cream No.",
-                        "length": 3
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Is cheese powders fine? I like ice cream. I like. They do not. They burgers. They do not belong together. Not.",
-                        "length": 21
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Ice cream No.",
-                        "length": 3
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think the ice cream part makes it a sin.",
-                        "length": 10
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, like, even though the alligator sounds funny, I I saw, I don't know, I don't know.",
-                        "length": 18
-                    }
-                ]
-            },
-            "id": "2345678",
-            "depth": 6,
-            "parentNodes": {
-                "4": [
-                    "45678"
-                ],
-                "5": [
-                    "234567"
-                ]
-            },
-            "childNodes": {
-                "7": [
-                    "23456789"
-                ],
-                "8": [
-                    "012345678"
-                ]
-            },
-            "segments": "2 3 4 5 6 7 8"
-        },
-        {
-            "topic": "UNUSUAL FOOD COMBINATIONS",
-            "description": "They do not belong together.",
-            "segment": "It it was like, like I give you that much or a hot dog. But not Yeah, I. Cheeseburger ice cream. Apparently it tastes like meat. Makes me sound comfortable. And like it's got like. I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like. Is cheese powders fine? I like ice cream. I like. They do not. They burgers. They do not belong together. Not. Ice cream No. I think the ice cream part makes it a sin. I mean, like, even though the alligator sounds funny, I I saw, I don't know, I don't know. Remember the scorpion pizza? I'm making someone uncomfortable. That's actually gross. How to get so many? There's no scorpions here. Oh my gosh, I don't want to think about it. One time when my dad works in Texas, he brought back. ",
-            "time": "12:53:02",
-            "speakerTurns": {
-                "total": 522,
-                "speakers": [
-                    {
-                        "speakerId": "Guest-2",
-                        "length": 449
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "length": 73
-                    }
-                ],
-                "turns": [
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Cheeseburger ice cream. Apparently it tastes like meat.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Makes me sound comfortable.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "And like it's got like.",
-                        "length": 5
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Is cheese powders fine? I like ice cream. I like. They do not. They burgers. They do not belong together. Not.",
-                        "length": 21
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Ice cream No.",
-                        "length": 3
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Is cheese powders fine? I like ice cream. I like. They do not. They burgers. They do not belong together. Not.",
-                        "length": 21
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Ice cream No.",
-                        "length": 3
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think the ice cream part makes it a sin.",
-                        "length": 10
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, like, even though the alligator sounds funny, I I saw, I don't know, I don't know.",
-                        "length": 18
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Is cheese powders fine? I like ice cream. I like. They do not. They burgers. They do not belong together. Not.",
-                        "length": 21
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Ice cream No.",
-                        "length": 3
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think the ice cream part makes it a sin.",
-                        "length": 10
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, like, even though the alligator sounds funny, I I saw, I don't know, I don't know.",
-                        "length": 18
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think the ice cream part makes it a sin.",
-                        "length": 10
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, like, even though the alligator sounds funny, I I saw, I don't know, I don't know.",
-                        "length": 18
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "Remember the scorpion pizza?",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "I'm making someone uncomfortable. That's actually gross. How to get so many?",
-                        "length": 12
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Is cheese powders fine? I like ice cream. I like. They do not. They burgers. They do not belong together. Not.",
-                        "length": 21
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Ice cream No.",
-                        "length": 3
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think the ice cream part makes it a sin.",
-                        "length": 10
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, like, even though the alligator sounds funny, I I saw, I don't know, I don't know.",
-                        "length": 18
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think the ice cream part makes it a sin.",
-                        "length": 10
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, like, even though the alligator sounds funny, I I saw, I don't know, I don't know.",
-                        "length": 18
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "Remember the scorpion pizza?",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "I'm making someone uncomfortable. That's actually gross. How to get so many?",
-                        "length": 12
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think the ice cream part makes it a sin.",
-                        "length": 10
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, like, even though the alligator sounds funny, I I saw, I don't know, I don't know.",
-                        "length": 18
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "Remember the scorpion pizza?",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "I'm making someone uncomfortable. That's actually gross. How to get so many?",
-                        "length": 12
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "There's no scorpions here.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "Oh my gosh, I don't want to think about it. One time when my dad works in Texas, he brought back.",
-                        "length": 21
-                    }
-                ]
-            },
-            "id": "45678910",
-            "depth": 6,
-            "parentNodes": {
-                "4": [
-                    "678910"
-                ],
-                "5": [
-                    "456789"
-                ]
-            },
-            "childNodes": {
-                "7": [],
-                "8": [
-                    "2345678910"
-                ]
-            },
-            "segments": "4 5 6 7 8 9 10"
-        }
-    ],
-    "7": [
-        {
-            "topic": "CHEESEBURGER ICE CREAM",
-            "description": "Cheeseburger ice cream apparently it tastes like meat it makes me sound comfortable.",
-            "segment": "It's going to. Shanti Kumar, are there any? Are you gonna check the foods or are you just gonna? I'm gonna try some of them, but I don't know. Are you gonna try the cheeseburger? I'm a little scared. Share dollars, right? Yeah, like $15 like OK. I mean, it's called premium. It's like. I think it's like. Marvel Science where, I don't know, they have, there's a lot of food science they gotta like. Extra creamy. I don't know the science. I don't know scientists. It it was like, like I give you that much or a hot dog. But not Yeah, I. Cheeseburger ice cream. Apparently it tastes like meat. Makes me sound comfortable. And like it's got like. I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like. Is cheese powders fine? I like ice cream. I like. They do not. They burgers. They do not belong together. Not. Ice cream No. ",
-            "time": "12:52:18",
-            "speakerTurns": {
-                "total": 719,
-                "speakers": [
-                    {
-                        "speakerId": "Guest-1",
-                        "length": 3
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "length": 716
-                    }
-                ],
-                "turns": [
-                    {
-                        "speakerId": "Guest-1",
-                        "speakerSeg": "It's going to.",
-                        "length": 3
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Shanti Kumar, are there any?",
-                        "length": 5
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Are you gonna check the foods or are you just gonna? I'm gonna try some of them, but I don't know. Are you gonna try the cheeseburger?",
-                        "length": 27
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm a little scared.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Share dollars, right? Yeah, like $15 like OK.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, it's called premium. It's like.",
-                        "length": 7
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think it's like.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Share dollars, right? Yeah, like $15 like OK.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, it's called premium. It's like.",
-                        "length": 7
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think it's like.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Marvel Science where, I don't know, they have, there's a lot of food science they gotta like.",
-                        "length": 17
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Extra creamy. I don't know the science. I don't know scientists.",
-                        "length": 11
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Share dollars, right? Yeah, like $15 like OK.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, it's called premium. It's like.",
-                        "length": 7
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think it's like.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Marvel Science where, I don't know, they have, there's a lot of food science they gotta like.",
-                        "length": 17
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Extra creamy. I don't know the science. I don't know scientists.",
-                        "length": 11
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Share dollars, right? Yeah, like $15 like OK.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, it's called premium. It's like.",
-                        "length": 7
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think it's like.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Marvel Science where, I don't know, they have, there's a lot of food science they gotta like.",
-                        "length": 17
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Extra creamy. I don't know the science. I don't know scientists.",
-                        "length": 11
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Cheeseburger ice cream. Apparently it tastes like meat.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Makes me sound comfortable.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "And like it's got like.",
-                        "length": 5
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Share dollars, right? Yeah, like $15 like OK.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, it's called premium. It's like.",
-                        "length": 7
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think it's like.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Marvel Science where, I don't know, they have, there's a lot of food science they gotta like.",
-                        "length": 17
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Extra creamy. I don't know the science. I don't know scientists.",
-                        "length": 11
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Cheeseburger ice cream. Apparently it tastes like meat.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Makes me sound comfortable.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "And like it's got like.",
-                        "length": 5
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Cheeseburger ice cream. Apparently it tastes like meat.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Makes me sound comfortable.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "And like it's got like.",
-                        "length": 5
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Share dollars, right? Yeah, like $15 like OK.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, it's called premium. It's like.",
-                        "length": 7
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think it's like.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Marvel Science where, I don't know, they have, there's a lot of food science they gotta like.",
-                        "length": 17
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Extra creamy. I don't know the science. I don't know scientists.",
-                        "length": 11
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Cheeseburger ice cream. Apparently it tastes like meat.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Makes me sound comfortable.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "And like it's got like.",
-                        "length": 5
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Cheeseburger ice cream. Apparently it tastes like meat.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Makes me sound comfortable.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "And like it's got like.",
-                        "length": 5
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Cheeseburger ice cream. Apparently it tastes like meat.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Makes me sound comfortable.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "And like it's got like.",
-                        "length": 5
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Is cheese powders fine? I like ice cream. I like. They do not. They burgers. They do not belong together. Not.",
-                        "length": 21
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Ice cream No.",
-                        "length": 3
-                    }
-                ]
-            },
-            "id": "01234567",
-            "depth": 7,
-            "parentNodes": {
-                "5": [
-                    "234567"
-                ],
-                "6": [
-                    "0123456"
-                ]
-            },
-            "childNodes": {
-                "8": [
-                    "012345678"
-                ],
-                "9": []
-            },
             "segments": "0 1 2 3 4 5 6 7"
-        },
-        {
-            "topic": "UNUSUAL ICE CREAM FLAVORS",
-            "description": "Apparently it tastes like meat.",
-            "segment": "Share dollars, right? Yeah, like $15 like OK. I mean, it's called premium. It's like. I think it's like. Marvel Science where, I don't know, they have, there's a lot of food science they gotta like. Extra creamy. I don't know the science. I don't know scientists. It it was like, like I give you that much or a hot dog. But not Yeah, I. Cheeseburger ice cream. Apparently it tastes like meat. Makes me sound comfortable. And like it's got like. I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like. Is cheese powders fine? I like ice cream. I like. They do not. They burgers. They do not belong together. Not. Ice cream No. I think the ice cream part makes it a sin. I mean, like, even though the alligator sounds funny, I I saw, I don't know, I don't know. Remember the scorpion pizza? I'm making someone uncomfortable. That's actually gross. How to get so many? ",
-            "time": "12:52:40",
-            "speakerTurns": {
-                "total": 812,
-                "speakers": [
-                    {
-                        "speakerId": "Guest-2",
-                        "length": 796
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "length": 16
-                    }
-                ],
-                "turns": [
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Share dollars, right? Yeah, like $15 like OK.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, it's called premium. It's like.",
-                        "length": 7
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think it's like.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Marvel Science where, I don't know, they have, there's a lot of food science they gotta like.",
-                        "length": 17
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Extra creamy. I don't know the science. I don't know scientists.",
-                        "length": 11
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Cheeseburger ice cream. Apparently it tastes like meat.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Makes me sound comfortable.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "And like it's got like.",
-                        "length": 5
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Cheeseburger ice cream. Apparently it tastes like meat.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Makes me sound comfortable.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "And like it's got like.",
-                        "length": 5
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Cheeseburger ice cream. Apparently it tastes like meat.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Makes me sound comfortable.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "And like it's got like.",
-                        "length": 5
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Is cheese powders fine? I like ice cream. I like. They do not. They burgers. They do not belong together. Not.",
-                        "length": 21
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Ice cream No.",
-                        "length": 3
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Cheeseburger ice cream. Apparently it tastes like meat.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Makes me sound comfortable.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "And like it's got like.",
-                        "length": 5
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Is cheese powders fine? I like ice cream. I like. They do not. They burgers. They do not belong together. Not.",
-                        "length": 21
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Ice cream No.",
-                        "length": 3
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Is cheese powders fine? I like ice cream. I like. They do not. They burgers. They do not belong together. Not.",
-                        "length": 21
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Ice cream No.",
-                        "length": 3
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think the ice cream part makes it a sin.",
-                        "length": 10
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, like, even though the alligator sounds funny, I I saw, I don't know, I don't know.",
-                        "length": 18
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Cheeseburger ice cream. Apparently it tastes like meat.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Makes me sound comfortable.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "And like it's got like.",
-                        "length": 5
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Is cheese powders fine? I like ice cream. I like. They do not. They burgers. They do not belong together. Not.",
-                        "length": 21
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Ice cream No.",
-                        "length": 3
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Is cheese powders fine? I like ice cream. I like. They do not. They burgers. They do not belong together. Not.",
-                        "length": 21
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Ice cream No.",
-                        "length": 3
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think the ice cream part makes it a sin.",
-                        "length": 10
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, like, even though the alligator sounds funny, I I saw, I don't know, I don't know.",
-                        "length": 18
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Is cheese powders fine? I like ice cream. I like. They do not. They burgers. They do not belong together. Not.",
-                        "length": 21
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Ice cream No.",
-                        "length": 3
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think the ice cream part makes it a sin.",
-                        "length": 10
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, like, even though the alligator sounds funny, I I saw, I don't know, I don't know.",
-                        "length": 18
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think the ice cream part makes it a sin.",
-                        "length": 10
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, like, even though the alligator sounds funny, I I saw, I don't know, I don't know.",
-                        "length": 18
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "Remember the scorpion pizza?",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "I'm making someone uncomfortable. That's actually gross. How to get so many?",
-                        "length": 12
-                    }
-                ]
-            },
-            "id": "23456789",
-            "depth": 7,
-            "parentNodes": {
-                "5": [
-                    "456789"
-                ],
-                "6": [
-                    "2345678"
-                ]
-            },
-            "childNodes": {
-                "8": [
-                    "2345678910"
-                ],
-                "9": [
-                    "0123456789"
-                ]
-            },
-            "segments": "2 3 4 5 6 7 8 9"
         }
-    ],
-    "8": [
-        {
-            "topic": "CHEESEBURGER ICE CREAM",
-            "description": "Cheeseburger ice cream, apparently it tastes like meat.",
-            "segment": "It's going to. Shanti Kumar, are there any? Are you gonna check the foods or are you just gonna? I'm gonna try some of them, but I don't know. Are you gonna try the cheeseburger? I'm a little scared. Share dollars, right? Yeah, like $15 like OK. I mean, it's called premium. It's like. I think it's like. Marvel Science where, I don't know, they have, there's a lot of food science they gotta like. Extra creamy. I don't know the science. I don't know scientists. It it was like, like I give you that much or a hot dog. But not Yeah, I. Cheeseburger ice cream. Apparently it tastes like meat. Makes me sound comfortable. And like it's got like. I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like. Is cheese powders fine? I like ice cream. I like. They do not. They burgers. They do not belong together. Not. Ice cream No. I think the ice cream part makes it a sin. I mean, like, even though the alligator sounds funny, I I saw, I don't know, I don't know. ",
-            "time": "12:52:18",
-            "speakerTurns": {
-                "total": 1204,
-                "speakers": [
-                    {
-                        "speakerId": "Guest-1",
-                        "length": 3
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "length": 1201
-                    }
-                ],
-                "turns": [
-                    {
-                        "speakerId": "Guest-1",
-                        "speakerSeg": "It's going to.",
-                        "length": 3
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Shanti Kumar, are there any?",
-                        "length": 5
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Are you gonna check the foods or are you just gonna? I'm gonna try some of them, but I don't know. Are you gonna try the cheeseburger?",
-                        "length": 27
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm a little scared.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Share dollars, right? Yeah, like $15 like OK.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, it's called premium. It's like.",
-                        "length": 7
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think it's like.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Share dollars, right? Yeah, like $15 like OK.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, it's called premium. It's like.",
-                        "length": 7
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think it's like.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Marvel Science where, I don't know, they have, there's a lot of food science they gotta like.",
-                        "length": 17
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Extra creamy. I don't know the science. I don't know scientists.",
-                        "length": 11
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Share dollars, right? Yeah, like $15 like OK.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, it's called premium. It's like.",
-                        "length": 7
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think it's like.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Marvel Science where, I don't know, they have, there's a lot of food science they gotta like.",
-                        "length": 17
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Extra creamy. I don't know the science. I don't know scientists.",
-                        "length": 11
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Share dollars, right? Yeah, like $15 like OK.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, it's called premium. It's like.",
-                        "length": 7
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think it's like.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Marvel Science where, I don't know, they have, there's a lot of food science they gotta like.",
-                        "length": 17
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Extra creamy. I don't know the science. I don't know scientists.",
-                        "length": 11
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Cheeseburger ice cream. Apparently it tastes like meat.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Makes me sound comfortable.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "And like it's got like.",
-                        "length": 5
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Share dollars, right? Yeah, like $15 like OK.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, it's called premium. It's like.",
-                        "length": 7
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think it's like.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Marvel Science where, I don't know, they have, there's a lot of food science they gotta like.",
-                        "length": 17
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Extra creamy. I don't know the science. I don't know scientists.",
-                        "length": 11
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Cheeseburger ice cream. Apparently it tastes like meat.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Makes me sound comfortable.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "And like it's got like.",
-                        "length": 5
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Cheeseburger ice cream. Apparently it tastes like meat.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Makes me sound comfortable.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "And like it's got like.",
-                        "length": 5
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Share dollars, right? Yeah, like $15 like OK.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, it's called premium. It's like.",
-                        "length": 7
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think it's like.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Marvel Science where, I don't know, they have, there's a lot of food science they gotta like.",
-                        "length": 17
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Extra creamy. I don't know the science. I don't know scientists.",
-                        "length": 11
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Cheeseburger ice cream. Apparently it tastes like meat.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Makes me sound comfortable.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "And like it's got like.",
-                        "length": 5
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Cheeseburger ice cream. Apparently it tastes like meat.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Makes me sound comfortable.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "And like it's got like.",
-                        "length": 5
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Cheeseburger ice cream. Apparently it tastes like meat.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Makes me sound comfortable.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "And like it's got like.",
-                        "length": 5
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Is cheese powders fine? I like ice cream. I like. They do not. They burgers. They do not belong together. Not.",
-                        "length": 21
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Ice cream No.",
-                        "length": 3
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Share dollars, right? Yeah, like $15 like OK.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, it's called premium. It's like.",
-                        "length": 7
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think it's like.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Marvel Science where, I don't know, they have, there's a lot of food science they gotta like.",
-                        "length": 17
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Extra creamy. I don't know the science. I don't know scientists.",
-                        "length": 11
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Cheeseburger ice cream. Apparently it tastes like meat.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Makes me sound comfortable.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "And like it's got like.",
-                        "length": 5
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Cheeseburger ice cream. Apparently it tastes like meat.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Makes me sound comfortable.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "And like it's got like.",
-                        "length": 5
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Cheeseburger ice cream. Apparently it tastes like meat.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Makes me sound comfortable.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "And like it's got like.",
-                        "length": 5
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Is cheese powders fine? I like ice cream. I like. They do not. They burgers. They do not belong together. Not.",
-                        "length": 21
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Ice cream No.",
-                        "length": 3
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Cheeseburger ice cream. Apparently it tastes like meat.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Makes me sound comfortable.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "And like it's got like.",
-                        "length": 5
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Is cheese powders fine? I like ice cream. I like. They do not. They burgers. They do not belong together. Not.",
-                        "length": 21
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Ice cream No.",
-                        "length": 3
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Is cheese powders fine? I like ice cream. I like. They do not. They burgers. They do not belong together. Not.",
-                        "length": 21
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Ice cream No.",
-                        "length": 3
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think the ice cream part makes it a sin.",
-                        "length": 10
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, like, even though the alligator sounds funny, I I saw, I don't know, I don't know.",
-                        "length": 18
-                    }
-                ]
-            },
-            "id": "012345678",
-            "depth": 8,
-            "parentNodes": {
-                "6": [
-                    "2345678"
-                ],
-                "7": [
-                    "01234567"
-                ]
-            },
-            "childNodes": {
-                "9": [
-                    "0123456789"
-                ],
-                "10": []
-            },
-            "segments": "0 1 2 3 4 5 6 7 8"
-        },
-        {
-            "topic": "UNUSUAL FOOD COMBINATIONS",
-            "description": "They do not belong together.",
-            "segment": "Share dollars, right? Yeah, like $15 like OK. I mean, it's called premium. It's like. I think it's like. Marvel Science where, I don't know, they have, there's a lot of food science they gotta like. Extra creamy. I don't know the science. I don't know scientists. It it was like, like I give you that much or a hot dog. But not Yeah, I. Cheeseburger ice cream. Apparently it tastes like meat. Makes me sound comfortable. And like it's got like. I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like. Is cheese powders fine? I like ice cream. I like. They do not. They burgers. They do not belong together. Not. Ice cream No. I think the ice cream part makes it a sin. I mean, like, even though the alligator sounds funny, I I saw, I don't know, I don't know. Remember the scorpion pizza? I'm making someone uncomfortable. That's actually gross. How to get so many? There's no scorpions here. Oh my gosh, I don't want to think about it. One time when my dad works in Texas, he brought back. ",
-            "time": "12:52:40",
-            "speakerTurns": {
-                "total": 1334,
-                "speakers": [
-                    {
-                        "speakerId": "Guest-2",
-                        "length": 1245
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "length": 89
-                    }
-                ],
-                "turns": [
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Share dollars, right? Yeah, like $15 like OK.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, it's called premium. It's like.",
-                        "length": 7
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think it's like.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Marvel Science where, I don't know, they have, there's a lot of food science they gotta like.",
-                        "length": 17
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Extra creamy. I don't know the science. I don't know scientists.",
-                        "length": 11
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Cheeseburger ice cream. Apparently it tastes like meat.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Makes me sound comfortable.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "And like it's got like.",
-                        "length": 5
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Cheeseburger ice cream. Apparently it tastes like meat.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Makes me sound comfortable.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "And like it's got like.",
-                        "length": 5
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Cheeseburger ice cream. Apparently it tastes like meat.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Makes me sound comfortable.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "And like it's got like.",
-                        "length": 5
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Is cheese powders fine? I like ice cream. I like. They do not. They burgers. They do not belong together. Not.",
-                        "length": 21
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Ice cream No.",
-                        "length": 3
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Cheeseburger ice cream. Apparently it tastes like meat.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Makes me sound comfortable.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "And like it's got like.",
-                        "length": 5
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Is cheese powders fine? I like ice cream. I like. They do not. They burgers. They do not belong together. Not.",
-                        "length": 21
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Ice cream No.",
-                        "length": 3
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Is cheese powders fine? I like ice cream. I like. They do not. They burgers. They do not belong together. Not.",
-                        "length": 21
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Ice cream No.",
-                        "length": 3
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think the ice cream part makes it a sin.",
-                        "length": 10
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, like, even though the alligator sounds funny, I I saw, I don't know, I don't know.",
-                        "length": 18
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Cheeseburger ice cream. Apparently it tastes like meat.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Makes me sound comfortable.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "And like it's got like.",
-                        "length": 5
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Is cheese powders fine? I like ice cream. I like. They do not. They burgers. They do not belong together. Not.",
-                        "length": 21
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Ice cream No.",
-                        "length": 3
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Is cheese powders fine? I like ice cream. I like. They do not. They burgers. They do not belong together. Not.",
-                        "length": 21
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Ice cream No.",
-                        "length": 3
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think the ice cream part makes it a sin.",
-                        "length": 10
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, like, even though the alligator sounds funny, I I saw, I don't know, I don't know.",
-                        "length": 18
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Is cheese powders fine? I like ice cream. I like. They do not. They burgers. They do not belong together. Not.",
-                        "length": 21
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Ice cream No.",
-                        "length": 3
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think the ice cream part makes it a sin.",
-                        "length": 10
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, like, even though the alligator sounds funny, I I saw, I don't know, I don't know.",
-                        "length": 18
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think the ice cream part makes it a sin.",
-                        "length": 10
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, like, even though the alligator sounds funny, I I saw, I don't know, I don't know.",
-                        "length": 18
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "Remember the scorpion pizza?",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "I'm making someone uncomfortable. That's actually gross. How to get so many?",
-                        "length": 12
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Cheeseburger ice cream. Apparently it tastes like meat.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Makes me sound comfortable.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "And like it's got like.",
-                        "length": 5
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Is cheese powders fine? I like ice cream. I like. They do not. They burgers. They do not belong together. Not.",
-                        "length": 21
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Ice cream No.",
-                        "length": 3
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Is cheese powders fine? I like ice cream. I like. They do not. They burgers. They do not belong together. Not.",
-                        "length": 21
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Ice cream No.",
-                        "length": 3
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think the ice cream part makes it a sin.",
-                        "length": 10
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, like, even though the alligator sounds funny, I I saw, I don't know, I don't know.",
-                        "length": 18
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Is cheese powders fine? I like ice cream. I like. They do not. They burgers. They do not belong together. Not.",
-                        "length": 21
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Ice cream No.",
-                        "length": 3
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think the ice cream part makes it a sin.",
-                        "length": 10
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, like, even though the alligator sounds funny, I I saw, I don't know, I don't know.",
-                        "length": 18
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think the ice cream part makes it a sin.",
-                        "length": 10
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, like, even though the alligator sounds funny, I I saw, I don't know, I don't know.",
-                        "length": 18
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "Remember the scorpion pizza?",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "I'm making someone uncomfortable. That's actually gross. How to get so many?",
-                        "length": 12
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Is cheese powders fine? I like ice cream. I like. They do not. They burgers. They do not belong together. Not.",
-                        "length": 21
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Ice cream No.",
-                        "length": 3
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think the ice cream part makes it a sin.",
-                        "length": 10
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, like, even though the alligator sounds funny, I I saw, I don't know, I don't know.",
-                        "length": 18
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think the ice cream part makes it a sin.",
-                        "length": 10
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, like, even though the alligator sounds funny, I I saw, I don't know, I don't know.",
-                        "length": 18
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "Remember the scorpion pizza?",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "I'm making someone uncomfortable. That's actually gross. How to get so many?",
-                        "length": 12
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think the ice cream part makes it a sin.",
-                        "length": 10
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, like, even though the alligator sounds funny, I I saw, I don't know, I don't know.",
-                        "length": 18
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "Remember the scorpion pizza?",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "I'm making someone uncomfortable. That's actually gross. How to get so many?",
-                        "length": 12
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "There's no scorpions here.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "Oh my gosh, I don't want to think about it. One time when my dad works in Texas, he brought back.",
-                        "length": 21
-                    }
-                ]
-            },
-            "id": "2345678910",
-            "depth": 8,
-            "parentNodes": {
-                "6": [
-                    "45678910"
-                ],
-                "7": [
-                    "23456789"
-                ]
-            },
-            "childNodes": {
-                "9": [],
-                "10": []
-            },
-            "segments": "2 3 4 5 6 7 8 9 10"
-        }
-    ],
-    "9": [
-        {
-            "topic": "CHEESEBURGER ICE CREAM",
-            "description": "Apparently it tastes like meat.",
-            "segment": "It's going to. Shanti Kumar, are there any? Are you gonna check the foods or are you just gonna? I'm gonna try some of them, but I don't know. Are you gonna try the cheeseburger? I'm a little scared. Share dollars, right? Yeah, like $15 like OK. I mean, it's called premium. It's like. I think it's like. Marvel Science where, I don't know, they have, there's a lot of food science they gotta like. Extra creamy. I don't know the science. I don't know scientists. It it was like, like I give you that much or a hot dog. But not Yeah, I. Cheeseburger ice cream. Apparently it tastes like meat. Makes me sound comfortable. And like it's got like. I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like. Is cheese powders fine? I like ice cream. I like. They do not. They burgers. They do not belong together. Not. Ice cream No. I think the ice cream part makes it a sin. I mean, like, even though the alligator sounds funny, I I saw, I don't know, I don't know. Remember the scorpion pizza? I'm making someone uncomfortable. That's actually gross. How to get so many? ",
-            "time": "12:52:18",
-            "speakerTurns": {
-                "total": 2016,
-                "speakers": [
-                    {
-                        "speakerId": "Guest-1",
-                        "length": 3
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "length": 1997
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "length": 16
-                    }
-                ],
-                "turns": [
-                    {
-                        "speakerId": "Guest-1",
-                        "speakerSeg": "It's going to.",
-                        "length": 3
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Shanti Kumar, are there any?",
-                        "length": 5
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Are you gonna check the foods or are you just gonna? I'm gonna try some of them, but I don't know. Are you gonna try the cheeseburger?",
-                        "length": 27
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm a little scared.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Share dollars, right? Yeah, like $15 like OK.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, it's called premium. It's like.",
-                        "length": 7
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think it's like.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Share dollars, right? Yeah, like $15 like OK.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, it's called premium. It's like.",
-                        "length": 7
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think it's like.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Marvel Science where, I don't know, they have, there's a lot of food science they gotta like.",
-                        "length": 17
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Extra creamy. I don't know the science. I don't know scientists.",
-                        "length": 11
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Share dollars, right? Yeah, like $15 like OK.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, it's called premium. It's like.",
-                        "length": 7
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think it's like.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Marvel Science where, I don't know, they have, there's a lot of food science they gotta like.",
-                        "length": 17
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Extra creamy. I don't know the science. I don't know scientists.",
-                        "length": 11
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Share dollars, right? Yeah, like $15 like OK.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, it's called premium. It's like.",
-                        "length": 7
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think it's like.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Marvel Science where, I don't know, they have, there's a lot of food science they gotta like.",
-                        "length": 17
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Extra creamy. I don't know the science. I don't know scientists.",
-                        "length": 11
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Cheeseburger ice cream. Apparently it tastes like meat.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Makes me sound comfortable.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "And like it's got like.",
-                        "length": 5
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Share dollars, right? Yeah, like $15 like OK.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, it's called premium. It's like.",
-                        "length": 7
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think it's like.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Marvel Science where, I don't know, they have, there's a lot of food science they gotta like.",
-                        "length": 17
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Extra creamy. I don't know the science. I don't know scientists.",
-                        "length": 11
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Cheeseburger ice cream. Apparently it tastes like meat.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Makes me sound comfortable.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "And like it's got like.",
-                        "length": 5
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Cheeseburger ice cream. Apparently it tastes like meat.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Makes me sound comfortable.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "And like it's got like.",
-                        "length": 5
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Share dollars, right? Yeah, like $15 like OK.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, it's called premium. It's like.",
-                        "length": 7
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think it's like.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Marvel Science where, I don't know, they have, there's a lot of food science they gotta like.",
-                        "length": 17
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Extra creamy. I don't know the science. I don't know scientists.",
-                        "length": 11
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Cheeseburger ice cream. Apparently it tastes like meat.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Makes me sound comfortable.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "And like it's got like.",
-                        "length": 5
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Cheeseburger ice cream. Apparently it tastes like meat.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Makes me sound comfortable.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "And like it's got like.",
-                        "length": 5
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Cheeseburger ice cream. Apparently it tastes like meat.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Makes me sound comfortable.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "And like it's got like.",
-                        "length": 5
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Is cheese powders fine? I like ice cream. I like. They do not. They burgers. They do not belong together. Not.",
-                        "length": 21
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Ice cream No.",
-                        "length": 3
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Share dollars, right? Yeah, like $15 like OK.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, it's called premium. It's like.",
-                        "length": 7
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think it's like.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Marvel Science where, I don't know, they have, there's a lot of food science they gotta like.",
-                        "length": 17
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Extra creamy. I don't know the science. I don't know scientists.",
-                        "length": 11
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Cheeseburger ice cream. Apparently it tastes like meat.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Makes me sound comfortable.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "And like it's got like.",
-                        "length": 5
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Cheeseburger ice cream. Apparently it tastes like meat.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Makes me sound comfortable.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "And like it's got like.",
-                        "length": 5
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Cheeseburger ice cream. Apparently it tastes like meat.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Makes me sound comfortable.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "And like it's got like.",
-                        "length": 5
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Is cheese powders fine? I like ice cream. I like. They do not. They burgers. They do not belong together. Not.",
-                        "length": 21
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Ice cream No.",
-                        "length": 3
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Cheeseburger ice cream. Apparently it tastes like meat.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Makes me sound comfortable.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "And like it's got like.",
-                        "length": 5
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Is cheese powders fine? I like ice cream. I like. They do not. They burgers. They do not belong together. Not.",
-                        "length": 21
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Ice cream No.",
-                        "length": 3
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Is cheese powders fine? I like ice cream. I like. They do not. They burgers. They do not belong together. Not.",
-                        "length": 21
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Ice cream No.",
-                        "length": 3
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think the ice cream part makes it a sin.",
-                        "length": 10
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, like, even though the alligator sounds funny, I I saw, I don't know, I don't know.",
-                        "length": 18
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Share dollars, right? Yeah, like $15 like OK.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, it's called premium. It's like.",
-                        "length": 7
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think it's like.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Marvel Science where, I don't know, they have, there's a lot of food science they gotta like.",
-                        "length": 17
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Extra creamy. I don't know the science. I don't know scientists.",
-                        "length": 11
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Cheeseburger ice cream. Apparently it tastes like meat.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Makes me sound comfortable.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "And like it's got like.",
-                        "length": 5
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Cheeseburger ice cream. Apparently it tastes like meat.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Makes me sound comfortable.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "And like it's got like.",
-                        "length": 5
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Cheeseburger ice cream. Apparently it tastes like meat.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Makes me sound comfortable.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "And like it's got like.",
-                        "length": 5
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Is cheese powders fine? I like ice cream. I like. They do not. They burgers. They do not belong together. Not.",
-                        "length": 21
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Ice cream No.",
-                        "length": 3
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Cheeseburger ice cream. Apparently it tastes like meat.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Makes me sound comfortable.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "And like it's got like.",
-                        "length": 5
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Is cheese powders fine? I like ice cream. I like. They do not. They burgers. They do not belong together. Not.",
-                        "length": 21
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Ice cream No.",
-                        "length": 3
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Is cheese powders fine? I like ice cream. I like. They do not. They burgers. They do not belong together. Not.",
-                        "length": 21
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Ice cream No.",
-                        "length": 3
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think the ice cream part makes it a sin.",
-                        "length": 10
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, like, even though the alligator sounds funny, I I saw, I don't know, I don't know.",
-                        "length": 18
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It it was like, like I give you that much or a hot dog.",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But not Yeah, I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Cheeseburger ice cream. Apparently it tastes like meat.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Makes me sound comfortable.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "And like it's got like.",
-                        "length": 5
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Is cheese powders fine? I like ice cream. I like. They do not. They burgers. They do not belong together. Not.",
-                        "length": 21
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Ice cream No.",
-                        "length": 3
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Is cheese powders fine? I like ice cream. I like. They do not. They burgers. They do not belong together. Not.",
-                        "length": 21
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Ice cream No.",
-                        "length": 3
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think the ice cream part makes it a sin.",
-                        "length": 10
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, like, even though the alligator sounds funny, I I saw, I don't know, I don't know.",
-                        "length": 18
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I'm at home and like an onion ring and a pickle cheese powder is already like, I like all of those things individually. OK, I like onion rings. I like.",
-                        "length": 30
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Is cheese powders fine? I like ice cream. I like. They do not. They burgers. They do not belong together. Not.",
-                        "length": 21
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Ice cream No.",
-                        "length": 3
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think the ice cream part makes it a sin.",
-                        "length": 10
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, like, even though the alligator sounds funny, I I saw, I don't know, I don't know.",
-                        "length": 18
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I think the ice cream part makes it a sin.",
-                        "length": 10
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I mean, like, even though the alligator sounds funny, I I saw, I don't know, I don't know.",
-                        "length": 18
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "Remember the scorpion pizza?",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "I'm making someone uncomfortable. That's actually gross. How to get so many?",
-                        "length": 12
-                    }
-                ]
-            },
-            "id": "0123456789",
-            "depth": 9,
-            "parentNodes": {
-                "7": [
-                    "23456789"
-                ],
-                "8": [
-                    "012345678"
-                ]
-            },
-            "childNodes": {
-                "10": [],
-                "11": []
-            },
-            "segments": "0 1 2 3 4 5 6 7 8 9"
-        }
-      ]
+    ]
     }
-    return data;
-  }
-  
-
-  mockData2() {
-    let data = {
-      s10: [
-        {
-          topic: "READINESS FOR CHANGE",
-          description: "I was not ready when she was ready.",
-          segment:
-            "It's hard 💪 to mentally prepare. I was not ready when she was ready. Oh my gosh 😱.",
-          time: "00:59:36",
-          speakerTurns: {
-            total: 16,
-            speakers: [
-              {
-                speakerId: "Guest-1",
-                length: 16,
-              },
-            ],
-            turns: [
-              {
-                speakerId: "Guest-1",
-                speakerSeg:
-                  "It's hard 💪 to mentally prepare. I was not ready when she was ready. Oh my gosh 😱.",
-                length: 16,
-              },
-            ],
-          },
-          topicIndex: 0,
-          zoomInIndex: null,
-          zoomOutIndex: 0,
-          id: "s10-0",
-        },
-        {
-          topic: "SKYDIVING PROPOSAL",
-          description:
-            "Yeah, she was like, let's go skydiving, like right now.",
-          segment: "Yeah, she was like, let's go skydiving ✈️, like right now.",
-          time: "00:59:46",
-          speakerTurns: {
-            total: 10,
-            speakers: [
-              {
-                speakerId: "Guest-1",
-                length: 10,
-              },
-            ],
-            turns: [
-              {
-                speakerId: "Guest-1",
-                speakerSeg:
-                  "Yeah, she was like, let's go skydiving ✈️, like right now.",
-                length: 10,
-              },
-            ],
-          },
-          topicIndex: 0,
-          zoomInIndex: null,
-          zoomOutIndex: 0,
-          id: "s10-1",
-        },
-        {
-          topic: "TRAVEL PLANS",
-          description: "I thought that would be more time in between.",
-          segment:
-            "I've never even thought 🤔 about this before. What do you mean? Yeah, I thought she was like joking 😄 at first, or like by how soon she wanted to go, but then. Pictures of her. And I was like, Oh yeah, OK 👌, yeah, I thought. I thought that would be more time ⏰ in between.",
-          time: "00:59:57",
-          speakerTurns: {
-            total: 53,
-            speakers: [
-              {
-                speakerId: "Guest-1",
-                length: 53,
-              },
-            ],
-            turns: [
-              {
-                speakerId: "Guest-1",
-                speakerSeg:
-                  "I've never even thought 🤔 about this before. What do you mean? Yeah, I thought she was like joking 😄 at first, or like by how soon she wanted to go, but then.",
-                length: 31,
-              },
-              {
-                speakerId: "Guest-1",
-                speakerSeg:
-                  "Pictures of her. And I was like, Oh yeah, OK 👌, yeah, I thought. I thought that would be more time ⏰ in between.",
-                length: 22,
-              },
-            ],
-          },
-          topicIndex: 0,
-          zoomInIndex: null,
-          zoomOutIndex: 0,
-          id: "s10-2",
-        },
-        {
-          topic: "PERSONALITY DESCRIPTION",
-          description: "Yeah, like she's, she's very much like.",
-          segment: "Yeah, like she's, she's very much like 💯.",
-          time: "01:00:08",
-          speakerTurns: {
-            total: 7,
-            speakers: [
-              {
-                speakerId: "Guest-1",
-                length: 7,
-              },
-            ],
-            turns: [
-              {
-                speakerId: "Guest-1",
-                speakerSeg: "Yeah, like she's, she's very much like 💯.",
-                length: 7,
-              },
-            ],
-          },
-          topicIndex: 0,
-          zoomInIndex: null,
-          zoomOutIndex: 1,
-          id: "s10-3",
-        },
-        {
-          topic: "DECISION MAKING",
-          description: "She just went into this, which is crazy.",
-          segment:
-            "Couple times and I was always like, oh, like I'll think about it, whatever. And then she's like OK, enough is enough. And she just went into this, which is crazy. I was like, oh, do you think?",
-          time: "01:00:19",
-          speakerTurns: {
-            total: 38,
-            speakers: [
-              {
-                speakerId: "Guest-2",
-                length: 38,
-              },
-            ],
-            turns: [
-              {
-                speakerId: "Guest-2",
-                speakerSeg:
-                  "Couple times and I was always like, oh, like I'll think about it, whatever. And then she's like OK, enough is enough. And she just went into this, which is crazy. I was like, oh, do you think?",
-                length: 38,
-              },
-            ],
-          },
-          topicIndex: 0,
-          zoomInIndex: null,
-          zoomOutIndex: 1,
-          id: "s10-4",
-        },
-        {
-          topic: "ADRENALINE ACTIVITY INTEREST",
-          description: "Like he really likes it.",
-          segment:
-            "Bro, I don't know, 'cause like he's I, I think he would 'cause he's definitely like an adrenaline junkie to a certain extent. Like he really likes it.",
-          time: "01:00:30",
-          speakerTurns: {
-            total: 28,
-            speakers: [
-              {
-                speakerId: "Guest-2",
-                length: 28,
-              },
-            ],
-            turns: [
-              {
-                speakerId: "Guest-2",
-                speakerSeg:
-                  "Bro, I don't know, 'cause like he's I, I think he would 'cause he's definitely like an adrenaline junkie to a certain extent. Like he really likes it.",
-                length: 28,
-              },
-            ],
-          },
-          topicIndex: 0,
-          zoomInIndex: null,
-          zoomOutIndex: 1,
-          id: "s10-5",
-        },
-        {
-          topic: "READINESS FOR CHANGE",
-          description: "I was not ready when she was ready.",
-          segment:
-            "It's hard 💪 to mentally prepare. I was not ready when she was ready. Oh my gosh 😱.",
-          time: "00:59:36",
-          speakerTurns: {
-            total: 16,
-            speakers: [
-              {
-                speakerId: "Guest-1",
-                length: 16,
-              },
-            ],
-            turns: [
-              {
-                speakerId: "Guest-1",
-                speakerSeg:
-                  "It's hard 💪 to mentally prepare. I was not ready when she was ready. Oh my gosh 😱.",
-                length: 16,
-              },
-            ],
-          },
-          topicIndex: 0,
-          zoomInIndex: null,
-          zoomOutIndex: 0,
-          id: "s10-0",
-        },
-        {
-          topic: "SKYDIVING PROPOSAL",
-          description:
-            "Yeah, she was like, let's go skydiving, like right now.",
-          segment: "Yeah, she was like, let's go skydiving ✈️, like right now.",
-          time: "00:59:46",
-          speakerTurns: {
-            total: 10,
-            speakers: [
-              {
-                speakerId: "Guest-1",
-                length: 10,
-              },
-            ],
-            turns: [
-              {
-                speakerId: "Guest-1",
-                speakerSeg:
-                  "Yeah, she was like, let's go skydiving ✈️, like right now.",
-                length: 10,
-              },
-            ],
-          },
-          topicIndex: 0,
-          zoomInIndex: null,
-          zoomOutIndex: 0,
-          id: "s10-1",
-        },
-        {
-          topic: "TRAVEL PLANS",
-          description: "I thought that would be more time in between.",
-          segment:
-            "I've never even thought 🤔 about this before. What do you mean? Yeah, I thought she was like joking 😄 at first, or like by how soon she wanted to go, but then. Pictures of her. And I was like, Oh yeah, OK 👌, yeah, I thought. I thought that would be more time ⏰ in between.",
-          time: "00:59:57",
-          speakerTurns: {
-            total: 53,
-            speakers: [
-              {
-                speakerId: "Guest-1",
-                length: 53,
-              },
-            ],
-            turns: [
-              {
-                speakerId: "Guest-1",
-                speakerSeg:
-                  "I've never even thought 🤔 about this before. What do you mean? Yeah, I thought she was like joking 😄 at first, or like by how soon she wanted to go, but then.",
-                length: 31,
-              },
-              {
-                speakerId: "Guest-1",
-                speakerSeg:
-                  "Pictures of her. And I was like, Oh yeah, OK 👌, yeah, I thought. I thought that would be more time ⏰ in between.",
-                length: 22,
-              },
-            ],
-          },
-          topicIndex: 0,
-          zoomInIndex: null,
-          zoomOutIndex: 0,
-          id: "s10-2",
-        },
-        {
-          topic: "PERSONALITY DESCRIPTION",
-          description: "Yeah, like she's, she's very much like.",
-          segment: "Yeah, like she's, she's very much like 💯.",
-          time: "01:00:08",
-          speakerTurns: {
-            total: 7,
-            speakers: [
-              {
-                speakerId: "Guest-1",
-                length: 7,
-              },
-            ],
-            turns: [
-              {
-                speakerId: "Guest-1",
-                speakerSeg: "Yeah, like she's, she's very much like 💯.",
-                length: 7,
-              },
-            ],
-          },
-          topicIndex: 0,
-          zoomInIndex: null,
-          zoomOutIndex: 1,
-          id: "s10-3",
-        },
-        {
-          topic: "DECISION MAKING",
-          description: "She just went into this, which is crazy.",
-          segment:
-            "Couple times and I was always like, oh, like I'll think about it, whatever. And then she's like OK, enough is enough. And she just went into this, which is crazy. I was like, oh, do you think?",
-          time: "01:00:19",
-          speakerTurns: {
-            total: 38,
-            speakers: [
-              {
-                speakerId: "Guest-2",
-                length: 38,
-              },
-            ],
-            turns: [
-              {
-                speakerId: "Guest-2",
-                speakerSeg:
-                  "Couple times and I was always like, oh, like I'll think about it, whatever. And then she's like OK, enough is enough. And she just went into this, which is crazy. I was like, oh, do you think?",
-                length: 38,
-              },
-            ],
-          },
-          topicIndex: 0,
-          zoomInIndex: null,
-          zoomOutIndex: 1,
-          id: "s10-4",
-        },
-        {
-          topic: "ADRENALINE ACTIVITY INTEREST",
-          description: "Like he really likes it.",
-          segment:
-            "Bro, I don't know, 'cause like he's I, I think he would 'cause he's definitely like an adrenaline junkie to a certain extent. Like he really likes it.",
-          time: "01:00:30",
-          speakerTurns: {
-            total: 28,
-            speakers: [
-              {
-                speakerId: "Guest-2",
-                length: 28,
-              },
-            ],
-            turns: [
-              {
-                speakerId: "Guest-2",
-                speakerSeg:
-                  "Bro, I don't know, 'cause like he's I, I think he would 'cause he's definitely like an adrenaline junkie to a certain extent. Like he really likes it.",
-                length: 28,
-              },
-            ],
-          },
-          topicIndex: 0,
-          zoomInIndex: null,
-          zoomOutIndex: 1,
-          id: "s10-5",
-        },
-      ]
-    };
     return data;
   }
 }
