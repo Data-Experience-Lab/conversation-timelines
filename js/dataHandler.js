@@ -3,7 +3,7 @@ import { OpenAI } from "/conversation-timelines/js/openaiController.js";
 
 export class DataHandler {
   constructor() {
-    this.tree = this.mockData();
+    this.tree = this.initTree();
     this.openAI = new OpenAI();
     this.lastPostTurn = "";
     this.minSegWithLastTurn = "";
