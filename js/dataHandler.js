@@ -4,7 +4,7 @@ import mockData from "./mockData.js";
 
 export class DataHandler {
   constructor() {  
-    this.tree = this.initTree();
+    this.tree = mockData;
     this.openAI = new OpenAI();
   }
 
@@ -101,10 +101,8 @@ export class DataHandler {
         }
         result = await this.openAI.gptResult(transcript, "");
         parentNodes = {[node1.depth]: [node1.id]};
-        // speakerTurns = node1.speakerTurn;
     } else {
         parentNodes = (node1.depth==node2.depth) ?  {[node1.depth]: [node1.id, node2.id]} : {[node1.depth]: [node1.id], [node2.depth]: [node2.id]};
-        // speakerTurns = this.mergeSpeakerTurns(node1.speakerTurns, node2.speakerTurns);
     }
 
     // Ensure the layer exists in the tree
@@ -152,40 +150,5 @@ export class DataHandler {
           "childNodes": [],
           "segments": segments
         }
-  }
-
-   mergeSpeakerTurns(speakerTurns1, speakerTurns2) {
-    let speakerTurns = [speakerTurns1, speakerTurns2]
-
-    let combinedTotal = 0;
-    // use an object to accumulate speaker lengths by speakerId
-    const combinedSpeakers = {};
-    const combinedTurns = [];
-
-    speakerTurns.forEach((segment) => {
-      combinedTotal += segment.total;
-      // process speakers
-      segment.speakers.forEach((sp) => {
-        if (combinedSpeakers[sp.speakerId] === undefined) {
-          combinedSpeakers[sp.speakerId] = sp.length;
-        } else {
-          combinedSpeakers[sp.speakerId] += sp.length;
-        }
-      });
-
-      // add turns (order is preserved by concatenation)
-      combinedTurns.push(...segment.turns);
-    });
-
-    // Convert combinedSpeakers object to an array
-    const speakersArray = Object.keys(combinedSpeakers).map((speakerId) => {
-      return { speakerId, length: combinedSpeakers[speakerId] };
-    });
-
-    return {
-      total: combinedTotal,
-      speakers: speakersArray,
-      turns: combinedTurns,
-    };
   }
 }

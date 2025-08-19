@@ -14,7 +14,6 @@ export class Visualization {
     this.treeDepth = 0;
     this.zoomValue = 0.0; // Start at speech bubble level
     this.zoomStep = 0.02; // Step size for left/right arrow keys
-    this.lastVisibleTopics = "";
     this.selfID = "Guest-1";
 
     //  font sizes
@@ -96,6 +95,12 @@ export class Visualization {
           "padding": ["15px", "0px"]
         }
       },
+      "speechBubbleGroup": {
+        "selector": ".speechBubbleGroup",
+        "properties": {
+          "padding-left": ["1vw", "0vw"],
+        }
+      },
       "speechBubbleContainers": {
         "selector": ".speechBubble",
         "properties": {
@@ -167,7 +172,6 @@ export class Visualization {
     this.currLevel = 0;
 
     // Only data at current tree depth
-    this.lastVisibleTopics = this.visibleTopics;
     this.data = this.DataObj.getData(this.treeDepth);
     this.segments = this.DataObj.getData(0);
     console.log(this.data);
@@ -457,6 +461,10 @@ export class Visualization {
       let config = this.bubbleConfig[key];
       this.animateObjects(config.selector, config.properties, speechBubbleConfigIndex, animationDuration)
     });
+    if (this.treeDepth==0) {
+      d3.selectAll(".speechBubbleGroup").style("border-left", null)
+      d3.select(`.speechBubbleGroup#segment-${this.currViewedTopic.id}`).style("border-left", "2px solid #8a2525");
+    }
 
     //********** Updating topics/rep sentences
     let delay = (this.lastZoomOperation=="+" && this.treeDepth==1) ? 1600 : 0;
@@ -530,11 +538,6 @@ export class Visualization {
 
   scrollUp(log = true) {
     this.lastZoomOperation = "";
-    console.log("Before")
-    console.log("CVT: ", this.currViewedTopic)
-    console.log("CI: ", this.currIndex)
-    console.log("VT: ", this.visibleTopics)
-    console.log("VTI: ", this.visTopicIndex)
     if (this.visTopicIndex == 0 && this.currIndex == 0){
       return;
     }
@@ -555,22 +558,12 @@ export class Visualization {
         this.log += `${timeOnly}.Action.↑\n`;
         console.log(this.log);
       }
-      console.log("After")
-      console.log("CVT: ", this.currViewedTopic)
-      console.log("CI: ", this.currIndex)
-      console.log("VT: ", this.visibleTopics)
-      console.log("VTI: ", this.visTopicIndex)
       this.updateScreen(this.DataObj);
     }
   }
 
   scrollDown(log = true) {
     this.lastZoomOperation = "";
-    console.log("Before")
-      console.log("CVT: ", this.currViewedTopic)
-      console.log("CI: ", this.currIndex)
-      console.log("VT: ", this.visibleTopics)
-      console.log("VTI: ", this.visTopicIndex)
     if (this.visTopicIndex == this.numTopicsShown - 1 && this.currIndex == this.maxIndex){
       return;
     }
@@ -579,11 +572,6 @@ export class Visualization {
       this.currIndex = this.currIndex + 1;
     // If there is more than one topic in the list
     } else if (this.DataObj.getData(this.treeDepth).length > 1) {
-      // if (
-      //   this.visTopicIndex < this.numTopicsShown - 1 &&
-      //   this.visTopicIndex <
-      //     this.DataObj.getData(this.treeDepth).length - 1
-      // )
         this.visTopicIndex += 1;
     }
     if (this.currViewedTopic != this.data.at(-1)) {
@@ -595,11 +583,6 @@ export class Visualization {
         this.log += `${timeOnly}.Action.↓\n`;
         console.log(this.log);
       }
-      console.log("After")
-      console.log("CVT: ", this.currViewedTopic)
-      console.log("CI: ", this.currIndex)
-      console.log("VT: ", this.visibleTopics)
-      console.log("VTI: ", this.visTopicIndex)
       this.updateScreen(this.DataObj);
     }
   }
