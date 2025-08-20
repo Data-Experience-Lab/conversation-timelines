@@ -15,6 +15,7 @@ export class Visualization {
     this.zoomValue = 0.0; // Start at speech bubble level
     this.zoomStep = 0.02; // Step size for left/right arrow keys
     this.selfID = "Guest-1";
+    this.bubbleFontSize = "10px";
 
     //  font sizes
     this.topicSize = "";
@@ -49,11 +50,12 @@ export class Visualization {
     // Parse URL parameters to set the number of topics shown
     let params = new URLSearchParams(document.location.search);
     let numTopicsParam = parseInt(params.get("numtopics"), 10);
-    this.numTopicsShown =
+    this.requestedNum =
       !isNaN(numTopicsParam) && numTopicsParam > 0 ? numTopicsParam : 4;
     if (this.numTopicsShown > 16) {
       this.numTopicsShown = 16;
     }
+    this.numTopicsShown = this.requestedNum;
     
     // the mapping we talked about in our convo
     this.bubbleConfig = {
@@ -76,7 +78,7 @@ export class Visualization {
         "selector": ".bubbleText",
         "properties": {
           "color": ["white", "rgba(255,255,255,0.0)"],
-          "font-size": ["20px", "0px"],
+          "font-size": [() => this.bubbleFontSize, "0px"]
         }
       },
       "speechBubbleSelf": {
@@ -84,7 +86,8 @@ export class Visualization {
         "properties": {
           "margin": ["0px 0px 8px 60%", "0px 0px 1px 0%"],
           "border-radius": ["30px 30px 5px 30px", "30px 30px 30px 30px"],
-          "padding": ["15px", "0px"]
+          "padding-left": ["10px", "0px"],
+          "padding-right": ["10px", "0px"]
         }
       },
       "speechBubbleOther": {
@@ -92,7 +95,8 @@ export class Visualization {
         "properties": {
           "margin": ["8px 0px 8px 0px", "0px 0px 1px 0px"],
           "border-radius": ["30px 30px 30px 5px", "30px 30px 30px 30px"],
-          "padding": ["15px", "0px"]
+          "padding-left": ["10px", "0px"],
+          "padding-right": ["10px", "0px"]
         }
       },
       "speechBubbleGroup": {
@@ -164,12 +168,14 @@ export class Visualization {
     dataobj,
     debug = false,
     resize = false,
-    numTopics = this.numTopicsShown
+    numTopics = this.requestedNum
   ) {
     // Full dialogue tree
     this.DataObj = dataobj;
     // console.log(this.DataObj.data);
     this.currLevel = 0;
+    this.numTopicsShown = (this.treeDepth==0) ? Math.min(this.requestedNum, 3) : this.requestedNum;
+    console.log("Num topics", this.numTopicsShown)
 
     // Only data at current tree depth
     this.data = this.DataObj.getData(this.treeDepth);
@@ -179,7 +185,8 @@ export class Visualization {
     this.maxIndex = this.data.length - this.numTopicsShown;
 
     if (numTopics != this.numTopicsShown) {
-      this.numTopicsShown = numTopics;
+      this.requestedNum =  numTopics;
+      this.numTopicsShown = (this.treeDepth==0) ? Math.min(this.requestedNum, 3) : this.requestedNum;
       this.visibleTopics = this.data
         .slice(this.currIndex, this.currIndex + this.numTopicsShown);
     } else {
@@ -291,7 +298,7 @@ export class Visualization {
       .append("div")
       .attr("class", "line") 
       .style("flex-grow", 1)
-      .style("margin-bottom", "5%")
+      .style("margin-bottom", "2%")
       .style("align-items", "center")
       .style("display", "flex")
       .style("position", "relative")
@@ -415,14 +422,21 @@ export class Visualization {
           bubbleDiv.append("p")
             .attr("class", "bubbleText")
             .html(processedText);
-
-          // Apply styles
-          Object.keys(this.bubbleConfig).forEach((key)=> {
-            let config = this.bubbleConfig[key];
-            this.animateObjects(config.selector, config.properties, 0)
-          });
         });
       }
+    });
+
+    if (this.treeDepth==0) {
+      this.resizeFont();
+    } else {
+      let el = document.getElementsByClassName('bubbleText')[0];
+      let style = window.getComputedStyle(el, null).getPropertyValue('font-size');
+      this.bubbleConfig.bubbleText.properties["font-size"][0] = style;
+    }
+    // Apply styles
+    Object.keys(this.bubbleConfig).forEach((key)=> {
+      let config = this.bubbleConfig[key];
+      this.animateObjects(config.selector, config.properties, 0)
     });
       
     // Apply zoom styling to newly created speech bubbles then see speaker colors are good
@@ -432,7 +446,7 @@ export class Visualization {
     }, 10);
   }
 
-  animateObjects(selector, config, index, animationDuration, delay = 0) {
+  animateObjects(selector, config, index, animationDuration, delay=0) {
     const elements = d3.selectAll(selector);
 
     // Then animate to end styles
@@ -442,9 +456,13 @@ export class Visualization {
 
     Object.entries(config).forEach(([property, values]) => {
       let style = (values.length>index) ? index : 0;
-      if (values[style] !== undefined) {
-        transition.style(property, values[style]).on("end", function() {
-          d3.select(this).style(property, values[style]);
+      let value = values[style];
+      if (typeof value === "function") value = value();
+      if (value !== undefined) {
+        if (selector==".bubbleText" && property=="font-size"){
+        } 
+        transition.style(property, value).on("end", function() {
+          d3.select(this).style(property, value);
         });
       }
     });
@@ -461,8 +479,9 @@ export class Visualization {
       let config = this.bubbleConfig[key];
       this.animateObjects(config.selector, config.properties, speechBubbleConfigIndex, animationDuration)
     });
+
+    d3.selectAll(".speechBubbleGroup").style("border-left", null)
     if (this.treeDepth==0) {
-      d3.selectAll(".speechBubbleGroup").style("border-left", null)
       d3.select(`.speechBubbleGroup#segment-${this.currViewedTopic.id}`).style("border-left", "2px solid #8a2525");
     }
 
@@ -812,5 +831,24 @@ export class Visualization {
         levelText.textContent = "5m Topics";
       }
     }
+  }
+
+   resizeFont() {
+    let window = document.getElementById("topics");
+    let numBubbles = d3.selectAll(".speechBubbleItem").size();
+    console.log(window.offsetHeight)
+    console.log(numBubbles)
+    if (numBubbles>0 && this.treeDepth==0) {
+        this.bubbleFontSize = `clamp(1.5vmin, ${
+          (window.offsetHeight / numBubbles) * 0.2
+        }px, 20px)`;
+    }
+    this.topicSize = `clamp(15px, ${
+      (window.offsetHeight / this.visibleTopics.length) * 0.4
+      }px, 4vmin)`;
+    this.repSize = `clamp(10px, ${
+      (window.offsetHeight / this.visibleTopics.length) * 0.3
+      }px, 2.5vmin)`;
+    this.bubbleConfig.bubbleText.properties["font-size"][0] = this.bubbleFontSize;
   }
 }
