@@ -4,7 +4,7 @@ import mockData from "./mockData.js";
 
 export class DataHandler {
   constructor() {  
-    this.tree = initTree();
+    this.tree = this.initTree();
     this.openAI = new OpenAI();
   }
 
