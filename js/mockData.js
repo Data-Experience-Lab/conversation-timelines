@@ -41,12 +41,12 @@ const mockData =
                     }
                 ]
             },
-            "id": "0",
+            "id": "0-0",
             "depth": 0,
             "parentNodes": null,
             "childNodes": {
                 "1": [
-                    "01"
+                    "1-01"
                 ]
             },
             "segments": "0"
@@ -81,12 +81,12 @@ const mockData =
                     }
                 ]
             },
-            "id": "1",
+            "id": "0-1",
             "depth": 0,
             "parentNodes": null,
             "childNodes": {
                 "1": [
-                    "01"
+                    "1-01"
                 ]
             },
             "segments": "1"
@@ -117,12 +117,12 @@ const mockData =
                     }
                 ]
             },
-            "id": "2",
+            "id": "0-2",
             "depth": 0,
             "parentNodes": null,
             "childNodes": {
                 "1": [
-                    "23"
+                    "1-23"
                 ]
             },
             "segments": "2"
@@ -153,12 +153,12 @@ const mockData =
                     }
                 ]
             },
-            "id": "3",
+            "id": "0-3",
             "depth": 0,
             "parentNodes": null,
             "childNodes": {
                 "1": [
-                    "23"
+                    "1-23"
                 ]
             },
             "segments": "3"
@@ -189,12 +189,12 @@ const mockData =
                     }
                 ]
             },
-            "id": "4",
+            "id": "0-4",
             "depth": 0,
             "parentNodes": null,
             "childNodes": {
                 "1": [
-                    "45"
+                    "1-45"
                 ]
             },
             "segments": "4"
@@ -230,12 +230,12 @@ const mockData =
                     }
                 ]
             },
-            "id": "5",
+            "id": "0-5",
             "depth": 0,
             "parentNodes": null,
             "childNodes": {
                 "1": [
-                    "45"
+                    "1-45"
                 ]
             },
             "segments": "5"
@@ -261,12 +261,12 @@ const mockData =
                     }
                 ]
             },
-            "id": "6",
+            "id": "0-6",
             "depth": 0,
             "parentNodes": null,
             "childNodes": {
                 "1": [
-                    "6"
+                    "1-6"
                 ]
             },
             "segments": "6"
@@ -292,12 +292,12 @@ const mockData =
                     }
                 ]
             },
-            "id": "7",
+            "id": "0-7",
             "depth": 0,
             "parentNodes": null,
             "childNodes": {
                 "1": [
-                    "78"
+                    "1-78"
                 ]
             },
             "segments": "7"
@@ -323,12 +323,12 @@ const mockData =
                     }
                 ]
             },
-            "id": "8",
+            "id": "0-8",
             "depth": 0,
             "parentNodes": null,
             "childNodes": {
                 "1": [
-                    "78"
+                    "1-78"
                 ]
             },
             "segments": "8"
@@ -354,12 +354,12 @@ const mockData =
                     }
                 ]
             },
-            "id": "9",
+            "id": "0-9",
             "depth": 0,
             "parentNodes": null,
             "childNodes": {
                 "1": [
-                    "910"
+                    "1-910"
                 ]
             },
             "segments": "9"
@@ -385,12 +385,12 @@ const mockData =
                     }
                 ]
             },
-            "id": "10",
+            "id": "0-10",
             "depth": 0,
             "parentNodes": null,
             "childNodes": {
                 "1": [
-                    "910"
+                    "1-910"
                 ]
             },
             "segments": "10"
@@ -416,12 +416,12 @@ const mockData =
                     }
                 ]
             },
-            "id": "11",
+            "id": "0-11",
             "depth": 0,
             "parentNodes": null,
             "childNodes": {
                 "1": [
-                    "1112"
+                    "1-1112"
                 ]
             },
             "segments": "11"
@@ -447,12 +447,12 @@ const mockData =
                     }
                 ]
             },
-            "id": "12",
+            "id": "0-12",
             "depth": 0,
             "parentNodes": null,
             "childNodes": {
                 "1": [
-                    "1112"
+                    "1-1112"
                 ]
             },
             "segments": "12"
@@ -483,12 +483,12 @@ const mockData =
                     }
                 ]
             },
-            "id": "13",
+            "id": "0-13",
             "depth": 0,
             "parentNodes": null,
             "childNodes": {
                 "1": [
-                    "1314"
+                    "1-1314"
                 ]
             },
             "segments": "13"
@@ -514,12 +514,12 @@ const mockData =
                     }
                 ]
             },
-            "id": "14",
+            "id": "0-14",
             "depth": 0,
             "parentNodes": null,
             "childNodes": {
                 "1": [
-                    "1314"
+                    "1-1314"
                 ]
             },
             "segments": "14"
@@ -555,12 +555,12 @@ const mockData =
                     }
                 ]
             },
-            "id": "15",
+            "id": "0-15",
             "depth": 0,
             "parentNodes": null,
             "childNodes": {
                 "1": [
-                    "1516"
+                    "1-1516"
                 ]
             },
             "segments": "15"
@@ -586,12 +586,12 @@ const mockData =
                     }
                 ]
             },
-            "id": "16",
+            "id": "0-16",
             "depth": 0,
             "parentNodes": null,
             "childNodes": {
                 "1": [
-                    "1516"
+                    "1-1516"
                 ]
             },
             "segments": "16"
@@ -631,12 +631,12 @@ const mockData =
                     }
                 ]
             },
-            "id": "17",
+            "id": "0-17",
             "depth": 0,
             "parentNodes": null,
             "childNodes": {
                 "1": [
-                    "1718"
+                    "1-1718"
                 ]
             },
             "segments": "17"
@@ -662,12 +662,12 @@ const mockData =
                     }
                 ]
             },
-            "id": "18",
+            "id": "0-18",
             "depth": 0,
             "parentNodes": null,
             "childNodes": {
                 "1": [
-                    "1718"
+                    "1-1718"
                 ]
             },
             "segments": "18"
@@ -698,12 +698,12 @@ const mockData =
                     }
                 ]
             },
-            "id": "19",
+            "id": "0-19",
             "depth": 0,
             "parentNodes": null,
             "childNodes": {
                 "1": [
-                    "1920"
+                    "1-1920"
                 ]
             },
             "segments": "19"
@@ -729,12 +729,12 @@ const mockData =
                     }
                 ]
             },
-            "id": "20",
+            "id": "0-20",
             "depth": 0,
             "parentNodes": null,
             "childNodes": {
                 "1": [
-                    "1920"
+                    "1-1920"
                 ]
             },
             "segments": "20"
@@ -747,17 +747,17 @@ const mockData =
             "segment": "Continentally. Prepare I was not ready when she. Was ready. Oh my gosh. Yeah, I know. She was like, let's go skydiving. Like I've never even thought about this before. What do you mean? Yeah, I thought she was like joking at first or like by how soon she wanted to go, but. ",
             "time": "00:01:50",
             "speakerTurns": null,
-            "id": "01",
+            "id": "1-01",
             "depth": 1,
             "parentNodes": {
                 "0": [
-                    "0",
-                    "1"
+                    "0-0",
+                    "0-1"
                 ]
             },
             "childNodes": {
                 "2": [
-                    "0123"
+                    "2-0123"
                 ]
             },
             "segments": "0 1",
@@ -774,17 +774,17 @@ const mockData =
             "segment": "Pictures of her. And I was like, Oh yeah, OK, yeah, I thought. I thought that there would be more time in between 2:00. Yeah, like she's, she's very much like. Times and I was always like oh like I'll think about it whatever and then she's like OK, enough is enough and she just went into this which is. Crazy. I was like, oh, do you think? ",
             "time": "00:02:12",
             "speakerTurns": null,
-            "id": "23",
+            "id": "1-23",
             "depth": 1,
             "parentNodes": {
                 "0": [
-                    "2",
-                    "3"
+                    "0-2",
+                    "0-3"
                 ]
             },
             "childNodes": {
                 "2": [
-                    "0123"
+                    "2-0123"
                 ]
             },
             "segments": "2 3",
@@ -801,17 +801,17 @@ const mockData =
             "segment": "Bro, I don't know, 'cause like he's I. I think he would 'cause he's definitely like an adrenaline junkie to a certain extent, like he really likes. That type of stuff. But I mean, honestly, yeah, probably. Go together then, that'd be cute. Well, I. ",
             "time": "00:02:33",
             "speakerTurns": null,
-            "id": "45",
+            "id": "1-45",
             "depth": 1,
             "parentNodes": {
                 "0": [
-                    "4",
-                    "5"
+                    "0-4",
+                    "0-5"
                 ]
             },
             "childNodes": {
                 "2": [
-                    "456"
+                    "2-456"
                 ]
             },
             "segments": "4 5",
@@ -826,16 +826,16 @@ const mockData =
             "segment": "1-2 But I'm also like, there's just so many implications of going because it's like like, yeah, you're with the instructor, but like things can always go. ",
             "time": "00:02:55",
             "speakerTurns": null,
-            "id": "6",
+            "id": "1-6",
             "depth": 1,
             "parentNodes": {
                 "0": [
-                    "6"
+                    "0-6"
                 ]
             },
             "childNodes": {
                 "2": [
-                    "456"
+                    "2-456"
                 ]
             },
             "segments": "6",
@@ -852,17 +852,17 @@ const mockData =
             "segment": "But another thing is like I wanna get my actual motorcycle license. I know the lessons. Let me tell you why. OK, 'cause I did do the lessons right and like, it was fine, whatever. But The thing is. ",
             "time": "00:03:06",
             "speakerTurns": null,
-            "id": "78",
+            "id": "1-78",
             "depth": 1,
             "parentNodes": {
                 "0": [
-                    "7",
-                    "8"
+                    "0-7",
+                    "0-8"
                 ]
             },
             "childNodes": {
                 "2": [
-                    "78910"
+                    "2-78910"
                 ]
             },
             "segments": "7 8",
@@ -879,17 +879,17 @@ const mockData =
             "segment": "You can't practice without a license and like the way you get the license is with a driven text. So it's like it's not like where you can get a learners and have smoking. Is there with you right that's fully licensed you can't do that with a motorcycle right and then it's also like do I really wanna invest like 3-4 K in a bike and I'm still learning and like what happens if I. ",
             "time": "00:03:28",
             "speakerTurns": null,
-            "id": "910",
+            "id": "1-910",
             "depth": 1,
             "parentNodes": {
                 "0": [
-                    "9",
-                    "10"
+                    "0-9",
+                    "0-10"
                 ]
             },
             "childNodes": {
                 "2": [
-                    "78910"
+                    "2-78910"
                 ]
             },
             "segments": "9 10",
@@ -909,17 +909,17 @@ const mockData =
             "segment": "You know, there's like lots of things that can ruin a bike. Yeah, So you know what I mean? So it's like I need to either be able to rent one at. Be able to get decent or I have to buy one and be like incredibly careful But I don't know if I trust myself enough yet 'cause I feel like even if you write 1. ",
             "time": "00:03:50",
             "speakerTurns": null,
-            "id": "1112",
+            "id": "1-1112",
             "depth": 1,
             "parentNodes": {
                 "0": [
-                    "11",
-                    "12"
+                    "0-11",
+                    "0-12"
                 ]
             },
             "childNodes": {
                 "2": [
-                    "11121314"
+                    "2-11121314"
                 ]
             },
             "segments": "11 12",
@@ -937,17 +937,17 @@ const mockData =
             "segment": "I feel like that would still cost you money, right? Well, it's a little different because like when I did my lessons, I did end up. Or not crashing, but I did drop 2 bikes but they couldn't drive to me because it's included in the fee. Yeah, I mean I guess. ",
             "time": "00:04:12",
             "speakerTurns": null,
-            "id": "1314",
+            "id": "1-1314",
             "depth": 1,
             "parentNodes": {
                 "0": [
-                    "13",
-                    "14"
+                    "0-13",
+                    "0-14"
                 ]
             },
             "childNodes": {
                 "2": [
-                    "11121314"
+                    "2-11121314"
                 ]
             },
             "segments": "13 14",
@@ -964,17 +964,17 @@ const mockData =
             "segment": "It doesn't get completely. Busted. Yeah. What would be on your bucket list? OK. Honestly, I feel like I have achieved a lot of those things in the past couple years, OK. ",
             "time": "00:04:33",
             "speakerTurns": null,
-            "id": "1516",
+            "id": "1-1516",
             "depth": 1,
             "parentNodes": {
                 "0": [
-                    "15",
-                    "16"
+                    "0-15",
+                    "0-16"
                 ]
             },
             "childNodes": {
                 "2": [
-                    "15161718"
+                    "2-15161718"
                 ]
             },
             "segments": "15 16",
@@ -990,17 +990,17 @@ const mockData =
             "segment": "The one thing that was on my bucket list for a really long time, but I did it when. I was in Singapore, no when I went to Indonesia. Yeah, well, I always really wanted to go like. Behind the waterfalls. Oh, yeah, yeah, yeah. I always wanted to do that. And then I got to do when I was in Indonesia. It was kind of must need to be honest. ",
             "time": "00:04:55",
             "speakerTurns": null,
-            "id": "1718",
+            "id": "1-1718",
             "depth": 1,
             "parentNodes": {
                 "0": [
-                    "17",
-                    "18"
+                    "0-17",
+                    "0-18"
                 ]
             },
             "childNodes": {
                 "2": [
-                    "15161718"
+                    "2-15161718"
                 ]
             },
             "segments": "17 18",
@@ -1017,12 +1017,12 @@ const mockData =
             "segment": "Oh, really? Yes. I didn't know it was like it'd be *****. Oh, I mean, it's a big cave with like an eternal flow of water coming down. To the duck neck cave. OK, yeah, you put it like that honestly. OK, to be fair, I kind of didn't expect it either. ",
             "time": "00:05:17",
             "speakerTurns": null,
-            "id": "1920",
+            "id": "1-1920",
             "depth": 1,
             "parentNodes": {
                 "0": [
-                    "19",
-                    "20"
+                    "0-19",
+                    "0-20"
                 ]
             },
             "childNodes": {
@@ -1043,17 +1043,17 @@ const mockData =
             "segment": "Continentally. Prepare I was not ready when she. Was ready. Oh my gosh. Yeah, I know. She was like, let's go skydiving. Like I've never even thought about this before. What do you mean? Yeah, I thought she was like joking at first or like by how soon she wanted to go, but. Pictures of her. And I was like, Oh yeah, OK, yeah, I thought. I thought that there would be more time in between 2:00. Yeah, like she's, she's very much like. Times and I was always like oh like I'll think about it whatever and then she's like OK, enough is enough and she just went into this which is. Crazy. I was like, oh, do you think? ",
             "time": "00:01:50",
             "speakerTurns": null,
-            "id": "0123",
+            "id": "2-0123",
             "depth": 2,
             "parentNodes": {
                 "1": [
-                    "01",
-                    "23"
+                    "1-01",
+                    "1-23"
                 ]
             },
             "childNodes": {
                 "3": [
-                    "0123456"
+                    "3-0123456"
                 ]
             },
             "segments": "0 1 2 3",
@@ -1071,17 +1071,17 @@ const mockData =
             "segment": "Bro, I don't know, 'cause like he's I. I think he would 'cause he's definitely like an adrenaline junkie to a certain extent, like he really likes. That type of stuff. But I mean, honestly, yeah, probably. Go together then, that'd be cute. Well, I. 1-2 But I'm also like, there's just so many implications of going because it's like like, yeah, you're with the instructor, but like things can always go. ",
             "time": "00:02:33",
             "speakerTurns": null,
-            "id": "456",
+            "id": "2-456",
             "depth": 2,
             "parentNodes": {
                 "1": [
-                    "45",
-                    "6"
+                    "1-45",
+                    "1-6"
                 ]
             },
             "childNodes": {
                 "3": [
-                    "0123456"
+                    "3-0123456"
                 ]
             },
             "segments": "4 5 6",
@@ -1097,17 +1097,17 @@ const mockData =
             "segment": "But another thing is like I wanna get my actual motorcycle license. I know the lessons. Let me tell you why. OK, 'cause I did do the lessons right and like, it was fine, whatever. But The thing is. You can't practice without a license and like the way you get the license is with a driven text. So it's like it's not like where you can get a learners and have smoking. Is there with you right that's fully licensed you can't do that with a motorcycle right and then it's also like do I really wanna invest like 3-4 K in a bike and I'm still learning and like what happens if I. ",
             "time": "00:03:06",
             "speakerTurns": null,
-            "id": "78910",
+            "id": "2-78910",
             "depth": 2,
             "parentNodes": {
                 "1": [
-                    "78",
-                    "910"
+                    "1-78",
+                    "1-910"
                 ]
             },
             "childNodes": {
                 "3": [
-                    "7891011121314"
+                    "3-7891011121314"
                 ]
             },
             "segments": "7 8 9 10",
@@ -1128,17 +1128,17 @@ const mockData =
             "segment": "You know, there's like lots of things that can ruin a bike. Yeah, So you know what I mean? So it's like I need to either be able to rent one at. Be able to get decent or I have to buy one and be like incredibly careful But I don't know if I trust myself enough yet 'cause I feel like even if you write 1. I feel like that would still cost you money, right? Well, it's a little different because like when I did my lessons, I did end up. Or not crashing, but I did drop 2 bikes but they couldn't drive to me because it's included in the fee. Yeah, I mean I guess. ",
             "time": "00:03:50",
             "speakerTurns": null,
-            "id": "11121314",
+            "id": "2-11121314",
             "depth": 2,
             "parentNodes": {
                 "1": [
-                    "1112",
-                    "1314"
+                    "1-1112",
+                    "1-1314"
                 ]
             },
             "childNodes": {
                 "3": [
-                    "7891011121314"
+                    "3-7891011121314"
                 ]
             },
             "segments": "11 12 13 14",
@@ -1159,12 +1159,12 @@ const mockData =
             "segment": "It doesn't get completely. Busted. Yeah. What would be on your bucket list? OK. Honestly, I feel like I have achieved a lot of those things in the past couple years, OK. The one thing that was on my bucket list for a really long time, but I did it when. I was in Singapore, no when I went to Indonesia. Yeah, well, I always really wanted to go like. Behind the waterfalls. Oh, yeah, yeah, yeah. I always wanted to do that. And then I got to do when I was in Indonesia. It was kind of must need to be honest. ",
             "time": "00:04:33",
             "speakerTurns": null,
-            "id": "15161718",
+            "id": "2-15161718",
             "depth": 2,
             "parentNodes": {
                 "1": [
-                    "1516",
-                    "1718"
+                    "1-1516",
+                    "1-1718"
                 ]
             },
             "childNodes": {
@@ -1187,17 +1187,17 @@ const mockData =
             "segment": "Continentally. Prepare I was not ready when she. Was ready. Oh my gosh. Yeah, I know. She was like, let's go skydiving. Like I've never even thought about this before. What do you mean? Yeah, I thought she was like joking at first or like by how soon she wanted to go, but. Pictures of her. And I was like, Oh yeah, OK, yeah, I thought. I thought that there would be more time in between 2:00. Yeah, like she's, she's very much like. Times and I was always like oh like I'll think about it whatever and then she's like OK, enough is enough and she just went into this which is. Crazy. I was like, oh, do you think? Bro, I don't know, 'cause like he's I. I think he would 'cause he's definitely like an adrenaline junkie to a certain extent, like he really likes. That type of stuff. But I mean, honestly, yeah, probably. Go together then, that'd be cute. Well, I. 1-2 But I'm also like, there's just so many implications of going because it's like like, yeah, you're with the instructor, but like things can always go. ",
             "time": "00:01:50",
             "speakerTurns": null,
-            "id": "0123456",
+            "id": "3-0123456",
             "depth": 3,
             "parentNodes": {
                 "2": [
-                    "0123",
-                    "456"
+                    "2-0123",
+                    "2-456"
                 ]
             },
             "childNodes": {
                 "4": [
-                    "0123456"
+                    "4-0123456"
                 ]
             },
             "segments": "0 1 2 3 4 5 6",
@@ -1215,12 +1215,12 @@ const mockData =
             "segment": "But another thing is like I wanna get my actual motorcycle license. I know the lessons. Let me tell you why. OK, 'cause I did do the lessons right and like, it was fine, whatever. But The thing is. You can't practice without a license and like the way you get the license is with a driven text. So it's like it's not like where you can get a learners and have smoking. Is there with you right that's fully licensed you can't do that with a motorcycle right and then it's also like do I really wanna invest like 3-4 K in a bike and I'm still learning and like what happens if I. You know, there's like lots of things that can ruin a bike. Yeah, So you know what I mean? So it's like I need to either be able to rent one at. Be able to get decent or I have to buy one and be like incredibly careful But I don't know if I trust myself enough yet 'cause I feel like even if you write 1. I feel like that would still cost you money, right? Well, it's a little different because like when I did my lessons, I did end up. Or not crashing, but I did drop 2 bikes but they couldn't drive to me because it's included in the fee. Yeah, I mean I guess. ",
             "time": "00:03:06",
             "speakerTurns": null,
-            "id": "7891011121314",
+            "id": "3-7891011121314",
             "depth": 3,
             "parentNodes": {
                 "2": [
-                    "78910",
-                    "11121314"
+                    "2-78910",
+                    "2-11121314"
                 ]
             },
             "childNodes": {
@@ -1248,11 +1248,11 @@ const mockData =
             "segment": "Continentally. Prepare I was not ready when she. Was ready. Oh my gosh. Yeah, I know. She was like, let's go skydiving. Like I've never even thought about this before. What do you mean? Yeah, I thought she was like joking at first or like by how soon she wanted to go, but. Pictures of her. And I was like, Oh yeah, OK, yeah, I thought. I thought that there would be more time in between 2:00. Yeah, like she's, she's very much like. Times and I was always like oh like I'll think about it whatever and then she's like OK, enough is enough and she just went into this which is. Crazy. I was like, oh, do you think? Bro, I don't know, 'cause like he's I. I think he would 'cause he's definitely like an adrenaline junkie to a certain extent, like he really likes. That type of stuff. But I mean, honestly, yeah, probably. Go together then, that'd be cute. Well, I. 1-2 But I'm also like, there's just so many implications of going because it's like like, yeah, you're with the instructor, but like things can always go. ",
             "time": "00:01:50",
             "speakerTurns": null,
-            "id": "0123456",
+            "id": "4-0123456",
             "depth": 4,
             "parentNodes": {
                 "3": [
-                    "0123456"
+                    "3-0123456"
                 ]
             },
             "childNodes": {

@@ -176,6 +176,7 @@ export class Visualization {
     this.currLevel = 0;
     this.numTopicsShown = (this.treeDepth==0) ? Math.min(this.requestedNum, 3) : this.requestedNum;
     console.log("Num topics", this.numTopicsShown)
+    this.currIndex = Math.max(0, this.currIndex);
 
     // Only data at current tree depth
     this.data = this.DataObj.getData(this.treeDepth);
@@ -383,7 +384,7 @@ export class Visualization {
       } else {
         console.log(int)
         segmentDiv = bubble.append("div")
-        .attr("id", `segment-${int}`)
+        .attr("id", `segment-${this.treeDepth}-${int}`)
         .attr("class", "speechBubbleGroup")
         .style("display", "flex")
         .style("flex-direction", "column")
@@ -569,7 +570,9 @@ export class Visualization {
 
   scrollDown(log = true) {
     this.lastZoomOperation = "";
-    if (this.visTopicIndex == this.numTopicsShown - 1 && this.currIndex == this.maxIndex){
+    console.log(this.currViewedTopic)
+    if (this.currViewedTopic.id == this.data.at(-1).id){
+      console.log("At the bottom!")
       return;
     }
     // If at the bottom of visible topics, load new topic
@@ -600,12 +603,16 @@ export class Visualization {
       this.treeDepth += 1;
       let newData = this.DataObj.getData(this.treeDepth);
       console.log(this.currViewedTopic)
-      if (!(Object.keys(this.currViewedTopic.childNodes).length==0)){
+      console.log(Object.keys(this.currViewedTopic.childNodes).length)
+      if (!(Object.keys(this.currViewedTopic.childNodes[this.treeDepth]).length==0)){
+        console.log("children:)")
         let targetId = this.currViewedTopic.childNodes[this.treeDepth][0];
         this.currIndex = newData.findIndex(item => item.id === targetId);
       } else {
+        console.log("No children!")
         this.currIndex = newData.length-1;
       }
+      console.log(this.currIndex)
       // Ensure currIndex will allow for all topics to be shown
       if ((this.currIndex+this.numTopicsShown)>newData.length){
         let tempIndex = newData.length-this.numTopicsShown;

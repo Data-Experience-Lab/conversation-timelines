@@ -34,7 +34,7 @@ export class DataHandler {
     // Propogate up the last node in all levels
 
     // Turn transcript into new root node
-    let id = Object.keys(this.tree[0]).length
+    let id = Object.keys(this.tree[0]).length;
     this.tree[0].push(this.createNode(null, null, transcription, time, speakerTurns, id, 0, null, String(id))) 
         
     // If this is the first node in the tree, return.
