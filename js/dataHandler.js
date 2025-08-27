@@ -4,7 +4,7 @@ import mockData from "./mockData.js";
 
 export class DataHandler {
   constructor() {  
-    this.tree = initTree();
+    this.tree = mockData;
     this.openAI = new OpenAI();
   }
 
@@ -62,7 +62,7 @@ export class DataHandler {
         if ((node1!=null)&&(node2!=null)) {
         // If node 1 does not already have a child at this depth
             console.log(node1.childNodes)
-            if (node1.childNodes.length == 0) {
+            if (Object.keys(node1.childNodes[depth]).length == 0) {
                 let node = await this.summarizeNodes(node1, node2, depth);
                 console.log("New node:\t", node)
                 if (node != null) {
@@ -90,17 +90,26 @@ export class DataHandler {
     }
     
     // OpenAI call
-    let parentNodes, speakerTurns;
-    let result = await this.openAI.gptResult(transcript, "");
-    console.log("OpenAI result:\t", result)
+    let parentNodes;
+    let twoParents = true;
+    let lastTopic = (this.tree[depth]!=null) ? this.tree[depth].at(-1) : "";
+    let result = await this.openAI.gptResult(transcript, lastTopic, "turn");
+    // console.log("OpenAI result:\t", result)
+    console.log("DH result 1: ", result)
     if (result == null) {
+        twoParents = false;
+        console.log("DH Turn detected: ", transcript)
         numStrings = String(node1.segments).split(' '); // Split by whitespace
         numbers = numStrings.map(Number).filter(num => !isNaN(num));
+        transcript = "";
         for (let i=0; i<numbers.length; i++) {
             transcript += this.tree[0][numbers[i]].segment;
         }
-        result = await this.openAI.gptResult(transcript, "");
+        result = await this.openAI.gptResult(transcript, lastTopic);
+        console.log("DH result 2: ", result)
         parentNodes = {[node1.depth]: [node1.id]};
+        id = node1.id;
+        segments = node1.segments;
     } else {
         parentNodes = (node1.depth==node2.depth) ?  {[node1.depth]: [node1.id, node2.id]} : {[node1.depth]: [node1.id], [node2.depth]: [node2.id]};
     }
@@ -120,12 +129,13 @@ export class DataHandler {
                         id,
                         depth,
                         parentNodes,
-                        segments
+                        segments,
+                        result.keywords
                         )
 
     // Push child node to parent node children
-    node1.childNodes.push(node.id)
-    node2.childNodes.push(node.id)
+    node1.childNodes[depth].push(node.id);
+    if (twoParents) node2.childNodes[depth].push(node.id);
     return node;
   }
 
@@ -138,17 +148,18 @@ export class DataHandler {
     return [id.join(''), segments.join(' ')];
   }
 
-  createNode(topic, description, segment, time, speakerTurns, id, depth, parentNodes, segments) {
+  createNode(topic, description, segment, time, speakerTurns, id, depth, parentNodes, segments, keywords) {
     return {"topic": topic,
           "description": description,
           "segment": segment,
           "time": time,
           "speakerTurns": speakerTurns,
-          "id": String(id),
+          "id": `${depth}-${String(id)}`,
           "depth": depth,
           "parentNodes": parentNodes,
-          "childNodes": [],
-          "segments": segments
+          "childNodes": {[depth+1]: []},
+          "segments": segments,
+          "keywords": keywords
         }
   }
 }

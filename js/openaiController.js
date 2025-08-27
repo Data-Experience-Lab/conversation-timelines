@@ -36,7 +36,7 @@ export class OpenAI {
                     properties: {
                       topic: {
                         type: "string",
-                        description: `1-3 words succinctly describing the overarching conversation topic of the segment. It should not use any of the following words: ${lastTopic}). It should be as specific as possible; rather than simply broadly classifying a topic about trying new foods as 'culinary experience', personalize the topic with words from the transcript as much as possible where it makes sense to do so.`
+                        description: `1-3 words succinctly describing the overarching conversation topic of the segment. It should not use any of the following words: ${lastTopic}. Highlight something else if possible.                              It should be as specific as possible; rather than simply broadly classifying a topic about trying new foods as 'culinary experience', personalize the topic with words from the transcript as much as possible where it makes sense to do so.`
                       },
                       sentence: {
                         type: "string",
@@ -45,9 +45,16 @@ export class OpenAI {
                       segment: {
                         type: "string",
                         description: "The segment of text for the detected topic, exactly as it was inputted to you. Do not change or drop a single word. However, add punctuation where necessary."
-                      }
+                      },
+                      keywords: {
+                        type: "array",
+                        items: {
+                          type: "string"
+                        },  
+                        description: `2-10 most important keywords (this may include clear phrases such as 'motorcycle license' or 'jen's wedding') from the transcript that give a clear idea of a part of the conversation at a quick glance, and that would be likely to trigger a memory of the conversation's specifics. Keywords should all exist in the transcript. Only provide as many keywords as is necessary to gain a general picture of transcript contents- shorter transcripts are more likely to have less keywords.`
+                      },
                     },
-                    required: ["topic", "sentence", "segment"],
+                    required: ["topic", "sentence", "segment", "keywords"],
                     additionalProperties: false
                   }
                 }
@@ -95,10 +102,6 @@ export class OpenAI {
                   schema: {
                     type: "object",
                     properties: {
-                      // is_same_topic: {
-                      //   type: "boolean",
-                      //   description: `Indicates whether the transcript is likely a continuation about the same topic as ${lastTopic}.`
-                      // },
                       has_turn: {
                         type: "boolean",
                         description: "Indicates whether there appears to be a turn in the conversation from the topic."
@@ -107,23 +110,12 @@ export class OpenAI {
                         type: "string",
                         description: "The relevant sentence indicating a turn in the conversation.",
                         nullable: true
-                      },
-                      topic: {
-                        type: "string",
-                        description: "The new conversation topic *after* the detected turn sentence, if any, succintly defined in 1-3 words.",
-                        nullable: true
-                      },
-                      transcript: {
-                        type: "string",
-                        description: "The transcript that was analyzed"
                       }
                     },
                     required: [
                       // "is_same_topic",
-                      "topic",
                       "has_turn",
                       "turn_sentence",
-                      "transcript"
                     ],
                     additionalProperties: false
                   }
@@ -141,76 +133,32 @@ export class OpenAI {
       return resultText;
   }
   
-  async gptResult(speech, lastTopic, mode = "topic") {
+   async gptResult(speech, lastTopic, mode = "topic") {
     // console.log(`1: ${speech}, ${lastTopic}`);
     let result = null;
 
     if (mode === "topic") {
       try {
         const value = await this.topicClassify(speech, lastTopic);
-        // console.log("topic result");
-        // console.log(value);
         result = value;
       } catch (error) {
-        // console.error("Error in topic mode:", error);
+        console.error("Error in topic mode:", error);
       }
     } else {
       try {
         // Check if the segment contains a turn sentence for a new topic
         const turn = await this.checkForTopicTurn(speech);
-        if (!turn.has_turn) {
+        if (turn.has_turn) {
           return null;
         } else {
           const value = await this.topicClassify(speech, lastTopic);
           result = value;
         }
-//         console.log("topic turn result");
-//         console.log(value);
-        
-        // // If a turn sentence is detected, split the segment into a preturn and a postturn
-        // if (!(value.turn_sentence==null)){
-        //   const turnSentence = value.turn_sentence;
-        //   // console.log(`turn sentence: ${turnSentence}`);
-        //   // console.log(speech.indexOf(turnSentence))
-          
-        //   const splitAtTurnSentence = (speech, turnSentence) =>
-        //     speech.includes(turnSentence)
-        //       ? [speech.slice(0, speech.indexOf(turnSentence)), speech.slice(speech.indexOf(turnSentence))]
-        //       : [speech, ""]; 
-          
-        //   const [preturn, postturn] = splitAtTurnSentence(speech.toLowerCase(), turnSentence.toLowerCase());
-        //   // console.log(`Preturn: ${preturn}`);
-        //   // console.log(`Postturn: ${postturn}`);
-          
-        //   //Only classify a new segment if the postturn and preturn is > 100 characters
-        //   if (postturn.length > 100 && preturn.length > 100) {
-        //     const topic = await this.topicClassify(postturn, lastTopic);
-        //     // console.log("topic result");
-        //     // console.log(topic);
-        //     topic.sentence = turnSentence;
-        //     console.log(topic)
-        //     result = [topic, preturn];
-        //   }
-        // }
       } catch (error) {
         console.error("Error in turn mode:", error);
       }
     }
 
     return result;
-  }
-  
-  async getSubtopics(speech) {
-    let subtopics = await this.subTopicClassify(speech);
-    let string = "";
-    console.log(subtopics)
-    for (let i=0; i < subtopics.length; i++) {
-      if (i==subtopics.length-1) {
-        string += `${subtopics[i]}`;
-      } else {
-        string += `${subtopics[i]} -> `;
-      }
-    }
-    return string;
   }
 }

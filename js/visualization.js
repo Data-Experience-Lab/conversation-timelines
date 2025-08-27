@@ -217,6 +217,8 @@ export class Visualization {
       }
       this.currViewedTopic = this.visibleTopics[this.visTopicIndex];
 
+      console.log("Aa ", this.visibleTopics)
+
       console.log(this.currViewedTopic)
       console.log(this.currViewedTopic.time)
       this.handleNavigation(
@@ -237,20 +239,6 @@ export class Visualization {
     } else {
       this.showTopics();
     }
-
-    this.lastBubbleLocations = {};
-    d3.selectAll(".speechBubbleGroup").each((d, i, nodes) => {
-      const node = nodes[i];
-      const rect = node.getBoundingClientRect();
-      // Store the position and size
-      this.lastBubbleLocations[node.id] = {
-        left: rect.left,
-        top: rect.top,
-        width: rect.width,
-        height: rect.height
-      };
-    });
-    console.log(this.lastBubbleLocations)
   }
 
 
@@ -308,7 +296,8 @@ export class Visualization {
 
     // Create topic elements
     if (this.treeDepth!=0) 
-      {
+    {
+      console.log('aa aa: ', this.visibleTopics)
 
       line.style("border", "2px solid white")
 
@@ -328,7 +317,7 @@ export class Visualization {
         .attr("class", "repSentences")
         .style("display", "none")
         .text((d) => d.description || d.repSentence || "Representative sentence...");
-      }
+    }
 
     setTimeout(() => {
       line.attr("class", "line show");
@@ -345,13 +334,9 @@ export class Visualization {
       });
 
     let time = line.append("div").attr("class", `timeDiv`)
-      // .style("margin-left", "4vw")
       .style("position", "absolute")
       .style("right", "3vw")
-      // .style("top", "0")
-      // .style("z-index", "10")
       .style("width", "10vw")
-      // .style("text-align", "right");
 
     time
       .append("h1")
@@ -524,7 +509,6 @@ export class Visualization {
           totalTime.style.color = "#bfbfbf";
         }
         time.style.color = "#bfbfbf";
-        // bar.style.border = "0.3vw solid black";
         entry.removeAttribute("id");
       }
     });
@@ -539,6 +523,8 @@ export class Visualization {
       });
     }
   }
+
+  
 
   // ************ Button click events ************
 
@@ -609,13 +595,13 @@ export class Visualization {
    // Zoom in (increase zoom value)
   zoomIn() {
     console.log("zoom in")
-    if (this.treeDepth<this.DataObj.getTreeSize())
+    if (this.treeDepth<this.DataObj.getTreeSize()-1)
     {
       this.treeDepth += 1;
       let newData = this.DataObj.getData(this.treeDepth);
       console.log(this.currViewedTopic)
-      if (!(this.currViewedTopic.childNodes.length==0)){
-        let targetId = this.currViewedTopic.childNodes[0];
+      if (!(Object.keys(this.currViewedTopic.childNodes).length==0)){
+        let targetId = this.currViewedTopic.childNodes[this.treeDepth][0];
         this.currIndex = newData.findIndex(item => item.id === targetId);
       } else {
         this.currIndex = newData.length-1;
