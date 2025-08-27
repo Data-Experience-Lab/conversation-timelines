@@ -4,1196 +4,467 @@ const mockData =
         {
             "topic": null,
             "description": null,
-            "segment": "Is there for this we just buy the lock on that one? Never had like I only sell the beans. Yeah, it's good. I. Mean we have the chili oil. ",
-            "time": "14:19:46",
+            "segment": "Continentally. Prepare I was not ready when she. Was ready. Oh my gosh. Yeah, I know. She was like, let's go skydiving. ",
+            "time": "00:01:50",
             "speakerTurns": {
-                "total": 30,
+                "total": 22,
                 "speakers": [
                     {
                         "speakerId": "Guest-1",
-                        "length": 16
+                        "length": 1
                     },
                     {
                         "speakerId": "Guest-2",
-                        "length": 14
+                        "length": 21
                     }
                 ],
                 "turns": [
                     {
                         "speakerId": "Guest-1",
-                        "speakerSeg": "Is there for this we just buy the lock on that one?",
-                        "length": 12
+                        "speakerSeg": "Continentally.",
+                        "length": 1
                     },
                     {
                         "speakerId": "Guest-2",
-                        "speakerSeg": "Never had like I only sell the beans.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-1",
-                        "speakerSeg": "Yeah, it's good. I.",
-                        "length": 4
+                        "speakerSeg": "Prepare I was not ready when she.",
+                        "length": 7
                     },
                     {
                         "speakerId": "Guest-2",
-                        "speakerSeg": "Mean we have the chili oil.",
-                        "length": 6
+                        "speakerSeg": "Was ready. Oh my gosh.",
+                        "length": 5
+                    },
+                    {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "Yeah, I know. She was like, let's go skydiving.",
+                        "length": 9
                     }
                 ]
             },
-            "id": "0",
+            "id": "0-0",
             "depth": 0,
             "parentNodes": null,
-            "childNodes": [
-                "01"
-            ],
+            "childNodes": {
+                "1": [
+                    "1-01"
+                ]
+            },
             "segments": "0"
         },
         {
             "topic": null,
             "description": null,
-            "segment": "Chili crisp. Oh. So it's good. I mean, we don't like making stuff. I know so like I know people make their own dumplings. ",
-            "time": "14:19:58",
+            "segment": "Like I've never even thought about this before. What do you mean? Yeah, I thought she was like joking at first or like by how soon she wanted to go, but. ",
+            "time": "00:02:01",
             "speakerTurns": {
-                "total": 24,
+                "total": 31,
                 "speakers": [
                     {
-                        "speakerId": "Guest-2",
-                        "length": 14
+                        "speakerId": "Guest-3",
+                        "length": 12
                     },
                     {
-                        "speakerId": "Guest-3",
-                        "length": 10
+                        "speakerId": "Guest-2",
+                        "length": 19
                     }
                 ],
                 "turns": [
                     {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Chili crisp.",
-                        "length": 2
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Oh.",
-                        "length": 1
-                    },
-                    {
                         "speakerId": "Guest-3",
-                        "speakerSeg": "So it's good. I mean, we don't like making stuff.",
-                        "length": 10
+                        "speakerSeg": "Like I've never even thought about this before. What do you mean?",
+                        "length": 12
                     },
                     {
                         "speakerId": "Guest-2",
-                        "speakerSeg": "I know so like I know people make their own dumplings.",
-                        "length": 11
+                        "speakerSeg": "Yeah, I thought she was like joking at first or like by how soon she wanted to go, but.",
+                        "length": 19
                     }
                 ]
             },
-            "id": "1",
+            "id": "0-1",
             "depth": 0,
             "parentNodes": null,
-            "childNodes": [
-                "01"
-            ],
+            "childNodes": {
+                "1": [
+                    "1-01"
+                ]
+            },
             "segments": "1"
         },
         {
             "topic": null,
             "description": null,
-            "segment": "Chili crisp and make their own like kimchi. Yeah, my dad only does the. I think we used to buy it too. So yeah. ",
-            "time": "14:20:09",
+            "segment": "Pictures of her. And I was like, Oh yeah, OK, yeah, I thought. I thought that there would be more time in between 2:00. Yeah, like she's, she's very much like. ",
+            "time": "00:02:12",
             "speakerTurns": {
-                "total": 24,
+                "total": 31,
                 "speakers": [
                     {
                         "speakerId": "Guest-2",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "length": 14
-                    },
-                    {
-                        "speakerId": "Guest-1",
-                        "length": 2
+                        "length": 31
                     }
                 ],
                 "turns": [
                     {
                         "speakerId": "Guest-2",
-                        "speakerSeg": "Chili crisp and make their own like kimchi.",
-                        "length": 8
+                        "speakerSeg": "Pictures of her. And I was like, Oh yeah, OK, yeah, I thought. I thought that there would be more time in between 2:00.",
+                        "length": 24
                     },
                     {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "Yeah, my dad only does the.",
-                        "length": 6
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "I think we used to buy it too.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-1",
-                        "speakerSeg": "So yeah.",
-                        "length": 2
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "Yeah, like she's, she's very much like.",
+                        "length": 7
                     }
                 ]
             },
-            "id": "2",
+            "id": "0-2",
             "depth": 0,
             "parentNodes": null,
-            "childNodes": [
-                "23"
-            ],
+            "childNodes": {
+                "1": [
+                    "1-23"
+                ]
+            },
             "segments": "2"
         },
         {
             "topic": null,
             "description": null,
-            "segment": "She learned how to make delta this year though the sticky rice. Oh yeah, yeah. He's my friend, makes it. So that was my first time I. ",
-            "time": "14:20:20",
+            "segment": "Times and I was always like oh like I'll think about it whatever and then she's like OK, enough is enough and she just went into this which is. Crazy. I was like, oh, do you think? ",
+            "time": "00:02:23",
             "speakerTurns": {
-                "total": 27,
+                "total": 37,
                 "speakers": [
                     {
                         "speakerId": "Guest-2",
-                        "length": 24
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "length": 3
+                        "length": 37
                     }
                 ],
                 "turns": [
                     {
                         "speakerId": "Guest-2",
-                        "speakerSeg": "She learned how to make delta this year though the sticky rice.",
-                        "length": 12
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "Oh yeah, yeah.",
-                        "length": 3
+                        "speakerSeg": "Times and I was always like oh like I'll think about it whatever and then she's like OK, enough is enough and she just went into this which is.",
+                        "length": 29
                     },
                     {
                         "speakerId": "Guest-2",
-                        "speakerSeg": "He's my friend, makes it.",
-                        "length": 5
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "So that was my first time I.",
-                        "length": 7
+                        "speakerSeg": "Crazy. I was like, oh, do you think?",
+                        "length": 8
                     }
                 ]
             },
-            "id": "3",
+            "id": "0-3",
             "depth": 0,
             "parentNodes": null,
-            "childNodes": [
-                "23"
-            ],
+            "childNodes": {
+                "1": [
+                    "1-23"
+                ]
+            },
             "segments": "3"
         },
         {
             "topic": null,
             "description": null,
-            "segment": "Like we make we used to make wonton. Never. I've never made like one time at home. Like we're like dumplings. I used to do it. We've never made like dump like other. ",
-            "time": "14:20:31",
-            "speakerTurns": {
-                "total": 33,
-                "speakers": [
-                    {
-                        "speakerId": "Guest-2",
-                        "length": 20
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "length": 13
-                    }
-                ],
-                "turns": [
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Like we make we used to make wonton.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "Never. I've never made like one time at home. Like we're like dumplings.",
-                        "length": 13
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I used to do it. We've never made like dump like other.",
-                        "length": 12
-                    }
-                ]
-            },
-            "id": "4",
-            "depth": 0,
-            "parentNodes": null,
-            "childNodes": [
-                "45"
-            ],
-            "segments": "4"
-        },
-        {
-            "topic": null,
-            "description": null,
-            "segment": "But we actually haven't actually asked my mom about that. We haven't done that in years. It was really good when my mom made it. Mm-hmm. And then? Oh yeah. ",
-            "time": "14:20:42",
-            "speakerTurns": {
-                "total": 30,
-                "speakers": [
-                    {
-                        "speakerId": "Guest-2",
-                        "length": 30
-                    }
-                ],
-                "turns": [
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But we actually haven't actually asked my mom about that. We haven't done that in years. It was really good when my mom made it.",
-                        "length": 25
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Mm-hmm. And then? Oh yeah.",
-                        "length": 5
-                    }
-                ]
-            },
-            "id": "5",
-            "depth": 0,
-            "parentNodes": null,
-            "childNodes": [
-                "45"
-            ],
-            "segments": "5"
-        },
-        {
-            "topic": null,
-            "description": null,
-            "segment": "Like, slaving away, just like rolling and rolling and rolling. And then I was like, alright, roll more. And I'm like, no, yeah. The thing is, like my mom does it herself. Because, well, I help. ",
-            "time": "14:20:53",
-            "speakerTurns": {
-                "total": 36,
-                "speakers": [
-                    {
-                        "speakerId": "Guest-3",
-                        "length": 32
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "length": 4
-                    }
-                ],
-                "turns": [
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "Like, slaving away, just like rolling and rolling and rolling. And then I was like, alright, roll more. And I'm like, no, yeah. The thing is, like my mom does it herself.",
-                        "length": 32
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Because, well, I help.",
-                        "length": 4
-                    }
-                ]
-            },
-            "id": "6",
-            "depth": 0,
-            "parentNodes": null,
-            "childNodes": [
-                "67"
-            ],
-            "segments": "6"
-        },
-        {
-            "topic": null,
-            "description": null,
-            "segment": "I'll always want to help her, but then she won't tell me when she starts. Or she'll start when I'm, like, in the middle of something. Yeah. And then I'll be like, well, I was gonna help you. And she'll just be like, well, you were busy. Yeah. OK. Well, you didn't. ",
-            "time": "14:21:05",
-            "speakerTurns": {
-                "total": 52,
-                "speakers": [
-                    {
-                        "speakerId": "Guest-3",
-                        "length": 52
-                    }
-                ],
-                "turns": [
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "I'll always want to help her, but then she won't tell me when she starts. Or she'll start when I'm, like, in the middle of something. Yeah. And then I'll be like, well, I was gonna help you. And she'll just be like, well, you were busy. Yeah. OK. Well, you didn't.",
-                        "length": 52
-                    }
-                ]
-            },
-            "id": "7",
-            "depth": 0,
-            "parentNodes": null,
-            "childNodes": [
-                "67"
-            ],
-            "segments": "7"
-        },
-        {
-            "topic": null,
-            "description": null,
-            "segment": "It's kinda like sucky 'cause then you feel bad, but then they make you feel bad even though it's not you, but it's like you but not you. ",
-            "time": "14:21:16",
-            "speakerTurns": {
-                "total": 28,
-                "speakers": [
-                    {
-                        "speakerId": "Guest-3",
-                        "length": 28
-                    }
-                ],
-                "turns": [
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "It's kinda like sucky 'cause then you feel bad, but then they make you feel bad even though it's not you, but it's like you but not you.",
-                        "length": 28
-                    }
-                ]
-            },
-            "id": "8",
-            "depth": 0,
-            "parentNodes": null,
-            "childNodes": [
-                "89"
-            ],
-            "segments": "8"
-        },
-        {
-            "topic": null,
-            "description": null,
-            "segment": "Didn't say anything. Could be like that, maybe like that. It's OK. At least they turn out deliciously, yeah. ",
-            "time": "14:21:27",
-            "speakerTurns": {
-                "total": 19,
-                "speakers": [
-                    {
-                        "speakerId": "Guest-3",
-                        "length": 10
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "length": 9
-                    }
-                ],
-                "turns": [
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "Didn't say anything. Could be like that, maybe like that.",
-                        "length": 10
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It's OK. At least they turn out deliciously, yeah.",
-                        "length": 9
-                    }
-                ]
-            },
-            "id": "9",
-            "depth": 0,
-            "parentNodes": null,
-            "childNodes": [
-                "89"
-            ],
-            "segments": "9"
-        },
-        {
-            "topic": null,
-            "description": null,
-            "segment": "Mid dumplings and spring rolls just kind of hit different spring. Rolls are so good. Oh, I used to make. ",
-            "time": "14:21:38",
-            "speakerTurns": {
-                "total": 20,
-                "speakers": [
-                    {
-                        "speakerId": "Guest-2",
-                        "length": 11
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "length": 9
-                    }
-                ],
-                "turns": [
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Mid dumplings and spring rolls just kind of hit different spring.",
-                        "length": 11
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "Rolls are so good.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "Oh, I used to make.",
-                        "length": 5
-                    }
-                ]
-            },
-            "id": "10",
-            "depth": 0,
-            "parentNodes": null,
-            "childNodes": [
-                "1011"
-            ],
-            "segments": "10"
-        },
-        {
-            "topic": null,
-            "description": null,
-            "segment": "What is this like? What is it like steam buns? Oh yeah, with. My I've never actually made those. They're they're just a little bit ugly, but. ",
-            "time": "14:21:48",
+            "segment": "Bro, I don't know, 'cause like he's I. I think he would 'cause he's definitely like an adrenaline junkie to a certain extent, like he really likes. ",
+            "time": "00:02:33",
             "speakerTurns": {
                 "total": 27,
                 "speakers": [
                     {
-                        "speakerId": "Guest-3",
-                        "length": 21
-                    },
-                    {
                         "speakerId": "Guest-2",
-                        "length": 6
-                    }
-                ],
-                "turns": [
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "What is this like? What is it like steam buns? Oh yeah, with.",
-                        "length": 13
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "My I've never actually made those.",
-                        "length": 6
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "They're they're just a little bit ugly, but.",
-                        "length": 8
-                    }
-                ]
-            },
-            "id": "11",
-            "depth": 0,
-            "parentNodes": null,
-            "childNodes": [
-                "1011"
-            ],
-            "segments": "11"
-        },
-        {
-            "topic": null,
-            "description": null,
-            "segment": "Make them. So I think it's like a, it's pretty much like a normal bread. In when you're making it like yeast and like flour and water stuff. ",
-            "time": "14:21:59",
-            "speakerTurns": {
-                "total": 28,
-                "speakers": [
-                    {
-                        "speakerId": "Guest-2",
-                        "length": 2
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "length": 26
-                    }
-                ],
-                "turns": [
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Make them.",
-                        "length": 2
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "So I think it's like a, it's pretty much like a normal bread.",
-                        "length": 13
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "In when you're making it like yeast and like flour and water stuff.",
-                        "length": 13
-                    }
-                ]
-            },
-            "id": "12",
-            "depth": 0,
-            "parentNodes": null,
-            "childNodes": [
-                "1213"
-            ],
-            "segments": "12"
-        },
-        {
-            "topic": null,
-            "description": null,
-            "segment": "Stuff no like butter or anything, but like basic bread ingredients and then you and then you just like wrap it and steam it basically. So it's like. ",
-            "time": "14:22:10",
-            "speakerTurns": {
-                "total": 28,
-                "speakers": [
-                    {
-                        "speakerId": "Guest-3",
-                        "length": 28
-                    }
-                ],
-                "turns": [
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "Stuff no like butter or anything, but like basic bread ingredients and then you and then you just like wrap it and steam it basically. So it's like.",
-                        "length": 28
-                    }
-                ]
-            },
-            "id": "13",
-            "depth": 0,
-            "parentNodes": null,
-            "childNodes": [
-                "1213"
-            ],
-            "segments": "13"
-        }
-    ],
-    "1": [
-        {
-            "topic": "CHILI OIL AND DUMPLINGS",
-            "description": "Mean we have the chili oil.",
-            "segment": "Is there for this we just buy the lock on that one? Never had like I only sell the beans. Yeah, it's good. I. Mean we have the chili oil. Chili crisp. Oh. So it's good. I mean, we don't like making stuff. I know so like I know people make their own dumplings. ",
-            "time": "14:19:46",
-            "speakerTurns": {
-                "total": 54,
-                "speakers": [
-                    {
-                        "speakerId": "Guest-1",
-                        "length": 16
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "length": 28
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "length": 10
-                    }
-                ],
-                "turns": [
-                    {
-                        "speakerId": "Guest-1",
-                        "speakerSeg": "Is there for this we just buy the lock on that one?",
-                        "length": 12
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Never had like I only sell the beans.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-1",
-                        "speakerSeg": "Yeah, it's good. I.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Mean we have the chili oil.",
-                        "length": 6
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Chili crisp.",
-                        "length": 2
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Oh.",
-                        "length": 1
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "So it's good. I mean, we don't like making stuff.",
-                        "length": 10
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I know so like I know people make their own dumplings.",
-                        "length": 11
-                    }
-                ]
-            },
-            "id": "01",
-            "depth": 1,
-            "parentNodes": {
-                "0": [
-                    "0",
-                    "1"
-                ]
-            },
-            "childNodes": [
-                "0123"
-            ],
-            "segments": "0 1"
-        },
-        {
-            "topic": "HOMEMADE FOODS",
-            "description": "She learned how to make delta this year though the sticky rice.",
-            "segment": "Chili crisp and make their own like kimchi. Yeah, my dad only does the. I think we used to buy it too. So yeah. She learned how to make delta this year though the sticky rice. Oh yeah, yeah. He's my friend, makes it. So that was my first time I. ",
-            "time": "14:20:09",
-            "speakerTurns": {
-                "total": 51,
-                "speakers": [
-                    {
-                        "speakerId": "Guest-2",
-                        "length": 32
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "length": 17
-                    },
-                    {
-                        "speakerId": "Guest-1",
-                        "length": 2
-                    }
-                ],
-                "turns": [
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Chili crisp and make their own like kimchi.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "Yeah, my dad only does the.",
-                        "length": 6
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "I think we used to buy it too.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-1",
-                        "speakerSeg": "So yeah.",
-                        "length": 2
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "She learned how to make delta this year though the sticky rice.",
-                        "length": 12
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "Oh yeah, yeah.",
-                        "length": 3
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "He's my friend, makes it.",
-                        "length": 5
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "So that was my first time I.",
-                        "length": 7
-                    }
-                ]
-            },
-            "id": "23",
-            "depth": 1,
-            "parentNodes": {
-                "0": [
-                    "2",
-                    "3"
-                ]
-            },
-            "childNodes": [
-                "0123"
-            ],
-            "segments": "2 3"
-        },
-        {
-            "topic": "HOMEMADE WONTONS",
-            "description": "It was really good when my mom made it.",
-            "segment": "Like we make we used to make wonton. Never. I've never made like one time at home. Like we're like dumplings. I used to do it. We've never made like dump like other. But we actually haven't actually asked my mom about that. We haven't done that in years. It was really good when my mom made it. Mm-hmm. And then? Oh yeah. ",
-            "time": "14:20:31",
-            "speakerTurns": {
-                "total": 63,
-                "speakers": [
-                    {
-                        "speakerId": "Guest-2",
-                        "length": 50
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "length": 13
-                    }
-                ],
-                "turns": [
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Like we make we used to make wonton.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "Never. I've never made like one time at home. Like we're like dumplings.",
-                        "length": 13
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I used to do it. We've never made like dump like other.",
-                        "length": 12
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But we actually haven't actually asked my mom about that. We haven't done that in years. It was really good when my mom made it.",
-                        "length": 25
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Mm-hmm. And then? Oh yeah.",
-                        "length": 5
-                    }
-                ]
-            },
-            "id": "45",
-            "depth": 1,
-            "parentNodes": {
-                "0": [
-                    "4",
-                    "5"
-                ]
-            },
-            "childNodes": [
-                "4567"
-            ],
-            "segments": "4 5"
-        },
-        {
-            "topic": "HELPING MOM",
-            "description": "I'll always want to help her, but then she won't tell me when she starts.",
-            "segment": "Like, slaving away, just like rolling and rolling and rolling. And then I was like, alright, roll more. And I'm like, no, yeah. The thing is, like my mom does it herself. Because, well, I help. I'll always want to help her, but then she won't tell me when she starts. Or she'll start when I'm, like, in the middle of something. Yeah. And then I'll be like, well, I was gonna help you. And she'll just be like, well, you were busy. Yeah. OK. Well, you didn't. ",
-            "time": "14:20:53",
-            "speakerTurns": {
-                "total": 88,
-                "speakers": [
-                    {
-                        "speakerId": "Guest-3",
-                        "length": 84
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "length": 4
-                    }
-                ],
-                "turns": [
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "Like, slaving away, just like rolling and rolling and rolling. And then I was like, alright, roll more. And I'm like, no, yeah. The thing is, like my mom does it herself.",
-                        "length": 32
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Because, well, I help.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "I'll always want to help her, but then she won't tell me when she starts. Or she'll start when I'm, like, in the middle of something. Yeah. And then I'll be like, well, I was gonna help you. And she'll just be like, well, you were busy. Yeah. OK. Well, you didn't.",
-                        "length": 52
-                    }
-                ]
-            },
-            "id": "67",
-            "depth": 1,
-            "parentNodes": {
-                "0": [
-                    "6",
-                    "7"
-                ]
-            },
-            "childNodes": [
-                "4567"
-            ],
-            "segments": "6 7"
-        },
-        {
-            "topic": "FEELING BAD AND FOOD",
-            "description": "It's kinda like sucky 'cause then you feel bad, but then they make you feel bad even though it's not you.",
-            "segment": "It's kinda like sucky 'cause then you feel bad, but then they make you feel bad even though it's not you, but it's like you but not you. Didn't say anything. Could be like that, maybe like that. It's OK. At least they turn out deliciously, yeah. ",
-            "time": "14:21:16",
-            "speakerTurns": {
-                "total": 47,
-                "speakers": [
-                    {
-                        "speakerId": "Guest-3",
-                        "length": 38
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "length": 9
-                    }
-                ],
-                "turns": [
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "It's kinda like sucky 'cause then you feel bad, but then they make you feel bad even though it's not you, but it's like you but not you.",
-                        "length": 28
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "Didn't say anything. Could be like that, maybe like that.",
-                        "length": 10
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "It's OK. At least they turn out deliciously, yeah.",
-                        "length": 9
-                    }
-                ]
-            },
-            "id": "89",
-            "depth": 1,
-            "parentNodes": {
-                "0": [
-                    "8",
-                    "9"
-                ]
-            },
-            "childNodes": [
-                "891011"
-            ],
-            "segments": "8 9"
-        },
-        {
-            "topic": "DUMPLINGS AND STEAM BUNS",
-            "description": "Oh, I used to make, what is this like, what is it like, steam buns?",
-            "segment": "Mid dumplings and spring rolls just kind of hit different spring. Rolls are so good. Oh, I used to make. What is this like? What is it like steam buns? Oh yeah, with. My I've never actually made those. They're they're just a little bit ugly, but. ",
-            "time": "14:21:38",
-            "speakerTurns": {
-                "total": 47,
-                "speakers": [
-                    {
-                        "speakerId": "Guest-2",
-                        "length": 17
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "length": 30
-                    }
-                ],
-                "turns": [
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Mid dumplings and spring rolls just kind of hit different spring.",
-                        "length": 11
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "Rolls are so good.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "Oh, I used to make.",
-                        "length": 5
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "What is this like? What is it like steam buns? Oh yeah, with.",
-                        "length": 13
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "My I've never actually made those.",
-                        "length": 6
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "They're they're just a little bit ugly, but.",
-                        "length": 8
-                    }
-                ]
-            },
-            "id": "1011",
-            "depth": 1,
-            "parentNodes": {
-                "0": [
-                    "10",
-                    "11"
-                ]
-            },
-            "childNodes": [
-                "891011"
-            ],
-            "segments": "10 11"
-        },
-        {
-            "topic": "STEAMED BREAD",
-            "description": "It's pretty much like a normal bread.",
-            "segment": "Make them. So I think it's like a, it's pretty much like a normal bread. In when you're making it like yeast and like flour and water stuff. Stuff no like butter or anything, but like basic bread ingredients and then you and then you just like wrap it and steam it basically. So it's like. ",
-            "time": "14:21:59",
-            "speakerTurns": {
-                "total": 56,
-                "speakers": [
-                    {
-                        "speakerId": "Guest-2",
-                        "length": 2
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "length": 54
-                    }
-                ],
-                "turns": [
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Make them.",
-                        "length": 2
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "So I think it's like a, it's pretty much like a normal bread.",
-                        "length": 13
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "In when you're making it like yeast and like flour and water stuff.",
-                        "length": 13
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "Stuff no like butter or anything, but like basic bread ingredients and then you and then you just like wrap it and steam it basically. So it's like.",
-                        "length": 28
-                    }
-                ]
-            },
-            "id": "1213",
-            "depth": 1,
-            "parentNodes": {
-                "0": [
-                    "12",
-                    "13"
-                ]
-            },
-            "childNodes": [],
-            "segments": "12 13"
-        }
-    ],
-    "2": [
-        {
-            "topic": "HOMEMADE FOOD",
-            "description": "I know people make their own dumplings, chili crisp and make their own like kimchi.",
-            "segment": "Is there for this we just buy the lock on that one? Never had like I only sell the beans. Yeah, it's good. I. Mean we have the chili oil. Chili crisp. Oh. So it's good. I mean, we don't like making stuff. I know so like I know people make their own dumplings. Chili crisp and make their own like kimchi. Yeah, my dad only does the. I think we used to buy it too. So yeah. She learned how to make delta this year though the sticky rice. Oh yeah, yeah. He's my friend, makes it. So that was my first time I. ",
-            "time": "14:19:46",
-            "speakerTurns": {
-                "total": 105,
-                "speakers": [
-                    {
-                        "speakerId": "Guest-1",
-                        "length": 18
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "length": 60
-                    },
-                    {
-                        "speakerId": "Guest-3",
                         "length": 27
                     }
                 ],
                 "turns": [
                     {
-                        "speakerId": "Guest-1",
-                        "speakerSeg": "Is there for this we just buy the lock on that one?",
-                        "length": 12
-                    },
-                    {
                         "speakerId": "Guest-2",
-                        "speakerSeg": "Never had like I only sell the beans.",
+                        "speakerSeg": "Bro, I don't know, 'cause like he's I.",
                         "length": 8
                     },
                     {
-                        "speakerId": "Guest-1",
-                        "speakerSeg": "Yeah, it's good. I.",
-                        "length": 4
-                    },
-                    {
                         "speakerId": "Guest-2",
-                        "speakerSeg": "Mean we have the chili oil.",
-                        "length": 6
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Chili crisp.",
-                        "length": 2
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Oh.",
-                        "length": 1
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "So it's good. I mean, we don't like making stuff.",
-                        "length": 10
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I know so like I know people make their own dumplings.",
-                        "length": 11
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Chili crisp and make their own like kimchi.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "Yeah, my dad only does the.",
-                        "length": 6
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "I think we used to buy it too.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-1",
-                        "speakerSeg": "So yeah.",
-                        "length": 2
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "She learned how to make delta this year though the sticky rice.",
-                        "length": 12
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "Oh yeah, yeah.",
-                        "length": 3
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "He's my friend, makes it.",
-                        "length": 5
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "So that was my first time I.",
-                        "length": 7
+                        "speakerSeg": "I think he would 'cause he's definitely like an adrenaline junkie to a certain extent, like he really likes.",
+                        "length": 19
                     }
                 ]
             },
-            "id": "0123",
-            "depth": 2,
-            "parentNodes": {
+            "id": "0-4",
+            "depth": 0,
+            "parentNodes": null,
+            "childNodes": {
                 "1": [
-                    "01",
-                    "23"
+                    "1-45"
                 ]
             },
-            "childNodes": [
-                "01234567"
-            ],
-            "segments": "0 1 2 3"
+            "segments": "4"
         },
         {
-            "topic": "MAKING WONTONS",
-            "description": "It was really good when my mom made it.",
-            "segment": "Like we make we used to make wonton. Never. I've never made like one time at home. Like we're like dumplings. I used to do it. We've never made like dump like other. But we actually haven't actually asked my mom about that. We haven't done that in years. It was really good when my mom made it. Mm-hmm. And then? Oh yeah. Like, slaving away, just like rolling and rolling and rolling. And then I was like, alright, roll more. And I'm like, no, yeah. The thing is, like my mom does it herself. Because, well, I help. I'll always want to help her, but then she won't tell me when she starts. Or she'll start when I'm, like, in the middle of something. Yeah. And then I'll be like, well, I was gonna help you. And she'll just be like, well, you were busy. Yeah. OK. Well, you didn't. ",
-            "time": "14:20:31",
+            "topic": null,
+            "description": null,
+            "segment": "That type of stuff. But I mean, honestly, yeah, probably. Go together then, that'd be cute. Well, I. ",
+            "time": "00:02:44",
             "speakerTurns": {
-                "total": 151,
+                "total": 18,
                 "speakers": [
                     {
                         "speakerId": "Guest-2",
-                        "length": 54
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "length": 97
+                        "length": 18
                     }
                 ],
                 "turns": [
                     {
                         "speakerId": "Guest-2",
-                        "speakerSeg": "Like we make we used to make wonton.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "Never. I've never made like one time at home. Like we're like dumplings.",
-                        "length": 13
+                        "speakerSeg": "That type of stuff. But I mean, honestly, yeah, probably.",
+                        "length": 10
                     },
                     {
                         "speakerId": "Guest-2",
-                        "speakerSeg": "I used to do it. We've never made like dump like other.",
-                        "length": 12
+                        "speakerSeg": "Go together then, that'd be cute.",
+                        "length": 6
                     },
                     {
                         "speakerId": "Guest-2",
-                        "speakerSeg": "But we actually haven't actually asked my mom about that. We haven't done that in years. It was really good when my mom made it.",
-                        "length": 25
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Mm-hmm. And then? Oh yeah.",
-                        "length": 5
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "Like, slaving away, just like rolling and rolling and rolling. And then I was like, alright, roll more. And I'm like, no, yeah. The thing is, like my mom does it herself.",
-                        "length": 32
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Because, well, I help.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "I'll always want to help her, but then she won't tell me when she starts. Or she'll start when I'm, like, in the middle of something. Yeah. And then I'll be like, well, I was gonna help you. And she'll just be like, well, you were busy. Yeah. OK. Well, you didn't.",
-                        "length": 52
+                        "speakerSeg": "Well, I.",
+                        "length": 2
                     }
                 ]
             },
-            "id": "4567",
-            "depth": 2,
-            "parentNodes": {
+            "id": "0-5",
+            "depth": 0,
+            "parentNodes": null,
+            "childNodes": {
                 "1": [
-                    "45",
-                    "67"
+                    "1-45"
                 ]
             },
-            "childNodes": [
-                "01234567"
-            ],
-            "segments": "4 5 6 7"
+            "segments": "5"
         },
         {
-            "topic": "DUMPLINGS AND SPRING ROLLS",
-            "description": "Mid dumplings and spring rolls just kind of hit different spring.",
-            "segment": "It's kinda like sucky 'cause then you feel bad, but then they make you feel bad even though it's not you, but it's like you but not you. Didn't say anything. Could be like that, maybe like that. It's OK. At least they turn out deliciously, yeah. Mid dumplings and spring rolls just kind of hit different spring. Rolls are so good. Oh, I used to make. What is this like? What is it like steam buns? Oh yeah, with. My I've never actually made those. They're they're just a little bit ugly, but. ",
-            "time": "14:21:16",
+            "topic": null,
+            "description": null,
+            "segment": "1-2 But I'm also like, there's just so many implications of going because it's like like, yeah, you're with the instructor, but like things can always go. ",
+            "time": "00:02:55",
             "speakerTurns": {
-                "total": 94,
+                "total": 27,
                 "speakers": [
                     {
-                        "speakerId": "Guest-3",
-                        "length": 68
-                    },
+                        "speakerId": "Guest-2",
+                        "length": 27
+                    }
+                ],
+                "turns": [
+                    {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "1-2 But I'm also like, there's just so many implications of going because it's like like, yeah, you're with the instructor, but like things can always go.",
+                        "length": 27
+                    }
+                ]
+            },
+            "id": "0-6",
+            "depth": 0,
+            "parentNodes": null,
+            "childNodes": {
+                "1": [
+                    "1-6"
+                ]
+            },
+            "segments": "6"
+        },
+        {
+            "topic": null,
+            "description": null,
+            "segment": "But another thing is like I wanna get my actual motorcycle license. ",
+            "time": "00:03:06",
+            "speakerTurns": {
+                "total": 12,
+                "speakers": [
+                    {
+                        "speakerId": "Guest-2",
+                        "length": 12
+                    }
+                ],
+                "turns": [
+                    {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "But another thing is like I wanna get my actual motorcycle license.",
+                        "length": 12
+                    }
+                ]
+            },
+            "id": "0-7",
+            "depth": 0,
+            "parentNodes": null,
+            "childNodes": {
+                "1": [
+                    "1-78"
+                ]
+            },
+            "segments": "7"
+        },
+        {
+            "topic": null,
+            "description": null,
+            "segment": "I know the lessons. Let me tell you why. OK, 'cause I did do the lessons right and like, it was fine, whatever. But The thing is. ",
+            "time": "00:03:17",
+            "speakerTurns": {
+                "total": 27,
+                "speakers": [
+                    {
+                        "speakerId": "Guest-2",
+                        "length": 27
+                    }
+                ],
+                "turns": [
+                    {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "I know the lessons. Let me tell you why. OK, 'cause I did do the lessons right and like, it was fine, whatever. But The thing is.",
+                        "length": 27
+                    }
+                ]
+            },
+            "id": "0-8",
+            "depth": 0,
+            "parentNodes": null,
+            "childNodes": {
+                "1": [
+                    "1-78"
+                ]
+            },
+            "segments": "8"
+        },
+        {
+            "topic": null,
+            "description": null,
+            "segment": "You can't practice without a license and like the way you get the license is with a driven text. So it's like it's not like where you can get a learners and have smoking. ",
+            "time": "00:03:28",
+            "speakerTurns": {
+                "total": 34,
+                "speakers": [
+                    {
+                        "speakerId": "Guest-2",
+                        "length": 34
+                    }
+                ],
+                "turns": [
+                    {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "You can't practice without a license and like the way you get the license is with a driven text. So it's like it's not like where you can get a learners and have smoking.",
+                        "length": 34
+                    }
+                ]
+            },
+            "id": "0-9",
+            "depth": 0,
+            "parentNodes": null,
+            "childNodes": {
+                "1": [
+                    "1-910"
+                ]
+            },
+            "segments": "9"
+        },
+        {
+            "topic": null,
+            "description": null,
+            "segment": "Is there with you right that's fully licensed you can't do that with a motorcycle right and then it's also like do I really wanna invest like 3-4 K in a bike and I'm still learning and like what happens if I. ",
+            "time": "00:03:39",
+            "speakerTurns": {
+                "total": 42,
+                "speakers": [
+                    {
+                        "speakerId": "Guest-2",
+                        "length": 42
+                    }
+                ],
+                "turns": [
+                    {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "Is there with you right that's fully licensed you can't do that with a motorcycle right and then it's also like do I really wanna invest like 3-4 K in a bike and I'm still learning and like what happens if I.",
+                        "length": 42
+                    }
+                ]
+            },
+            "id": "0-10",
+            "depth": 0,
+            "parentNodes": null,
+            "childNodes": {
+                "1": [
+                    "1-910"
+                ]
+            },
+            "segments": "10"
+        },
+        {
+            "topic": null,
+            "description": null,
+            "segment": "You know, there's like lots of things that can ruin a bike. Yeah, So you know what I mean? So it's like I need to either be able to rent one at. ",
+            "time": "00:03:50",
+            "speakerTurns": {
+                "total": 32,
+                "speakers": [
+                    {
+                        "speakerId": "Guest-2",
+                        "length": 32
+                    }
+                ],
+                "turns": [
+                    {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "You know, there's like lots of things that can ruin a bike. Yeah, So you know what I mean? So it's like I need to either be able to rent one at.",
+                        "length": 32
+                    }
+                ]
+            },
+            "id": "0-11",
+            "depth": 0,
+            "parentNodes": null,
+            "childNodes": {
+                "1": [
+                    "1-1112"
+                ]
+            },
+            "segments": "11"
+        },
+        {
+            "topic": null,
+            "description": null,
+            "segment": "Be able to get decent or I have to buy one and be like incredibly careful But I don't know if I trust myself enough yet 'cause I feel like even if you write 1. ",
+            "time": "00:04:01",
+            "speakerTurns": {
+                "total": 35,
+                "speakers": [
+                    {
+                        "speakerId": "Guest-2",
+                        "length": 35
+                    }
+                ],
+                "turns": [
+                    {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "Be able to get decent or I have to buy one and be like incredibly careful But I don't know if I trust myself enough yet 'cause I feel like even if you write 1.",
+                        "length": 35
+                    }
+                ]
+            },
+            "id": "0-12",
+            "depth": 0,
+            "parentNodes": null,
+            "childNodes": {
+                "1": [
+                    "1-1112"
+                ]
+            },
+            "segments": "12"
+        },
+        {
+            "topic": null,
+            "description": null,
+            "segment": "I feel like that would still cost you money, right? Well, it's a little different because like when I did my lessons, I did end up. ",
+            "time": "00:04:12",
+            "speakerTurns": {
+                "total": 26,
+                "speakers": [
                     {
                         "speakerId": "Guest-2",
                         "length": 26
@@ -1201,221 +472,801 @@ const mockData =
                 ],
                 "turns": [
                     {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "It's kinda like sucky 'cause then you feel bad, but then they make you feel bad even though it's not you, but it's like you but not you.",
-                        "length": 28
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "Didn't say anything. Could be like that, maybe like that.",
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "I feel like that would still cost you money, right?",
                         "length": 10
                     },
                     {
                         "speakerId": "Guest-2",
-                        "speakerSeg": "It's OK. At least they turn out deliciously, yeah.",
-                        "length": 9
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Mid dumplings and spring rolls just kind of hit different spring.",
-                        "length": 11
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "Rolls are so good.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "Oh, I used to make.",
-                        "length": 5
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "What is this like? What is it like steam buns? Oh yeah, with.",
-                        "length": 13
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "My I've never actually made those.",
-                        "length": 6
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "They're they're just a little bit ugly, but.",
-                        "length": 8
+                        "speakerSeg": "Well, it's a little different because like when I did my lessons, I did end up.",
+                        "length": 16
                     }
                 ]
             },
-            "id": "891011",
-            "depth": 2,
-            "parentNodes": {
+            "id": "0-13",
+            "depth": 0,
+            "parentNodes": null,
+            "childNodes": {
                 "1": [
-                    "89",
-                    "1011"
+                    "1-1314"
                 ]
             },
-            "childNodes": [],
-            "segments": "8 9 10 11"
-        }
-    ],
-    "3": [
+            "segments": "13"
+        },
         {
-            "topic": "MAKING DUMPLINGS",
-            "description": "It was really good when my mom made it.",
-            "segment": "Is there for this we just buy the lock on that one? Never had like I only sell the beans. Yeah, it's good. I. Mean we have the chili oil. Chili crisp. Oh. So it's good. I mean, we don't like making stuff. I know so like I know people make their own dumplings. Chili crisp and make their own like kimchi. Yeah, my dad only does the. I think we used to buy it too. So yeah. She learned how to make delta this year though the sticky rice. Oh yeah, yeah. He's my friend, makes it. So that was my first time I. Like we make we used to make wonton. Never. I've never made like one time at home. Like we're like dumplings. I used to do it. We've never made like dump like other. But we actually haven't actually asked my mom about that. We haven't done that in years. It was really good when my mom made it. Mm-hmm. And then? Oh yeah. Like, slaving away, just like rolling and rolling and rolling. And then I was like, alright, roll more. And I'm like, no, yeah. The thing is, like my mom does it herself. Because, well, I help. I'll always want to help her, but then she won't tell me when she starts. Or she'll start when I'm, like, in the middle of something. Yeah. And then I'll be like, well, I was gonna help you. And she'll just be like, well, you were busy. Yeah. OK. Well, you didn't. ",
-            "time": "14:19:46",
+            "topic": null,
+            "description": null,
+            "segment": "Or not crashing, but I did drop 2 bikes but they couldn't drive to me because it's included in the fee. Yeah, I mean I guess. ",
+            "time": "00:04:22",
             "speakerTurns": {
-                "total": 256,
+                "total": 26,
                 "speakers": [
                     {
-                        "speakerId": "Guest-1",
-                        "length": 18
-                    },
-                    {
                         "speakerId": "Guest-2",
-                        "length": 114
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "length": 124
+                        "length": 26
                     }
                 ],
                 "turns": [
                     {
-                        "speakerId": "Guest-1",
-                        "speakerSeg": "Is there for this we just buy the lock on that one?",
-                        "length": 12
-                    },
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "Or not crashing, but I did drop 2 bikes but they couldn't drive to me because it's included in the fee. Yeah, I mean I guess.",
+                        "length": 26
+                    }
+                ]
+            },
+            "id": "0-14",
+            "depth": 0,
+            "parentNodes": null,
+            "childNodes": {
+                "1": [
+                    "1-1314"
+                ]
+            },
+            "segments": "14"
+        },
+        {
+            "topic": null,
+            "description": null,
+            "segment": "It doesn't get completely. Busted. Yeah. What would be on your bucket list? OK. ",
+            "time": "00:04:33",
+            "speakerTurns": {
+                "total": 14,
+                "speakers": [
                     {
                         "speakerId": "Guest-2",
-                        "speakerSeg": "Never had like I only sell the beans.",
-                        "length": 8
-                    },
+                        "length": 14
+                    }
+                ],
+                "turns": [
                     {
-                        "speakerId": "Guest-1",
-                        "speakerSeg": "Yeah, it's good. I.",
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "It doesn't get completely.",
                         "length": 4
                     },
                     {
                         "speakerId": "Guest-2",
-                        "speakerSeg": "Mean we have the chili oil.",
-                        "length": 6
+                        "speakerSeg": "Busted. Yeah. What would be on your bucket list?",
+                        "length": 9
                     },
                     {
                         "speakerId": "Guest-2",
-                        "speakerSeg": "Chili crisp.",
-                        "length": 2
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Oh.",
+                        "speakerSeg": "OK.",
                         "length": 1
+                    }
+                ]
+            },
+            "id": "0-15",
+            "depth": 0,
+            "parentNodes": null,
+            "childNodes": {
+                "1": [
+                    "1-1516"
+                ]
+            },
+            "segments": "15"
+        },
+        {
+            "topic": null,
+            "description": null,
+            "segment": "Honestly, I feel like I have achieved a lot of those things in the past couple years, OK. ",
+            "time": "00:04:44",
+            "speakerTurns": {
+                "total": 18,
+                "speakers": [
+                    {
+                        "speakerId": "Guest-2",
+                        "length": 18
+                    }
+                ],
+                "turns": [
+                    {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "Honestly, I feel like I have achieved a lot of those things in the past couple years, OK.",
+                        "length": 18
+                    }
+                ]
+            },
+            "id": "0-16",
+            "depth": 0,
+            "parentNodes": null,
+            "childNodes": {
+                "1": [
+                    "1-1516"
+                ]
+            },
+            "segments": "16"
+        },
+        {
+            "topic": null,
+            "description": null,
+            "segment": "The one thing that was on my bucket list for a really long time, but I did it when. I was in Singapore, no when I went to Indonesia. Yeah, well, I always really wanted to go like. ",
+            "time": "00:04:55",
+            "speakerTurns": {
+                "total": 38,
+                "speakers": [
+                    {
+                        "speakerId": "Guest-2",
+                        "length": 28
                     },
                     {
                         "speakerId": "Guest-3",
-                        "speakerSeg": "So it's good. I mean, we don't like making stuff.",
+                        "length": 10
+                    }
+                ],
+                "turns": [
+                    {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "The one thing that was on my bucket list for a really long time, but I did it when.",
+                        "length": 19
+                    },
+                    {
+                        "speakerId": "Guest-3",
+                        "speakerSeg": "I was in Singapore, no when I went to Indonesia.",
                         "length": 10
                     },
                     {
                         "speakerId": "Guest-2",
-                        "speakerSeg": "I know so like I know people make their own dumplings.",
-                        "length": 11
-                    },
+                        "speakerSeg": "Yeah, well, I always really wanted to go like.",
+                        "length": 9
+                    }
+                ]
+            },
+            "id": "0-17",
+            "depth": 0,
+            "parentNodes": null,
+            "childNodes": {
+                "1": [
+                    "1-1718"
+                ]
+            },
+            "segments": "17"
+        },
+        {
+            "topic": null,
+            "description": null,
+            "segment": "Behind the waterfalls. Oh, yeah, yeah, yeah. I always wanted to do that. And then I got to do when I was in Indonesia. It was kind of must need to be honest. ",
+            "time": "00:05:06",
+            "speakerTurns": {
+                "total": 33,
+                "speakers": [
                     {
                         "speakerId": "Guest-2",
-                        "speakerSeg": "Chili crisp and make their own like kimchi.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "Yeah, my dad only does the.",
-                        "length": 6
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "I think we used to buy it too.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-1",
-                        "speakerSeg": "So yeah.",
-                        "length": 2
-                    },
+                        "length": 33
+                    }
+                ],
+                "turns": [
                     {
                         "speakerId": "Guest-2",
-                        "speakerSeg": "She learned how to make delta this year though the sticky rice.",
-                        "length": 12
-                    },
+                        "speakerSeg": "Behind the waterfalls. Oh, yeah, yeah, yeah. I always wanted to do that. And then I got to do when I was in Indonesia. It was kind of must need to be honest.",
+                        "length": 33
+                    }
+                ]
+            },
+            "id": "0-18",
+            "depth": 0,
+            "parentNodes": null,
+            "childNodes": {
+                "1": [
+                    "1-1718"
+                ]
+            },
+            "segments": "18"
+        },
+        {
+            "topic": null,
+            "description": null,
+            "segment": "Oh, really? Yes. I didn't know it was like it'd be *****. Oh, I mean, it's a big cave with like an eternal flow of water coming down. ",
+            "time": "00:05:17",
+            "speakerTurns": {
+                "total": 28,
+                "speakers": [
                     {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "Oh yeah, yeah.",
+                        "speakerId": "Guest-2",
+                        "length": 28
+                    }
+                ],
+                "turns": [
+                    {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "Oh, really? Yes.",
                         "length": 3
                     },
                     {
                         "speakerId": "Guest-2",
-                        "speakerSeg": "He's my friend, makes it.",
-                        "length": 5
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "So that was my first time I.",
-                        "length": 7
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Like we make we used to make wonton.",
-                        "length": 8
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "Never. I've never made like one time at home. Like we're like dumplings.",
-                        "length": 13
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "I used to do it. We've never made like dump like other.",
-                        "length": 12
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "But we actually haven't actually asked my mom about that. We haven't done that in years. It was really good when my mom made it.",
+                        "speakerSeg": "I didn't know it was like it'd be *****. Oh, I mean, it's a big cave with like an eternal flow of water coming down.",
                         "length": 25
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Mm-hmm. And then? Oh yeah.",
-                        "length": 5
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "Like, slaving away, just like rolling and rolling and rolling. And then I was like, alright, roll more. And I'm like, no, yeah. The thing is, like my mom does it herself.",
-                        "length": 32
-                    },
-                    {
-                        "speakerId": "Guest-2",
-                        "speakerSeg": "Because, well, I help.",
-                        "length": 4
-                    },
-                    {
-                        "speakerId": "Guest-3",
-                        "speakerSeg": "I'll always want to help her, but then she won't tell me when she starts. Or she'll start when I'm, like, in the middle of something. Yeah. And then I'll be like, well, I was gonna help you. And she'll just be like, well, you were busy. Yeah. OK. Well, you didn't.",
-                        "length": 52
                     }
                 ]
             },
-            "id": "01234567",
+            "id": "0-19",
+            "depth": 0,
+            "parentNodes": null,
+            "childNodes": {
+                "1": [
+                    "1-1920"
+                ]
+            },
+            "segments": "19"
+        },
+        {
+            "topic": null,
+            "description": null,
+            "segment": "To the duck neck cave. OK, yeah, you put it like that honestly. OK, to be fair, I kind of didn't expect it either. ",
+            "time": "00:05:28",
+            "speakerTurns": {
+                "total": 24,
+                "speakers": [
+                    {
+                        "speakerId": "Guest-2",
+                        "length": 24
+                    }
+                ],
+                "turns": [
+                    {
+                        "speakerId": "Guest-2",
+                        "speakerSeg": "To the duck neck cave. OK, yeah, you put it like that honestly. OK, to be fair, I kind of didn't expect it either.",
+                        "length": 24
+                    }
+                ]
+            },
+            "id": "0-20",
+            "depth": 0,
+            "parentNodes": null,
+            "childNodes": {
+                "1": [
+                    "1-1920"
+                ]
+            },
+            "segments": "20"
+        }
+    ],
+    "1": [
+        {
+            "topic": "SKYDIVING PROPOSAL",
+            "description": "She was like, let's go skydiving.",
+            "segment": "Continentally. Prepare I was not ready when she. Was ready. Oh my gosh. Yeah, I know. She was like, let's go skydiving. Like I've never even thought about this before. What do you mean? Yeah, I thought she was like joking at first or like by how soon she wanted to go, but. ",
+            "time": "00:01:50",
+            "speakerTurns": null,
+            "id": "1-01",
+            "depth": 1,
+            "parentNodes": {
+                "0": [
+                    "0-0",
+                    "0-1"
+                ]
+            },
+            "childNodes": {
+                "2": [
+                    "2-0123"
+                ]
+            },
+            "segments": "0 1",
+            "keywords": [
+                "ready",
+                "skydiving",
+                "joking",
+                "thought about this"
+            ]
+        },
+        {
+            "topic": "TIMING EXPECTATIONS",
+            "description": "I thought that there would be more time in between.",
+            "segment": "Pictures of her. And I was like, Oh yeah, OK, yeah, I thought. I thought that there would be more time in between 2:00. Yeah, like she's, she's very much like. Times and I was always like oh like I'll think about it whatever and then she's like OK, enough is enough and she just went into this which is. Crazy. I was like, oh, do you think? ",
+            "time": "00:02:12",
+            "speakerTurns": null,
+            "id": "1-23",
+            "depth": 1,
+            "parentNodes": {
+                "0": [
+                    "0-2",
+                    "0-3"
+                ]
+            },
+            "childNodes": {
+                "2": [
+                    "2-0123"
+                ]
+            },
+            "segments": "2 3",
+            "keywords": [
+                "pictures of her",
+                "more time in between",
+                "times",
+                "enough is enough"
+            ]
+        },
+        {
+            "topic": "ADRENALINE EXPERIENCES",
+            "description": "He's definitely like an adrenaline junkie to a certain extent.",
+            "segment": "Bro, I don't know, 'cause like he's I. I think he would 'cause he's definitely like an adrenaline junkie to a certain extent, like he really likes. That type of stuff. But I mean, honestly, yeah, probably. Go together then, that'd be cute. Well, I. ",
+            "time": "00:02:33",
+            "speakerTurns": null,
+            "id": "1-45",
+            "depth": 1,
+            "parentNodes": {
+                "0": [
+                    "0-4",
+                    "0-5"
+                ]
+            },
+            "childNodes": {
+                "2": [
+                    "2-456"
+                ]
+            },
+            "segments": "4 5",
+            "keywords": [
+                "adrenaline junkie",
+                "adrenaline experiences"
+            ]
+        },
+        {
+            "topic": "SAFETY CONCERNS",
+            "description": "But I'm also like, there's just so many implications of going because it's like like, yeah, you're with the instructor, but like things can always go.",
+            "segment": "1-2 But I'm also like, there's just so many implications of going because it's like like, yeah, you're with the instructor, but like things can always go. ",
+            "time": "00:02:55",
+            "speakerTurns": null,
+            "id": "1-6",
+            "depth": 1,
+            "parentNodes": {
+                "0": [
+                    "0-6"
+                ]
+            },
+            "childNodes": {
+                "2": [
+                    "2-456"
+                ]
+            },
+            "segments": "6",
+            "keywords": [
+                "implications",
+                "instructor",
+                "safety",
+                "going"
+            ]
+        },
+        {
+            "topic": "MOTORCYCLE LICENSING",
+            "description": "But another thing is like I wanna get my actual motorcycle license.",
+            "segment": "But another thing is like I wanna get my actual motorcycle license. I know the lessons. Let me tell you why. OK, 'cause I did do the lessons right and like, it was fine, whatever. But The thing is. ",
+            "time": "00:03:06",
+            "speakerTurns": null,
+            "id": "1-78",
+            "depth": 1,
+            "parentNodes": {
+                "0": [
+                    "0-7",
+                    "0-8"
+                ]
+            },
+            "childNodes": {
+                "2": [
+                    "2-78910"
+                ]
+            },
+            "segments": "7 8",
+            "keywords": [
+                "motorcycle license",
+                "lessons",
+                "actual",
+                "get"
+            ]
+        },
+        {
+            "topic": "MOTORCYCLE LICENSING",
+            "description": "You can't practice without a license and like the way you get the license is with a driven text.",
+            "segment": "You can't practice without a license and like the way you get the license is with a driven text. So it's like it's not like where you can get a learners and have smoking. Is there with you right that's fully licensed you can't do that with a motorcycle right and then it's also like do I really wanna invest like 3-4 K in a bike and I'm still learning and like what happens if I. ",
+            "time": "00:03:28",
+            "speakerTurns": null,
+            "id": "1-910",
+            "depth": 1,
+            "parentNodes": {
+                "0": [
+                    "0-9",
+                    "0-10"
+                ]
+            },
+            "childNodes": {
+                "2": [
+                    "2-78910"
+                ]
+            },
+            "segments": "9 10",
+            "keywords": [
+                "motorcycle license",
+                "driven test",
+                "learners",
+                "motorcycle",
+                "investment",
+                "3-4 K",
+                "learning"
+            ]
+        },
+        {
+            "topic": "BIKE CONCERNS",
+            "description": "There's lots of things that can ruin a bike.",
+            "segment": "You know, there's like lots of things that can ruin a bike. Yeah, So you know what I mean? So it's like I need to either be able to rent one at. Be able to get decent or I have to buy one and be like incredibly careful But I don't know if I trust myself enough yet 'cause I feel like even if you write 1. ",
+            "time": "00:03:50",
+            "speakerTurns": null,
+            "id": "1-1112",
+            "depth": 1,
+            "parentNodes": {
+                "0": [
+                    "0-11",
+                    "0-12"
+                ]
+            },
+            "childNodes": {
+                "2": [
+                    "2-11121314"
+                ]
+            },
+            "segments": "11 12",
+            "keywords": [
+                "ruin a bike",
+                "rent one",
+                "buy one",
+                "careful",
+                "trust myself"
+            ]
+        },
+        {
+            "topic": "MOTORCYCLE LESSONS",
+            "description": "It's a little different because like when I did my lessons, I did end up.",
+            "segment": "I feel like that would still cost you money, right? Well, it's a little different because like when I did my lessons, I did end up. Or not crashing, but I did drop 2 bikes but they couldn't drive to me because it's included in the fee. Yeah, I mean I guess. ",
+            "time": "00:04:12",
+            "speakerTurns": null,
+            "id": "1-1314",
+            "depth": 1,
+            "parentNodes": {
+                "0": [
+                    "0-13",
+                    "0-14"
+                ]
+            },
+            "childNodes": {
+                "2": [
+                    "2-11121314"
+                ]
+            },
+            "segments": "13 14",
+            "keywords": [
+                "lessons",
+                "cost",
+                "drop 2 bikes",
+                "included in the fee"
+            ]
+        },
+        {
+            "topic": "BUCKET LIST ACHIEVEMENTS",
+            "description": "Honestly, I feel like I have achieved a lot of those things in the past couple years.",
+            "segment": "It doesn't get completely. Busted. Yeah. What would be on your bucket list? OK. Honestly, I feel like I have achieved a lot of those things in the past couple years, OK. ",
+            "time": "00:04:33",
+            "speakerTurns": null,
+            "id": "1-1516",
+            "depth": 1,
+            "parentNodes": {
+                "0": [
+                    "0-15",
+                    "0-16"
+                ]
+            },
+            "childNodes": {
+                "2": [
+                    "2-15161718"
+                ]
+            },
+            "segments": "15 16",
+            "keywords": [
+                "bucket list",
+                "achievements",
+                "past couple years"
+            ]
+        },
+        {
+            "topic": "INDONESIA WATERFALL EXPERIENCE",
+            "description": "I always really wanted to go behind the waterfalls, and then I got to do when I was in Indonesia.",
+            "segment": "The one thing that was on my bucket list for a really long time, but I did it when. I was in Singapore, no when I went to Indonesia. Yeah, well, I always really wanted to go like. Behind the waterfalls. Oh, yeah, yeah, yeah. I always wanted to do that. And then I got to do when I was in Indonesia. It was kind of must need to be honest. ",
+            "time": "00:04:55",
+            "speakerTurns": null,
+            "id": "1-1718",
+            "depth": 1,
+            "parentNodes": {
+                "0": [
+                    "0-17",
+                    "0-18"
+                ]
+            },
+            "childNodes": {
+                "2": [
+                    "2-15161718"
+                ]
+            },
+            "segments": "17 18",
+            "keywords": [
+                "bucket list",
+                "Singapore",
+                "Indonesia",
+                "behind the waterfalls"
+            ]
+        },
+        {
+            "topic": "DUCK NECK CAVE",
+            "description": "I mean, it's a big cave with like an eternal flow of water coming down to the duck neck cave.",
+            "segment": "Oh, really? Yes. I didn't know it was like it'd be *****. Oh, I mean, it's a big cave with like an eternal flow of water coming down. To the duck neck cave. OK, yeah, you put it like that honestly. OK, to be fair, I kind of didn't expect it either. ",
+            "time": "00:05:17",
+            "speakerTurns": null,
+            "id": "1-1920",
+            "depth": 1,
+            "parentNodes": {
+                "0": [
+                    "0-19",
+                    "0-20"
+                ]
+            },
+            "childNodes": {
+                "2": []
+            },
+            "segments": "19 20",
+            "keywords": [
+                "big cave",
+                "eternal flow of water",
+                "duck neck cave"
+            ]
+        }
+    ],
+    "2": [
+        {
+            "topic": "SKYDIVING PROPOSAL",
+            "description": "She was like, let's go skydiving.",
+            "segment": "Continentally. Prepare I was not ready when she. Was ready. Oh my gosh. Yeah, I know. She was like, let's go skydiving. Like I've never even thought about this before. What do you mean? Yeah, I thought she was like joking at first or like by how soon she wanted to go, but. Pictures of her. And I was like, Oh yeah, OK, yeah, I thought. I thought that there would be more time in between 2:00. Yeah, like she's, she's very much like. Times and I was always like oh like I'll think about it whatever and then she's like OK, enough is enough and she just went into this which is. Crazy. I was like, oh, do you think? ",
+            "time": "00:01:50",
+            "speakerTurns": null,
+            "id": "2-0123",
+            "depth": 2,
+            "parentNodes": {
+                "1": [
+                    "1-01",
+                    "1-23"
+                ]
+            },
+            "childNodes": {
+                "3": [
+                    "3-0123456"
+                ]
+            },
+            "segments": "0 1 2 3",
+            "keywords": [
+                "skydiving",
+                "ready",
+                "pictures",
+                "time",
+                "joking"
+            ]
+        },
+        {
+            "topic": "ADRENALINE ACTIVITIES",
+            "description": "I think he would 'cause he's definitely like an adrenaline junkie to a certain extent, like he really likes that type of stuff.",
+            "segment": "Bro, I don't know, 'cause like he's I. I think he would 'cause he's definitely like an adrenaline junkie to a certain extent, like he really likes. That type of stuff. But I mean, honestly, yeah, probably. Go together then, that'd be cute. Well, I. 1-2 But I'm also like, there's just so many implications of going because it's like like, yeah, you're with the instructor, but like things can always go. ",
+            "time": "00:02:33",
+            "speakerTurns": null,
+            "id": "2-456",
+            "depth": 2,
+            "parentNodes": {
+                "1": [
+                    "1-45",
+                    "1-6"
+                ]
+            },
+            "childNodes": {
+                "3": [
+                    "3-0123456"
+                ]
+            },
+            "segments": "4 5 6",
+            "keywords": [
+                "adrenaline junkie",
+                "implications",
+                "instructor"
+            ]
+        },
+        {
+            "topic": "MOTORCYCLE LICENSE",
+            "description": "But another thing is like I wanna get my actual motorcycle license.",
+            "segment": "But another thing is like I wanna get my actual motorcycle license. I know the lessons. Let me tell you why. OK, 'cause I did do the lessons right and like, it was fine, whatever. But The thing is. You can't practice without a license and like the way you get the license is with a driven text. So it's like it's not like where you can get a learners and have smoking. Is there with you right that's fully licensed you can't do that with a motorcycle right and then it's also like do I really wanna invest like 3-4 K in a bike and I'm still learning and like what happens if I. ",
+            "time": "00:03:06",
+            "speakerTurns": null,
+            "id": "2-78910",
+            "depth": 2,
+            "parentNodes": {
+                "1": [
+                    "1-78",
+                    "1-910"
+                ]
+            },
+            "childNodes": {
+                "3": [
+                    "3-7891011121314"
+                ]
+            },
+            "segments": "7 8 9 10",
+            "keywords": [
+                "motorcycle license",
+                "lessons",
+                "practice",
+                "license",
+                "driven text",
+                "learners",
+                "invest",
+                "bike"
+            ]
+        },
+        {
+            "topic": "BIKING AND EXPENSES",
+            "description": "It's like I need to either be able to rent one at, be able to get decent or I have to buy one and be like incredibly careful.",
+            "segment": "You know, there's like lots of things that can ruin a bike. Yeah, So you know what I mean? So it's like I need to either be able to rent one at. Be able to get decent or I have to buy one and be like incredibly careful But I don't know if I trust myself enough yet 'cause I feel like even if you write 1. I feel like that would still cost you money, right? Well, it's a little different because like when I did my lessons, I did end up. Or not crashing, but I did drop 2 bikes but they couldn't drive to me because it's included in the fee. Yeah, I mean I guess. ",
+            "time": "00:03:50",
+            "speakerTurns": null,
+            "id": "2-11121314",
+            "depth": 2,
+            "parentNodes": {
+                "1": [
+                    "1-1112",
+                    "1-1314"
+                ]
+            },
+            "childNodes": {
+                "3": [
+                    "3-7891011121314"
+                ]
+            },
+            "segments": "11 12 13 14",
+            "keywords": [
+                "bike",
+                "rent",
+                "buy",
+                "trust",
+                "lessons",
+                "crashing",
+                "drop",
+                "fee"
+            ]
+        },
+        {
+            "topic": "TRAVEL ADVENTURES",
+            "description": "The one thing that was on my bucket list for a really long time, but I did it, was going behind the waterfalls when I was in Indonesia.",
+            "segment": "It doesn't get completely. Busted. Yeah. What would be on your bucket list? OK. Honestly, I feel like I have achieved a lot of those things in the past couple years, OK. The one thing that was on my bucket list for a really long time, but I did it when. I was in Singapore, no when I went to Indonesia. Yeah, well, I always really wanted to go like. Behind the waterfalls. Oh, yeah, yeah, yeah. I always wanted to do that. And then I got to do when I was in Indonesia. It was kind of must need to be honest. ",
+            "time": "00:04:33",
+            "speakerTurns": null,
+            "id": "2-15161718",
+            "depth": 2,
+            "parentNodes": {
+                "1": [
+                    "1-1516",
+                    "1-1718"
+                ]
+            },
+            "childNodes": {
+                "3": []
+            },
+            "segments": "15 16 17 18",
+            "keywords": [
+                "bucket list",
+                "Indonesia",
+                "behind the waterfalls",
+                "Singapore",
+                "travel"
+            ]
+        }
+    ],
+    "3": [
+        {
+            "topic": "SKYDIVING DISCUSSION",
+            "description": "Yeah, I know.",
+            "segment": "Continentally. Prepare I was not ready when she. Was ready. Oh my gosh. Yeah, I know. She was like, let's go skydiving. Like I've never even thought about this before. What do you mean? Yeah, I thought she was like joking at first or like by how soon she wanted to go, but. Pictures of her. And I was like, Oh yeah, OK, yeah, I thought. I thought that there would be more time in between 2:00. Yeah, like she's, she's very much like. Times and I was always like oh like I'll think about it whatever and then she's like OK, enough is enough and she just went into this which is. Crazy. I was like, oh, do you think? Bro, I don't know, 'cause like he's I. I think he would 'cause he's definitely like an adrenaline junkie to a certain extent, like he really likes. That type of stuff. But I mean, honestly, yeah, probably. Go together then, that'd be cute. Well, I. 1-2 But I'm also like, there's just so many implications of going because it's like like, yeah, you're with the instructor, but like things can always go. ",
+            "time": "00:01:50",
+            "speakerTurns": null,
+            "id": "3-0123456",
             "depth": 3,
             "parentNodes": {
                 "2": [
-                    "0123",
-                    "4567"
+                    "2-0123",
+                    "2-456"
                 ]
             },
-            "childNodes": [],
-            "segments": "0 1 2 3 4 5 6 7"
+            "childNodes": {
+                "4": [
+                    "4-0123456"
+                ]
+            },
+            "segments": "0 1 2 3 4 5 6",
+            "keywords": [
+                "skydiving",
+                "adrenaline junkie",
+                "instructor",
+                "pictures",
+                "joking"
+            ]
+        },
+        {
+            "topic": "MOTORCYCLE LICENSING",
+            "description": "But another thing is like I wanna get my actual motorcycle license.",
+            "segment": "But another thing is like I wanna get my actual motorcycle license. I know the lessons. Let me tell you why. OK, 'cause I did do the lessons right and like, it was fine, whatever. But The thing is. You can't practice without a license and like the way you get the license is with a driven text. So it's like it's not like where you can get a learners and have smoking. Is there with you right that's fully licensed you can't do that with a motorcycle right and then it's also like do I really wanna invest like 3-4 K in a bike and I'm still learning and like what happens if I. You know, there's like lots of things that can ruin a bike. Yeah, So you know what I mean? So it's like I need to either be able to rent one at. Be able to get decent or I have to buy one and be like incredibly careful But I don't know if I trust myself enough yet 'cause I feel like even if you write 1. I feel like that would still cost you money, right? Well, it's a little different because like when I did my lessons, I did end up. Or not crashing, but I did drop 2 bikes but they couldn't drive to me because it's included in the fee. Yeah, I mean I guess. ",
+            "time": "00:03:06",
+            "speakerTurns": null,
+            "id": "3-7891011121314",
+            "depth": 3,
+            "parentNodes": {
+                "2": [
+                    "2-78910",
+                    "2-11121314"
+                ]
+            },
+            "childNodes": {
+                "4": []
+            },
+            "segments": "7 8 9 10 11 12 13 14",
+            "keywords": [
+                "motorcycle license",
+                "lessons",
+                "practice",
+                "rent",
+                "invest",
+                "bike",
+                "learners",
+                "money",
+                "trust",
+                "crashing"
+            ]
+        }
+    ],
+    "4": [
+        {
+            "topic": "SKYDIVING PLAN",
+            "description": "She was like, let's go skydiving.",
+            "segment": "Continentally. Prepare I was not ready when she. Was ready. Oh my gosh. Yeah, I know. She was like, let's go skydiving. Like I've never even thought about this before. What do you mean? Yeah, I thought she was like joking at first or like by how soon she wanted to go, but. Pictures of her. And I was like, Oh yeah, OK, yeah, I thought. I thought that there would be more time in between 2:00. Yeah, like she's, she's very much like. Times and I was always like oh like I'll think about it whatever and then she's like OK, enough is enough and she just went into this which is. Crazy. I was like, oh, do you think? Bro, I don't know, 'cause like he's I. I think he would 'cause he's definitely like an adrenaline junkie to a certain extent, like he really likes. That type of stuff. But I mean, honestly, yeah, probably. Go together then, that'd be cute. Well, I. 1-2 But I'm also like, there's just so many implications of going because it's like like, yeah, you're with the instructor, but like things can always go. ",
+            "time": "00:01:50",
+            "speakerTurns": null,
+            "id": "4-0123456",
+            "depth": 4,
+            "parentNodes": {
+                "3": [
+                    "3-0123456"
+                ]
+            },
+            "childNodes": {
+                "5": []
+            },
+            "segments": "0 1 2 3 4 5 6",
+            "keywords": [
+                "skydiving",
+                "not ready",
+                "adrenaline junkie",
+                "go together",
+                "instructor"
+            ]
         }
     ]
 }
-
 export default mockData;

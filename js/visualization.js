@@ -176,6 +176,7 @@ export class Visualization {
     this.currLevel = 0;
     this.numTopicsShown = (this.treeDepth==0) ? Math.min(this.requestedNum, 3) : this.requestedNum;
     console.log("Num topics", this.numTopicsShown)
+    this.currIndex = Math.max(0, this.currIndex);
 
     // Only data at current tree depth
     this.data = this.DataObj.getData(this.treeDepth);
@@ -217,6 +218,8 @@ export class Visualization {
       }
       this.currViewedTopic = this.visibleTopics[this.visTopicIndex];
 
+      console.log("Aa ", this.visibleTopics)
+
       console.log(this.currViewedTopic)
       console.log(this.currViewedTopic.time)
       this.handleNavigation(
@@ -237,20 +240,6 @@ export class Visualization {
     } else {
       this.showTopics();
     }
-
-    this.lastBubbleLocations = {};
-    d3.selectAll(".speechBubbleGroup").each((d, i, nodes) => {
-      const node = nodes[i];
-      const rect = node.getBoundingClientRect();
-      // Store the position and size
-      this.lastBubbleLocations[node.id] = {
-        left: rect.left,
-        top: rect.top,
-        width: rect.width,
-        height: rect.height
-      };
-    });
-    console.log(this.lastBubbleLocations)
   }
 
 
@@ -308,7 +297,8 @@ export class Visualization {
 
     // Create topic elements
     if (this.treeDepth!=0) 
-      {
+    {
+      console.log('aa aa: ', this.visibleTopics)
 
       line.style("border", "2px solid white")
 
@@ -328,7 +318,7 @@ export class Visualization {
         .attr("class", "repSentences")
         .style("display", "none")
         .text((d) => d.description || d.repSentence || "Representative sentence...");
-      }
+    }
 
     setTimeout(() => {
       line.attr("class", "line show");
@@ -345,13 +335,9 @@ export class Visualization {
       });
 
     let time = line.append("div").attr("class", `timeDiv`)
-      // .style("margin-left", "4vw")
       .style("position", "absolute")
       .style("right", "3vw")
-      // .style("top", "0")
-      // .style("z-index", "10")
       .style("width", "10vw")
-      // .style("text-align", "right");
 
     time
       .append("h1")
@@ -398,7 +384,7 @@ export class Visualization {
       } else {
         console.log(int)
         segmentDiv = bubble.append("div")
-        .attr("id", `segment-${int}`)
+        .attr("id", `segment-${this.treeDepth}-${int}`)
         .attr("class", "speechBubbleGroup")
         .style("display", "flex")
         .style("flex-direction", "column")
@@ -524,7 +510,6 @@ export class Visualization {
           totalTime.style.color = "#bfbfbf";
         }
         time.style.color = "#bfbfbf";
-        // bar.style.border = "0.3vw solid black";
         entry.removeAttribute("id");
       }
     });
@@ -539,6 +524,8 @@ export class Visualization {
       });
     }
   }
+
+  
 
   // ************ Button click events ************
 
@@ -583,7 +570,9 @@ export class Visualization {
 
   scrollDown(log = true) {
     this.lastZoomOperation = "";
-    if (this.visTopicIndex == this.numTopicsShown - 1 && this.currIndex == this.maxIndex){
+    console.log(this.currViewedTopic)
+    if (this.currViewedTopic.id == this.data.at(-1).id){
+      console.log("At the bottom!")
       return;
     }
     // If at the bottom of visible topics, load new topic
@@ -609,17 +598,21 @@ export class Visualization {
    // Zoom in (increase zoom value)
   zoomIn() {
     console.log("zoom in")
-    if (this.treeDepth<this.DataObj.getTreeSize())
+    if (this.treeDepth<this.DataObj.getTreeSize()-1)
     {
       this.treeDepth += 1;
       let newData = this.DataObj.getData(this.treeDepth);
       console.log(this.currViewedTopic)
-      if (!(this.currViewedTopic.childNodes.length==0)){
-        let targetId = this.currViewedTopic.childNodes[0];
+      console.log(Object.keys(this.currViewedTopic.childNodes).length)
+      if (!(Object.keys(this.currViewedTopic.childNodes[this.treeDepth]).length==0)){
+        console.log("children:)")
+        let targetId = this.currViewedTopic.childNodes[this.treeDepth][0];
         this.currIndex = newData.findIndex(item => item.id === targetId);
       } else {
+        console.log("No children!")
         this.currIndex = newData.length-1;
       }
+      console.log(this.currIndex)
       // Ensure currIndex will allow for all topics to be shown
       if ((this.currIndex+this.numTopicsShown)>newData.length){
         let tempIndex = newData.length-this.numTopicsShown;
