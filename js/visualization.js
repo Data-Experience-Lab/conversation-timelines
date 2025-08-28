@@ -207,7 +207,7 @@ export class Visualization {
       window.slider.step(this.zoomStep); // Change step size
     }
 
-    if (this.DataObj.getTreeSize()==2) {
+    if (this.DataObj.getTreeSize()>1) {
       document.querySelector("#slider").style.display = "block";
     }
 
@@ -532,9 +532,9 @@ export class Visualization {
   jumpToCurr() {
     this.lastZoomOperation = "";
     this.currIndex = this.maxIndex;
-    this.visTopicIndex = 0;
     this.visibleTopics = this.data
       .slice(this.currIndex, this.currIndex + this.numTopicsShown);
+    this.visTopicIndex = this.visibleTopics.length-1;
     // console.log(this.visibleTopics);
     const timeOnly = this.formatTime(new Date());
     this.log += `${timeOnly}.Action.J\n`;
