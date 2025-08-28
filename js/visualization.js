@@ -1,6 +1,7 @@
 export class Visualization {
   constructor() {
     this.DataObj;
+    this.onStart = true;
     this.segments = [];
     this.lastZoomOperation = null;
     this.lastTopics;
@@ -10,7 +11,7 @@ export class Visualization {
     this.maxIndex = 0;
     this.numTopicsShown = 3;
     this.data = "";
-    this.navMode = false; // When true, this updates the timeline in real time with new topics
+    this.navMode = false; // When false, this updates the timeline in real time with new topics
     this.treeDepth = 0;
     this.zoomValue = 0.0; // Start at speech bubble level
     this.zoomStep = 0.02; // Step size for left/right arrow keys
@@ -185,6 +186,12 @@ export class Visualization {
     let lastMax = this.maxIndex;
     this.maxIndex = this.data.length - this.numTopicsShown;
 
+    if(this.onStart){
+      this.onStart = false;
+      this.currIndex=this.maxIndex
+      this.visTopicIndex = Math.min(this.data.length-1, this.numTopicsShown)
+    }
+
     if (numTopics != this.numTopicsShown) {
       this.requestedNum =  numTopics;
       this.numTopicsShown = (this.treeDepth==0) ? Math.min(this.requestedNum, 3) : this.requestedNum;
@@ -218,16 +225,12 @@ export class Visualization {
       }
       this.currViewedTopic = this.visibleTopics[this.visTopicIndex];
 
-      console.log("Aa ", this.visibleTopics)
-
-      console.log(this.currViewedTopic)
-      console.log(this.currViewedTopic.time)
       this.handleNavigation(
         this.visibleTopics,
         lastMax,
         this.currViewedTopic.time
       );
-
+      
       this.renderTimeline(this.visibleTopics);
       console.log(this.currViewedTopic)
       if (this.visibleTopics[this.visTopicIndex] != null) {
@@ -249,7 +252,7 @@ export class Visualization {
       this.currIndex = this.maxIndex;
     }
 
-    if (this.currIndex == this.maxIndex && this.visTopicIndex == 0) {
+    if (this.currIndex == this.maxIndex && this.visTopicIndex == visibleTopics.length-1) {
       this.navMode = false;
     } else if (this.data.length > 1) {
       if (this.data.at(-1).id != this.visibleTopics.at(-1).id) {
