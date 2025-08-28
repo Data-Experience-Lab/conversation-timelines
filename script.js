@@ -20,7 +20,7 @@ startRecognition.addEventListener("click", function () {
   console.log("Transcribing");
   speechController.startContinuousRecording();
   startRecognition.style.display = "none";
-  // eventListeners();
+  eventListeners();
 });
 
 
@@ -54,17 +54,9 @@ d3.select("#slider")
 // allow left and right arrow keys to press back and forward (for now)
 document.onkeydown = function (e) {
   switch (e.keyCode) {
-    case 27:
-      // if (!hidden) {
-        console.log("Esc");
-        speechController.escape();
-      // }
-      break;
-    case 76:
-      // if (!hidden) {
-        console.log("L");
-        speechController.escape();
-      // }
+    case 13:
+        console.log("Enter")
+        speechController.toggleVis();
       break;
     case 37:
       // if (!hidden) {
@@ -93,11 +85,6 @@ document.onkeydown = function (e) {
         speechController.scrollDown();
       // }
       break;
-    // case 77:
-    //   // M
-    //   console.log("M");
-    //   speechController.timelineView();
-    //   break;
     case 83:
       // if (!hidden) {
         console.log("Jump to (S)");
@@ -145,18 +132,11 @@ function eventListeners() {
     const maxDoubleTapDelay = 300;
 
     if (distance < maxTapDistance && dt < maxTapDuration) {
-      if (touchEndTime - lastTapTime < maxDoubleTapDelay) {
-        clearTimeout(singleTapTimeout); // Cancel pending single tap
-        console.log("🚀 Double Tap event detected");
-        speechController.toggleVis();
-        lastTapTime = 0; // Reset to avoid triple tap issues
-      } else {
         lastTapTime = touchEndTime;
         singleTapTimeout = setTimeout(() => {
-          console.log("👆 Single Tap event detected");
-          speechController.timelineView();
+          console.log("Single Tap event detected");
+          speechController.toggleVis();
         }, maxDoubleTapDelay); // Wait before executing single tap
-      }
     } else if (distance > minSwipeDistance) {
       console.log("Swipe event detected");
       checkDirection(); // `this` is now correctly inherited

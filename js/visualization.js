@@ -382,7 +382,6 @@ export class Visualization {
 
       // Otherwise create segment
       } else {
-        console.log(int)
         segmentDiv = bubble.append("div")
         .attr("id", `segment-${this.treeDepth}-${int}`)
         .attr("class", "speechBubbleGroup")
@@ -514,10 +513,7 @@ export class Visualization {
       }
     });
     // Apply styles
-    console.log(this.lastZoomOperation)
-    console.log(this.treeDepth)
     if (!(this.lastZoomOperation=="+" && this.treeDepth==1)) {
-      console.log("hi")
       Object.keys(this.topicConfig).forEach((key)=> {
         let config = this.topicConfig[key];
         this.animateObjects(config.selector, config.properties, 1)
@@ -691,13 +687,14 @@ export class Visualization {
   }
 
   toggleVis() {
+    this.lastZoomOperation = "";
     let topics = document.querySelector("#topics");
     let top = document.querySelector(".info-container");
     let main = document.querySelector(".main");
     requestAnimationFrame(() => {
       if (topics.style.display == "flex") {
         top.style.display = "none";
-        document.querySelector("#zoom").style.visibility = "hidden";
+        document.querySelector("#slider").style.display = "none";
         topics.style.display = "none";
         main.style.border = "1vw solid #80808042";
         const timeOnly = this.formatTime(new Date());
@@ -706,7 +703,7 @@ export class Visualization {
       } else {
         topics.style.display = "flex";
         top.style.display = "block";
-        document.querySelector("#zoom").style.visibility = "visible";
+        document.querySelector("#slider").style.display = "block";
         main.style.border = "";
         const timeOnly = this.formatTime(new Date());
         this.log += `${timeOnly}.Vis.FV\n`;
