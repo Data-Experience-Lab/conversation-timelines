@@ -220,10 +220,13 @@ export class Visualization {
 
     // Update UI elements based on the current state
     if (this.data.length > 0) {
-      if (this.visTopicIndex > this.visibleTopics.length - 1) {
+      if ((this.visTopicIndex>this.visibleTopics.length - 1)||this.visTopicIndex<0) {
         this.visTopicIndex = this.visibleTopics.length - 1;
       }
       this.currViewedTopic = this.visibleTopics[this.visTopicIndex];
+      console.log(this.currViewedTopic)
+      console.log(this.visTopicIndex)
+      console.log(this.visibleTopics)
 
       this.handleNavigation(
         this.visibleTopics,
