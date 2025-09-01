@@ -152,19 +152,10 @@ export class SpeechToTopic {
     this.vis.zoomOut();
   }
 
-  escape() {
-    this.vis.escape();
-  }
-
   jumpToCurr() {
     this.vis.jumpToCurr();
   }
 
-  
-  timelineView() {
-    this.vis.timelineView();
-  }
-  
   download() {
     this.vis.download();
   }
