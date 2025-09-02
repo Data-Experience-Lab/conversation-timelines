@@ -23,15 +23,29 @@ export class DataHandler {
   }
 
   // Update data and transcript with new transcription
-  async update(transcription, speakerTurns, data) {
-    await this.addToData(transcription, speakerTurns, data);
+  async update(transcription, time, speakerTurns, data, silenceLength=0) {
+    //Always render silence blocks
+    //We can stop showing speaker division at some point
+    await this.addToData(transcription, time, speakerTurns, data, silenceLength);
     return true;
   }
 
     // Add new data to the appropriate levels
-  async addToData(transcription, time, speakerTurns, data) {
+  async addToData(transcription, time, speakerTurns, data, silenceLength) {
     // When new 0 depth node is added
     // Propogate up the last node in all levels
+    console.log("Silence Length: ", silenceLength)
+    let newSpeakerTurns = []
+    let silenceBlock = {
+      "speakerId": "None",
+      "speakerSeg": "",
+      "length": 0
+    }
+    for (let i=0; i<silenceLength; i++){
+      newSpeakerTurns.push(silenceBlock)
+    }
+    speakerTurns.turns = newSpeakerTurns.concat(speakerTurns.turns);
+    console.log(speakerTurns)
 
     // Turn transcript into new root node
     let id = Object.keys(this.tree[0]).length;

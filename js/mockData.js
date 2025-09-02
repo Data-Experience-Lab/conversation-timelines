@@ -30,6 +30,21 @@ const mockData =
                         "length": 7
                     },
                     {
+                        "speakerId": "None",
+                        "speakerSeg": "",
+                        "length": 0
+                    },
+                    {
+                        "speakerId": "None",
+                        "speakerSeg": "",
+                        "length": 0
+                    },
+                    {
+                        "speakerId": "None",
+                        "speakerSeg": "",
+                        "length": 0
+                    },
+                    {
                         "speakerId": "Guest-2",
                         "speakerSeg": "Was ready. Oh my gosh.",
                         "length": 5
@@ -64,11 +79,21 @@ const mockData =
                         "length": 12
                     },
                     {
+                        "speakerId": "None",
+                        "speakerSeg": "",
+                        "length": 0
+                    },
+                    {
                         "speakerId": "Guest-2",
                         "length": 19
                     }
                 ],
                 "turns": [
+                    {
+                        "speakerId": "None",
+                        "speakerSeg": "",
+                        "length": 0
+                    },
                     {
                         "speakerId": "Guest-3",
                         "speakerSeg": "Like I've never even thought about this before. What do you mean?",
@@ -145,6 +170,16 @@ const mockData =
                         "speakerId": "Guest-2",
                         "speakerSeg": "Times and I was always like oh like I'll think about it whatever and then she's like OK, enough is enough and she just went into this which is.",
                         "length": 29
+                    },
+                    {
+                        "speakerId": "None",
+                        "speakerSeg": "",
+                        "length": 0
+                    },
+                    {
+                        "speakerId": "None",
+                        "speakerSeg": "",
+                        "length": 0
                     },
                     {
                         "speakerId": "Guest-2",

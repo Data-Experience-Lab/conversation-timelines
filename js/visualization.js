@@ -415,22 +415,29 @@ export class Visualization {
 
         // Create new bubble for each speaker turn
         segment.speakerTurns.turns.forEach((turn, index) => {
-          const speakerId = parseInt(turn.speakerId.charAt(turn.speakerId.length - 1)) - 1;  
-          //If speaker is self, align right
-          const alignRight = (turn.speakerId == this.selfID);
-          let speakerClass = "other";
-          if (alignRight) {
-            speakerClass = "self";
+          if (turn.speakerId!="None" || this.treeDepth>0) {
+            const speakerId = parseInt(turn.speakerId.charAt(turn.speakerId.length - 1)) - 1;  
+            console.log(speakerId)
+            //If speaker is self, align right
+            const alignRight = (turn.speakerId == this.selfID);
+            let speakerClass = "other";
+            if (alignRight) {
+              speakerClass = "self";
+            }
+
+            let speakerColour = (turn.speakerID=="None") ? "#000000" : this.speakerColours[speakerId % 5];
+              
+            const bubbleDiv = segmentDiv.append("div")
+              .attr("class", "speechBubbleItem")
+              .classed(speakerClass, true)
+              .style("background-color", speakerColour)  
+              .style("height", bubbleHeight)
+
+            const processedText = this.processFillerWords(turn.speakerSeg);
+            bubbleDiv.append("p")
+              .attr("class", "bubbleText")
+              .html(processedText);
           }
-            
-          const bubbleDiv = segmentDiv.append("div")
-            .attr("class", "speechBubbleItem")
-            .classed(speakerClass, true)
-            .style("height", bubbleHeight)
-          const processedText = this.processFillerWords(turn.speakerSeg);
-          bubbleDiv.append("p")
-            .attr("class", "bubbleText")
-            .html(processedText);
         });
       }
     });
@@ -827,14 +834,17 @@ export class Visualization {
   // Ensure speaker colors are preserved after zoom styling
   preserveSpeakerColors() {
     const speechBubbles = document.querySelectorAll('.speechBubbleItem');
+    console.log(this.visibleTopics)
     speechBubbles.forEach((bubble, index) => {
       // See if the bubble has a background color, if not, apply default speaker color
       const currentBgColor = bubble.style.backgroundColor;
-      if (!currentBgColor || currentBgColor === '' || currentBgColor === 'rgba(0, 0, 0, 0)') {
+      if (!currentBgColor || currentBgColor === '') {
         // Apply a default speaker color based on index if no color is set
         const speakerId = index % 5;
-        bubble.style.backgroundColor = this.speakerColours[speakerId];
-        // console.log(`Applied speaker color ${this.speakerColours[speakerId]} to bubble ${index}`);
+        console.log(currentBgColor)
+        // bubble.style.backgroundColor = this.speakerColours[speakerId];
+        bubble.style.backgroundColor = "#000000"
+        console.log(`Applied speaker color ${this.speakerColours[speakerId]} to bubble ${index}`);
       }
     });
   }

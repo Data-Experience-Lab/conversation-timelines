@@ -16,6 +16,7 @@ export class SpeechToTopic {
     this.speakerTurns = { total: 0, speakers: [], turns: [] };
     // subscription key and region for speech services.
     this.sdkSetup();
+    this.silenceLength = 0;
   }
 
   transcriptionStart() {
@@ -59,7 +60,10 @@ export class SpeechToTopic {
         const time = this.formatTime(new Date());
 
         if (this.transcript.length > 1) {
-          this.handleTranscription(this.transcript, time, this.speakerTurns);
+          this.handleTranscription(this.transcript, time, this.speakerTurns, this.silenceLength);
+          this.silenceLength = 0;
+        } else {
+          this.silenceLength += 1;
         }
 
         // Reset transcript and speaker turns
@@ -114,10 +118,11 @@ export class SpeechToTopic {
     }
   }
 
-  async handleTranscription(transcription, time, speakerTurns) {
+  async handleTranscription(transcription, time, speakerTurns, silenceLength) {
     console.log("analyzing speech");
     console.log(speakerTurns);
-    await this.data.update(transcription, time, speakerTurns, this.data);
+    console.log(silenceLength)
+    await this.data.update(transcription, time, speakerTurns, this.data, silenceLength);
     // Call function for initial render of display
     console.log("updated screen")
     this.vis.updateScreen(this.data);
