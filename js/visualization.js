@@ -17,6 +17,7 @@ export class Visualization {
     this.zoomStep = 0.02; // Step size for left/right arrow keys
     this.selfID = "Guest-1";
     this.bubbleFontSize = "10px";
+    this.bubbleHeight = null;
 
     //  font sizes
     this.topicSize = "";
@@ -65,8 +66,8 @@ export class Visualization {
         "properties": {
           "max-width": ["fit-content"],
           "min-width": ["1.5vw"],
-          "max-height": ["fit-content"],
-          "min-height": ["0.5vw"],
+          "max-height": ["fit-content", "fit-content", null],
+          "min-height": ["0.5vw", "0.5vw", "1px"],
           "overflow": ["visible", "hidden"],
           "position": ["relative"],
           "word-wrap": ["break-word"],
@@ -85,7 +86,7 @@ export class Visualization {
       "speechBubbleSelf": {
         "selector": ".self",
         "properties": {
-          "margin": ["0px 0px 8px 60%", "0px 0px 1px 0%"],
+          "margin": ["0px 0px 8px 60%", "0px 0px 0px 0%"],
           "border-radius": ["30px 30px 5px 30px", "30px 30px 30px 30px"],
           "padding-left": ["10px", "0px"],
           "padding-right": ["10px", "0px"]
@@ -94,7 +95,7 @@ export class Visualization {
       "speechBubbleOther": {
         "selector": ".other",
         "properties": {
-          "margin": ["8px 0px 8px 0px", "0px 0px 1px 0px"],
+          "margin": ["8px 0px 8px 0px", "0px 0px 0px 0px"],
           "border-radius": ["30px 30px 30px 5px", "30px 30px 30px 30px"],
           "padding-left": ["10px", "0px"],
           "padding-right": ["10px", "0px"]
@@ -171,9 +172,11 @@ export class Visualization {
     resize = false,
     numTopics = this.requestedNum
   ) {
+    console.log("Refreshing page")
+
     // Full dialogue tree
     this.DataObj = dataobj;
-    // console.log(this.DataObj.data);
+    this.zoomInput = "";
     this.currLevel = 0;
     this.numTopicsShown = (this.treeDepth==0) ? Math.min(this.requestedNum, 3) : this.requestedNum;
     console.log("Num topics", this.numTopicsShown)
@@ -224,9 +227,6 @@ export class Visualization {
         this.visTopicIndex = this.visibleTopics.length - 1;
       }
       this.currViewedTopic = this.visibleTopics[this.visTopicIndex];
-      console.log(this.currViewedTopic)
-      console.log(this.visTopicIndex)
-      console.log(this.visibleTopics)
 
       this.handleNavigation(
         this.visibleTopics,
@@ -235,7 +235,6 @@ export class Visualization {
       );
       
       this.renderTimeline(this.visibleTopics);
-      console.log(this.currViewedTopic)
       if (this.visibleTopics[this.visTopicIndex] != null) {
         if (this.treeDepth>0) this.hideRepSentences(this.currViewedTopic.id);
       }
@@ -304,8 +303,6 @@ export class Visualization {
     // Create topic elements
     if (this.treeDepth!=0) 
     {
-      console.log('aa aa: ', this.visibleTopics)
-
       line.style("border", "2px solid white")
 
       topicBlock
@@ -376,10 +373,32 @@ export class Visualization {
   }
 
   renderSpeechBubbles(bubble, data) {
+    console.log(data)
     let segments = data.segments.split(" ").map(Number);
+    let totalTurns = 0;
 
     segments.forEach((int) => {
       let segment = this.segments[int];
+      totalTurns += segment.speakerTurns.turns.length;
+    });
+    console.log("Total turns: ", totalTurns)
+
+    let bubbleHeight = null
+    if (this.treeDepth > 3){
+
+      let maxHeight = 120;
+      bubbleHeight = `clamp(1px, ${
+          (maxHeight / totalTurns)
+          }px, 0.5vw)`;
+      console.log(`${data.id} bubble height: `, bubbleHeight);
+    } else {
+      bubbleHeight = null;
+    }
+
+    segments.forEach((int) => {
+      let segment = this.segments[int];
+      totalTurns += segment.speakerTurns.turns.length;
+      console.log("Total turns now: ", totalTurns);
       let segmentDiv = d3.select(`#segment-${int}`);
         
       // If segment already exists move it to the right place
@@ -407,8 +426,7 @@ export class Visualization {
           const bubbleDiv = segmentDiv.append("div")
             .attr("class", "speechBubbleItem")
             .classed(speakerClass, true)
-            .style("background-color", this.speakerColours[speakerId % 5])  
-
+            .style("height", bubbleHeight)
           const processedText = this.processFillerWords(turn.speakerSeg);
           bubbleDiv.append("p")
             .attr("class", "bubbleText")
@@ -424,6 +442,9 @@ export class Visualization {
       let style = window.getComputedStyle(el, null).getPropertyValue('font-size');
       this.bubbleConfig.bubbleText.properties["font-size"][0] = style;
     }
+
+
+    
     // Apply styles
     Object.keys(this.bubbleConfig).forEach((key)=> {
       let config = this.bubbleConfig[key];
@@ -437,6 +458,24 @@ export class Visualization {
     }, 10);
   }
 
+    // resizeFont() {
+  //   let window = document.getElementById("topics");
+  //   let numBubbles = d3.selectAll(".speechBubbleItem").size();
+  //   if (numBubbles>0 && this.treeDepth==0) {
+  //       this.bubbleFontSize = `clamp(1.5vmin, ${
+  //         (window.offsetHeight / numBubbles) * 0.2
+  //       }px, 20px)`;
+  //   }
+  //   this.topicSize = `clamp(15px, ${
+  //     (window.offsetHeight / this.visibleTopics.length) * 0.4
+  //     }px, 4vmin)`;
+  //   this.repSize = `clamp(10px, ${
+  //     (window.offsetHeight / this.visibleTopics.length) * 0.3
+  //     }px, 2.5vmin)`;
+  //   this.bubbleConfig.bubbleText.properties["font-size"][0] = this.bubbleFontSize;
+  // }
+
+
   animateObjects(selector, config, index, animationDuration, delay=0) {
     const elements = d3.selectAll(selector);
 
@@ -446,7 +485,7 @@ export class Visualization {
       .duration(animationDuration)
 
     Object.entries(config).forEach(([property, values]) => {
-      let style = (values.length>index) ? index : 0;
+      let style = (values.length>index) ? index : values.length-1;
       let value = values[style];
       if (typeof value === "function") value = value();
       if (value !== undefined) {
@@ -462,7 +501,13 @@ export class Visualization {
   // Update all CSS properties based on current zoom value
   updateZoomStyles() {
     //********** Updating speech bubble/speaker turns
-    let speechBubbleConfigIndex = (this.treeDepth==0) ? 0 : 1;
+    // let speechBubbleConfigIndex = (this.treeDepth==0) ? 0 : 1;
+    let speechBubbleConfigIndex = 0;
+    if (this.treeDepth > 3) {
+      speechBubbleConfigIndex = 2;
+    } else if (this.treeDepth > 0){
+      speechBubbleConfigIndex = 1;
+    }
     //Only show the animation if switching from 0 to 1
     let animationDuration = ((this.lastZoomOperation!="+") || (this.treeDepth>1)) ? 0 : 1250;
 
@@ -478,12 +523,12 @@ export class Visualization {
 
     //********** Updating topics/rep sentences
     let delay = (this.lastZoomOperation=="+" && this.treeDepth==1) ? 1600 : 0;
-
+    let topicBubbleConfigIndex = (this.treeDepth==0) ? 0 : 1;
     console.log(this.lastZoomOperation)
     console.log(this.treeDepth)
     Object.keys(this.topicConfig).forEach((key)=> {
       let config = this.topicConfig[key];
-      this.animateObjects(config.selector, config.properties, speechBubbleConfigIndex, animationDuration, delay)
+      this.animateObjects(config.selector, config.properties, topicBubbleConfigIndex, animationDuration, delay)
     });
   }
 
@@ -537,10 +582,8 @@ export class Visualization {
     this.visibleTopics = this.data
       .slice(this.currIndex, this.currIndex + this.numTopicsShown);
     this.visTopicIndex = this.visibleTopics.length-1;
-    // console.log(this.visibleTopics);
     const timeOnly = this.formatTime(new Date());
     this.log += `${timeOnly}.Action.J\n`;
-    console.log(this.log);
     this.updateScreen(this.DataObj, false, true);
   }
 
@@ -551,7 +594,6 @@ export class Visualization {
     }
     if (this.visTopicIndex == 0 && this.currIndex > 0) {
       this.currIndex = this.currIndex - 1;
-      console.log("New data")
     } else {
       if (this.visTopicIndex > 0) {
         this.visTopicIndex -= 1;
@@ -572,7 +614,6 @@ export class Visualization {
 
   scrollDown(log = true) {
     this.lastZoomOperation = "";
-    console.log(this.currViewedTopic)
     if (this.currViewedTopic.id == this.data.at(-1).id){
       console.log("At the bottom!")
       return;
@@ -600,21 +641,19 @@ export class Visualization {
    // Zoom in (increase zoom value)
   zoomIn() {
     console.log("zoom in")
+    this.zoomInput = "press";
+    window.slider.value(Math.min(slider.value(), 0));
     if (this.treeDepth<this.DataObj.getTreeSize()-1)
     {
       this.treeDepth += 1;
+      console.log(this.treeDepth)
       let newData = this.DataObj.getData(this.treeDepth);
-      console.log(this.currViewedTopic)
-      console.log(Object.keys(this.currViewedTopic.childNodes).length)
       if (!(Object.keys(this.currViewedTopic.childNodes[this.treeDepth]).length==0)){
-        console.log("children:)")
         let targetId = this.currViewedTopic.childNodes[this.treeDepth][0];
         this.currIndex = newData.findIndex(item => item.id === targetId);
       } else {
-        console.log("No children!")
         this.currIndex = newData.length-1;
       }
-      console.log(this.currIndex)
       // Ensure currIndex will allow for all topics to be shown
       if ((this.currIndex+this.numTopicsShown)>newData.length){
         let tempIndex = newData.length-this.numTopicsShown;
@@ -630,6 +669,7 @@ export class Visualization {
   // Zoom out (decrease zoom value)
   zoomOut() {
     console.log("zoom out")
+    this.zoomInput = "press";
     if (this.treeDepth>=1)
     {
       this.treeDepth -= 1;
@@ -653,13 +693,13 @@ export class Visualization {
   }
 
   setSliderZoom(value) {
+    if (this.zoomInput=="press") return;
     if (value<0.01){
       value = 0;
     }
     let depth = parseInt(value/this.zoomStep);
     if (depth!=this.treeDepth) {
       this.lastZoomOperation = (this.treeDepth<depth) ? "+" : "-";
-      console.log(this.lastZoomOperation)
       let newData = this.DataObj.getData(depth);
 
       if (this.lastZoomOperation=="+"){
@@ -758,7 +798,6 @@ export class Visualization {
 
   // Helper method to calculate the time difference between the current time and a given time
   getTimeDiff(latestTime) {
-    console.log(latestTime);
     let currViewedTime = new Date();
     const [chours, cminutes, cseconds] = latestTime.split(":").map(Number);
     latestTime = new Date();
@@ -795,7 +834,7 @@ export class Visualization {
         // Apply a default speaker color based on index if no color is set
         const speakerId = index % 5;
         bubble.style.backgroundColor = this.speakerColours[speakerId];
-        console.log(`Applied speaker color ${this.speakerColours[speakerId]} to bubble ${index}`);
+        // console.log(`Applied speaker color ${this.speakerColours[speakerId]} to bubble ${index}`);
       }
     });
   }
@@ -803,37 +842,31 @@ export class Visualization {
   // Set zoom value and update styles
   setZoomValue(newZoomValue) {
     this.zoomValue = Math.max(0.0, Math.min(1.0, newZoomValue));
-    console.log(this.treeDepth)
-    if (this.treeDepth > 0){
-      this.zoomValue = 1.0;
-    } else {
-      this.zoomValue = 0;
-    }
-    console.log(`Setting zoom value to: ${this.zoomValue}`);
     this.preserveSpeakerColors();
     
     // Update level indicator
     const levelText = document.getElementById("vis-level-text");
     if (levelText) {
-      if (this.zoomValue < 0.15) {
+      if (this.treeDepth == 0) {
         levelText.textContent = "Speech Bubbles";
-      } else if (this.zoomValue < 0.35) {
-        levelText.textContent = "10s Topics";
-      } else if (this.zoomValue < 0.55) {
-        levelText.textContent = "30s Topics";
-      } else if (this.zoomValue < 0.75) {
-        levelText.textContent = "1m Topics";
       } else {
-        levelText.textContent = "5m Topics";
+        levelText.textContent = "Level " + this.treeDepth;
       }
+      // } else if (this.zoomValue < 0.35) {
+      //   levelText.textContent = "10s Topics";
+      // } else if (this.zoomValue < 0.55) {
+      //   levelText.textContent = "30s Topics";
+      // } else if (this.zoomValue < 0.75) {
+      //   levelText.textContent = "1m Topics";
+      // } else {
+      //   levelText.textContent = "5m Topics";
+      // }
     }
   }
 
    resizeFont() {
     let window = document.getElementById("topics");
     let numBubbles = d3.selectAll(".speechBubbleItem").size();
-    console.log(window.offsetHeight)
-    console.log(numBubbles)
     if (numBubbles>0 && this.treeDepth==0) {
         this.bubbleFontSize = `clamp(1.5vmin, ${
           (window.offsetHeight / numBubbles) * 0.2
