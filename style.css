@@ -266,7 +266,7 @@ h2 {
   align-items: left;
   width: auto;
   margin-bottom: 3px;
-  padding: 0.2vh 2vw;
+  padding: 0.2vh;
 }
 
 .top-informational-text {
@@ -275,7 +275,7 @@ h2 {
   background: rgb(92 92 92 / 35%);
   border-radius: 1vh;
   margin-top: 0.5vh;
-  margin-bottom: 0.5vh;
+  margin-bottom: 1.5vh;
   padding: 0.2vh 0.8vw;
   display: block;
   font-weight: bolder;

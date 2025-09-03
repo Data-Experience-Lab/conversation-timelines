@@ -25,10 +25,20 @@
               Start recognition
             </button>
           </div>
+          <div>
+            <div id="speakersCheckbox" style="margin-top: 5px; display: none; align-items: center; height: 3vw;">
+              <input type="checkbox" id="speakers" name="speakers" style="width: 20px; height: 20px;"/>
+              <label for="singleSpeaker" style="color: white;">Single Speaker</label>
+            </div>
+            <div id="recordingCheckbox" style="margin-top: 0px; display: none; align-items: center; height: 3vw;">
+              <input type="checkbox" id="recording" name="recording" style="width: 20px; height: 20px;"/>
+              <label for="recording" style="color: white;">Stop Recording</label>
+            </div>
+          </div>
           <button
             class="top-informational-text"
             id="jumpToCurrent"
-            style="margin-left: 10vw; display: none"
+            style="margin-left: 1vw; display: none"
           ></button>
           <label
             id="timeDetails"

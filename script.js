@@ -13,6 +13,8 @@ let sliderVal = 0;
 let speechController = new SpeechToTopic();
 
 const startRecognition = document.getElementById("startRecognition");
+const checkBox = document.getElementById("speakersCheckbox");
+const recording = document.getElementById("recordingCheckbox");
 const increase = document.getElementById("increase");
 const decrease = document.getElementById("decrease");
 
@@ -20,9 +22,19 @@ startRecognition.addEventListener("click", function () {
   console.log("Transcribing");
   speechController.startContinuousRecording();
   startRecognition.style.display = "none";
+  checkBox.style.display = "flex";
+  recording.style.display = "flex";
   eventListeners();
 });
 
+checkBox.addEventListener("click", function(){
+  speechController.preserveSpeakerColors(true);
+});
+
+recording.addEventListener("click", function(){
+  speechController.setRecordingStatus(!(document.getElementById("recording").checked));
+  if (!(document.getElementById("recording").checked)) speechController.transcriptionStart();
+});
 
 d3.select("#jumpToCurrent").on("click", function () {
   speechController.jumpToCurr();

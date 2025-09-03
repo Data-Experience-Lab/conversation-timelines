@@ -1,10 +1,11 @@
 // Hosted
 import { OpenAI } from "/conversation-timelines/js/openaiController.js";
 import mockData from "./mockData.js";
+import mockData2 from "./mockData2.js";
 
 export class DataHandler {
   constructor() {  
-    this.tree = this.initTree();
+    this.tree = mockData;
     this.openAI = new OpenAI();
   }
 

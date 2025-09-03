@@ -17,66 +17,78 @@ export class SpeechToTopic {
     // subscription key and region for speech services.
     this.sdkSetup();
     this.silenceLength = 0;
+    this.recordingStatus = true;
+  }
+
+  setRecordingStatus(status) {
+    this.recordingStatus = status;
+    console.log(this.recordingStatus)
   }
 
   transcriptionStart() {
-    console.log("Starting transcription...");
+    if (this.recordingStatus) {
+      console.log("Starting transcription...");
+      this.conversationTranscriber.startTranscribingAsync(
+        () => {
+          console.log("Transcription started.");
 
-    this.conversationTranscriber.startTranscribingAsync(
-      () => {
-        console.log("Transcription started.");
+          // Schedule 10-second cycle for processing transcripts
+          this.shortTimeoutId = setTimeout(() => {
+            console.log("Stopping transcription after 10 seconds...");
+            this.transcriptionStop();
+          }, 10000); // 10 seconds
 
-        // Schedule 10-second cycle for processing transcripts
-        this.shortTimeoutId = setTimeout(() => {
-          console.log("Stopping transcription after 10 seconds...");
-          this.transcriptionStop();
-        }, 10000); // 10 seconds
-
-        // Schedule full restart every 9 minutes
-        if (!this.longTimeoutId) {
-          this.longTimeoutId = setTimeout(() => {
-            console.log(
-              "Restarting Azure SDK session before 10-minute timeout..."
-            );
-            this.restartAzureSession();
-          }, 9 * 60 * 1000); // 9 minutes (540,000 ms)
+          // Schedule full restart every 9 minutes
+          if (!this.longTimeoutId) {
+            this.longTimeoutId = setTimeout(() => {
+              console.log(
+                "Restarting Azure SDK session before 10-minute timeout..."
+              );
+              this.restartAzureSession();
+            }, 9 * 60 * 1000); // 9 minutes (540,000 ms)
+          }
+        },
+        (err) => {
+          console.trace("Error starting transcription: " + err);
         }
-      },
-      (err) => {
-        console.trace("Error starting transcription: " + err);
-      }
-    );
+      );
+    } else {
+      // Schedule 10-second cycle for processing transcripts
+      console.log("Recording turned off")
+    }
   }
 
   transcriptionStop() {
-    console.log("Stopping transcription...");
+    if (this.recordingStatus) {
+      console.log("Stopping transcription...");
 
-    // Clear only the short 10-second timeout
-    clearTimeout(this.shortTimeoutId);
+      // Clear only the short 10-second timeout
+      clearTimeout(this.shortTimeoutId);
 
-    this.conversationTranscriber.stopTranscribingAsync(
-      () => {
-        console.log("Transcription stopped.");
-        const time = this.formatTime(new Date());
+      this.conversationTranscriber.stopTranscribingAsync(
+        () => {
+          console.log("Transcription stopped.");
+          const time = this.formatTime(new Date());
 
-        if (this.transcript.length > 1) {
-          this.handleTranscription(this.transcript, time, this.speakerTurns, this.silenceLength);
-          this.silenceLength = 0;
-        } else {
-          this.silenceLength += 1;
+          if (this.transcript.length > 1) {
+            this.handleTranscription(this.transcript, time, this.speakerTurns, this.silenceLength);
+            this.silenceLength = 0;
+          } else {
+            this.silenceLength += 1;
+          }
+
+          // Reset transcript and speaker turns
+          this.transcript = "";
+          this.speakerTurns = { total: 0, speakers: [], turns: [] };
+
+          // Immediately restart transcription for the next 10-second cycle
+          this.transcriptionStart();
+        },
+        (err) => {
+          console.trace("Error stopping transcription: " + err);
         }
-
-        // Reset transcript and speaker turns
-        this.transcript = "";
-        this.speakerTurns = { total: 0, speakers: [], turns: [] };
-
-        // Immediately restart transcription for the next 10-second cycle
-        this.transcriptionStart();
-      },
-      (err) => {
-        console.trace("Error stopping transcription: " + err);
-      }
-    );
+      );
+    }
   }
 
   restartAzureSession() {
@@ -176,6 +188,10 @@ export class SpeechToTopic {
   
   toggleVis() {
     this.vis.toggleVis()
+  }
+
+  preserveSpeakerColors() {
+    this.vis.preserveSpeakerColors(true);
   }
 
   //SDK SETUP*********************************
