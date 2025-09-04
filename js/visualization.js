@@ -573,7 +573,7 @@ export class Visualization {
     });
 
     d3.selectAll(".speechBubbleGroup").style("border-left", null)
-    if (this.treeDepth==0) {
+    if (this.treeDepth==0 && this.visibleTopics.length>0) {
       d3.select(`.speechBubbleGroup#segment-${this.currViewedTopic.id}`).style("border-left", "2px solid #8a2525");
     }
 
