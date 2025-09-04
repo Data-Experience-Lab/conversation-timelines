@@ -1,11 +1,14 @@
 // Hosted
 import { OpenAI } from "/conversation-timelines/js/openaiController.js";
+import { localStorage } from "./localStorage.js";
 import mockData from "./mockData.js";
 import mockData2 from "./mockData2.js";
 
 export class DataHandler {
   constructor() {  
-    this.tree = mockData;
+    this.tree = mockData2;
+    this.todayTree = {};
+    this.localStorage = new localStorage();
     this.openAI = new OpenAI();
   }
 
@@ -28,6 +31,7 @@ export class DataHandler {
     //Always render silence blocks
     //We can stop showing speaker division at some point
     await this.addToData(transcription, time, speakerTurns, data, silenceLength);
+    this.localStorage.addToStorage(data)
     return true;
   }
 

@@ -9,6 +9,11 @@ let touchEndY = null;
 let sliderVal = 0;
 // let hidden = false;
 
+// New local storage object for each day
+// Merge all existing local storage items
+// Delete after 7 days
+
+
 // Create class objects
 let speechController = new SpeechToTopic();
 
@@ -57,7 +62,7 @@ d3.select("#slider")
     .style("margin-top", "0px")
     .append("svg")
     .attr("width", 1000)
-    .attr("height", 100)
+    .attr("height", 30)
     .append("g")
     .attr("transform", "translate(40,10)")
     .call(slider);

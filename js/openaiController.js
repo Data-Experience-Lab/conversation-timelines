@@ -51,7 +51,7 @@ export class OpenAI {
                         items: {
                           type: "string"
                         },  
-                        description: `2-10 most important keywords (this may include clear phrases such as 'motorcycle license' or 'jen's wedding') from the transcript that give a clear idea of a part of the conversation at a quick glance, and that would be likely to trigger a memory of the conversation's specifics. Keywords should all exist in the transcript. Only provide as many keywords as is necessary to gain a general picture of transcript contents- shorter transcripts are more likely to have less keywords.`
+                        description: `2-6 most important keywords (this may include clear phrases such as 'motorcycle license' or 'jen's wedding') from the transcript that give a clear idea of a part of the conversation at a quick glance, and that would be likely to trigger a memory of the conversation's specifics. Keywords should all exist in the transcript. Only provide as many keywords as is necessary to gain a general picture of transcript contents- shorter transcripts are more likely to have less keywords.`
                       },
                     },
                     required: ["topic", "sentence", "segment", "keywords"],

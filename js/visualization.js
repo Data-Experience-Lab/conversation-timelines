@@ -138,7 +138,7 @@ export class Visualization {
           "transform": [
             "translateX(-800px)", "translateX(0px)"
           ],
-          "font-size": ["20px", "32px"]
+          "font-size": ["20px", "25px"]
         }
       },
       "repSentences": {
@@ -150,7 +150,7 @@ export class Visualization {
       "repSentencesSelected": {
         "selector": "#selected-entry",
         "properties": {
-          "display": ["none", "block"],
+          "display": ["none", "block", "none"],
           "opacity": [
             0.0, 1.0
           ],
@@ -161,7 +161,7 @@ export class Visualization {
             "translateX(-800px)", "translateX(0px)"
           ]
         }
-      }
+      },
     };
   }
 
@@ -245,6 +245,12 @@ export class Visualization {
     } else {
       this.showTopics();
     }
+
+    this.updateZoomStyles();
+    this.preserveSpeakerColors();
+    d3.select("#spacing").remove();
+    d3.select("#topics").append("div").style("flex-grow", 1).attr("id", "spacing");
+
   }
 
 
@@ -291,8 +297,8 @@ export class Visualization {
     let line = enter
       .append("div")
       .attr("class", "line") 
-      .style("flex-grow", 1)
-      .style("margin-bottom", "2%")
+      .style("flex-grow", 0.5)
+      .style("margin-bottom", "1.5%")
       .style("align-items", "center")
       .style("display", "flex")
       .style("position", "relative")
@@ -337,6 +343,14 @@ export class Visualization {
         this.renderSpeechBubbles(bubble, d);
       });
 
+    if (this.treeDepth%2==0 && this.treeDepth>0) {
+      topicBlock.each((d, i, nodes) => {
+          console.log(nodes)
+          const topic = d3.select(nodes[i]);
+          this.placeKeywords(topic, d)
+        });
+    }
+
     let time = line.append("div").attr("class", `timeDiv`)
       .style("position", "absolute")
       .style("right", "3vw")
@@ -369,7 +383,61 @@ export class Visualization {
         const bubble = d3.select(nodes[i]);
       });
 
-      this.updateZoomStyles();
+  }
+
+  placeKeywords(div, data) {
+    console.log(data)
+    console.log(data["keywords"])
+    const words = data["keywords"];
+
+    // Dimensions of the container
+    const width = (75 / 100) * window.innerWidth;
+    const height = (14 / 100) * window.innerHeight;
+    const randInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+
+    // const rows = 3; // number of vertical cells
+    // const cols = 4; // number of horizontal cells
+    const totalWords = words.length;
+    const cols = Math.ceil(Math.sqrt(totalWords));
+    const rows = Math.ceil(totalWords / cols);
+    const cellWidth = width / cols;
+    const cellHeight = height / rows;
+
+    const rotations = [-15, -5, 0, 5, 15];
+
+    words.forEach((word, i) => {
+      const row = Math.floor(i / cols);
+      const col = i % cols;
+
+      const rotation = rotations[Math.floor(Math.random() * rotations.length)];
+      
+      // Temporary span to measure size
+      const temp = div.append("span")
+        .style("position", "absolute")
+        .style("visibility", "hidden")
+        .style("font-size", "15px")
+        .text(word);
+
+      const textWidth = temp.node().offsetWidth;
+      const textHeight = temp.node().offsetHeight;
+      temp.remove();
+
+      // Random position inside the cell, constrained to keep word inside container
+      const x = Math.min(col * cellWidth + Math.random() * (cellWidth - textWidth), width - textWidth);
+      const y = Math.min(row * cellHeight + Math.random() * (cellHeight - textHeight), height - textHeight);
+
+      div.append("span")
+        .text(word)
+        .attr("class", "keyword")
+        .style("position", "absolute")
+        .style("left", x + "px")
+        .style("top", y + "px")
+        .style("font-size", "15px")
+        .style("color", "white")
+        .style("transform", `rotate(${rotation}deg)`)
+        .style("transform-origin", "top left");
+    });
+
   }
 
   renderSpeechBubbles(bubble, data) {
@@ -460,28 +528,9 @@ export class Visualization {
       
     // Apply zoom styling to newly created speech bubbles then see speaker colors are good
     setTimeout(() => {
-      this.updateZoomStyles();
       this.preserveSpeakerColors();
     }, 10);
   }
-
-    // resizeFont() {
-  //   let window = document.getElementById("topics");
-  //   let numBubbles = d3.selectAll(".speechBubbleItem").size();
-  //   if (numBubbles>0 && this.treeDepth==0) {
-  //       this.bubbleFontSize = `clamp(1.5vmin, ${
-  //         (window.offsetHeight / numBubbles) * 0.2
-  //       }px, 20px)`;
-  //   }
-  //   this.topicSize = `clamp(15px, ${
-  //     (window.offsetHeight / this.visibleTopics.length) * 0.4
-  //     }px, 4vmin)`;
-  //   this.repSize = `clamp(10px, ${
-  //     (window.offsetHeight / this.visibleTopics.length) * 0.3
-  //     }px, 2.5vmin)`;
-  //   this.bubbleConfig.bubbleText.properties["font-size"][0] = this.bubbleFontSize;
-  // }
-
 
   animateObjects(selector, config, index, animationDuration, delay=0) {
     const elements = d3.selectAll(selector);
@@ -530,13 +579,41 @@ export class Visualization {
 
     //********** Updating topics/rep sentences
     let delay = (this.lastZoomOperation=="+" && this.treeDepth==1) ? 1600 : 0;
-    let topicBubbleConfigIndex = (this.treeDepth==0) ? 0 : 1;
+    let topicBubbleConfigIndex;
+    if (this.treeDepth==0) {
+      topicBubbleConfigIndex = 0;
+    } else if (this.treeDepth%2 == 1) {
+      topicBubbleConfigIndex = 1;
+    } else {
+      topicBubbleConfigIndex = 2;
+    }
+
     console.log(this.lastZoomOperation)
     console.log(this.treeDepth)
     Object.keys(this.topicConfig).forEach((key)=> {
       let config = this.topicConfig[key];
       this.animateObjects(config.selector, config.properties, topicBubbleConfigIndex, animationDuration, delay)
     });
+
+    if (this.treeDepth%2==0 && this.treeDepth > 0) {
+      let lines = d3.selectAll(".entry");
+      lines.each(function(d, i) {
+        // select the .repSentences inside this line
+        const repSentence = d3.select(this).select(".repSentences");
+        let keywords = d3.select(this).selectAll(".keyword");
+        // check if it has an id
+        if (repSentence.attr("id")) {
+          let keywords = d3.select(this).selectAll(".keyword");
+          keywords.each(function(d, i) {
+             d3.select(this).style("display", "block")
+          });
+        } else {
+          keywords.each(function(d, i) {
+             d3.select(this).style("display", "none")
+          });
+        }
+      });
+    }
   }
 
   // Hide representative sentences for all topics except the selected one
@@ -548,7 +625,7 @@ export class Visualization {
       const topicSentence = entry.querySelector(".topicSentences");
       const time = entry.querySelector(".time");
       const totalTime = entry.querySelector(".total-time");
-
+  
       if (selectedTopic === topicSentence.__data__.id) {
         repSentence.style.display = "none";
         repSentence.setAttribute("id", "selected-entry");
@@ -567,7 +644,6 @@ export class Visualization {
           totalTime.style.color = "#bfbfbf";
         }
         time.style.color = "#bfbfbf";
-        entry.removeAttribute("id");
       }
     });
     // Apply styles
@@ -648,6 +724,7 @@ export class Visualization {
    // Zoom in (increase zoom value)
   zoomIn() {
     console.log("zoom in")
+    d3.selectAll(".keyword").remove();
     this.zoomInput = "press";
     window.slider.value(Math.min(slider.value(), 0));
     if (this.treeDepth<this.DataObj.getTreeSize()-1)
@@ -676,6 +753,7 @@ export class Visualization {
   // Zoom out (decrease zoom value)
   zoomOut() {
     console.log("zoom out")
+    d3.selectAll(".keyword").remove();
     this.zoomInput = "press";
     if (this.treeDepth>=1)
     {
@@ -839,11 +917,9 @@ export class Visualization {
 
     speechBubbles.forEach((bubble, index) => {
       if (checkBox.checked) {
-        console.log("Checkbox is checked")
         if (!bubble.classList.contains("Empty"))
           bubble.style.backgroundColor = this.speakerColours[0]
       } else {
-        console.log("Checkbox not checked")
         // See if the bubble has a background color, if not, apply default speaker color
         const currentBgColor = bubble.style.backgroundColor;
         if (!currentBgColor || currentBgColor === '' || fromCheckbox) {
@@ -855,7 +931,6 @@ export class Visualization {
             const speakerId = bubble.classList[2] % 5;
             bubble.style.backgroundColor = this.speakerColours[speakerId];
           }
-          // console.log(`Applied speaker color ${this.speakerColours[speakerId]} to bubble ${index}`);
         }
       }
     });
@@ -865,7 +940,7 @@ export class Visualization {
   setZoomValue(newZoomValue) {
     this.zoomValue = Math.max(0.0, Math.min(1.0, newZoomValue));
     this.preserveSpeakerColors();
-    
+
     // Update level indicator
     const levelText = document.getElementById("vis-level-text");
     if (levelText) {

@@ -54,7 +54,7 @@ export class SpeechToTopic {
       );
     } else {
       // Schedule 10-second cycle for processing transcripts
-      console.log("Recording turned off")
+      console.log("Recording turned off");
     }
   }
 
