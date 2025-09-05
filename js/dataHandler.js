@@ -1,19 +1,23 @@
 // Hosted
 import { OpenAI } from "/conversation-timelines/js/openaiController.js";
-import { localStorage } from "./localStorage.js";
+import { localStorageHelper } from "./localStorageHelper.js";
 import mockData from "./mockData.js";
 // import mockData2 from "./mockData2.js";
 
 export class DataHandler {
   constructor() {  
+    this.localStorageHelper = new localStorageHelper();
     this.tree = this.initTree();
-    this.todayTree = {};
-    // this.localStorage = new localStorage();
     this.openAI = new OpenAI();
   }
 
   initTree() {
-    return {0: []};
+    if (localStorage.length>0) {
+      let json = this.localStorageHelper.getJSONItem();
+      return (json!=null) ? json : {0: []};
+    } else {
+      return {0: []};
+    }
   }
 
   // Get data for a specific level
@@ -31,7 +35,8 @@ export class DataHandler {
     //Always render silence blocks
     //We can stop showing speaker division at some point
     await this.addToData(transcription, time, speakerTurns, data, silenceLength);
-    // this.localStorage.addToStorage(data)
+    this.localStorageHelper.addToStorage(data)
+    this.localStorageHelper.getFullList()
     return true;
   }
 
