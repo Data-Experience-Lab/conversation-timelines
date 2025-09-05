@@ -14,7 +14,8 @@ export class DataHandler {
   initTree() {
     if (localStorage.length>0) {
       let json = this.localStorageHelper.getJSONItem();
-      return (json!=null) ? json : {0: []};
+      json = (json!=null) ? json : {0: []};
+      return json
     } else {
       return {0: []};
     }
@@ -36,7 +37,6 @@ export class DataHandler {
     //We can stop showing speaker division at some point
     await this.addToData(transcription, time, speakerTurns, data, silenceLength);
     this.localStorageHelper.addToStorage(data)
-    this.localStorageHelper.getFullList()
     return true;
   }
 

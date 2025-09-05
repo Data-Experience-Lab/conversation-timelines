@@ -22,7 +22,6 @@ export class localStorageHelper {
         let json;
         const date = new Date();
         date.setHours(0, 0, 0, 0);
-        json = JSON.parse(localStorage.getItem(date)).tree;
 
         console.log(localStorage.length)
         for (let i = 0; i < localStorage.length; i++) {
