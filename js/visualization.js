@@ -67,7 +67,7 @@ export class Visualization {
           "max-width": ["fit-content"],
           "min-width": ["1.5vw"],
           "max-height": ["fit-content", "fit-content", null],
-          "min-height": ["0.5vw", "0.5vw", "1px"],
+          "min-height": ["0.5vw", "3px", "1px"],
           "overflow": ["visible", "hidden"],
           "position": ["relative"],
           "word-wrap": ["break-word"],
