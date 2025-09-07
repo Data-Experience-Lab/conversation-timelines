@@ -454,7 +454,7 @@ export class Visualization {
     let bubbleHeight = null
     if (this.treeDepth > 3){
       let maxHeight = 120;
-      bubbleHeight = `clamp(1px, ${
+      bubbleHeight = `clamp(0.01px, ${
           (maxHeight / totalTurns)
           }px, 0.5vw)`;
       console.log(`${data.id} bubble height: `, bubbleHeight);
