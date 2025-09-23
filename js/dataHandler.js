@@ -1,7 +1,7 @@
 // Hosted
 import { OpenAI } from "/conversation-timelines/js/openaiController.js";
-import { localStorageHelper } from "/conversation-timelines/localStorageHelper.js";
-import mockData from "/conversation-timelines/mockData.js";
+import { localStorageHelper } from "./localStorageHelper.js";
+import mockData from "./mockData.js";
 //Local
 // import { OpenAI } from "./openaiController.js";
 // import { localStorageHelper } from "./localStorageHelper.js";
