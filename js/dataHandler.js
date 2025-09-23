@@ -11,7 +11,7 @@ import mockData from "/conversation-timelines/mockData.js";
 export class DataHandler {
   constructor() {  
     this.localStorageHelper = new localStorageHelper();
-    this.tree = mockData2;
+    this.tree = this.initTree();
     this.openAI = new OpenAI();
   }
 
