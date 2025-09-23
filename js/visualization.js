@@ -18,6 +18,7 @@ export class Visualization {
     this.selfID = "Guest-1";
     this.bubbleFontSize = "10px";
     this.bubbleHeight = null;
+    this.displayedLevel=0;
 
     //  font sizes
     this.topicSize = "";
@@ -309,8 +310,6 @@ export class Visualization {
     // Create topic elements
     if (this.treeDepth!=0) 
     {
-      line.style("border", "2px solid white")
-
       topicBlock
       .style("width", "0vw")
       .attr("id", (d)=>d.id)
@@ -343,7 +342,7 @@ export class Visualization {
         this.renderSpeechBubbles(bubble, d);
       });
 
-    if (this.treeDepth%2==0 && this.treeDepth>0) {
+    if (this.treeDepth>1) {
       topicBlock.each((d, i, nodes) => {
           console.log(nodes)
           const topic = d3.select(nodes[i]);
@@ -359,7 +358,16 @@ export class Visualization {
     time
       .append("h1")
       .attr("class", "time")
-      .text((d) => d.time);
+      .text((d) => d.time)
+      .style("font-size", "1.8vmin");
+      
+    if (this.treeDepth>0){
+      time
+        .append("h1")
+        .attr("class", "time")
+        .text((d) => d.totalTime)
+        .style("margin-top", "1.5vh");
+    }
   }
 
   // Handle updates to existing elements in the DOM
@@ -582,7 +590,7 @@ export class Visualization {
     let topicBubbleConfigIndex;
     if (this.treeDepth==0) {
       topicBubbleConfigIndex = 0;
-    } else if (this.treeDepth%2 == 1) {
+    } else if (this.treeDepth == 1) {
       topicBubbleConfigIndex = 1;
     } else {
       topicBubbleConfigIndex = 2;
@@ -595,7 +603,7 @@ export class Visualization {
       this.animateObjects(config.selector, config.properties, topicBubbleConfigIndex, animationDuration, delay)
     });
 
-    if (this.treeDepth%2==0 && this.treeDepth > 0) {
+    if (this.treeDepth > 1) {
       let lines = d3.selectAll(".entry");
       lines.each(function(d, i) {
         // select the .repSentences inside this line
@@ -722,11 +730,12 @@ export class Visualization {
   }
 
    // Zoom in (increase zoom value)
-  zoomIn() {
+  zoomIn(iter=0) {
     console.log("zoom in")
     d3.selectAll(".keyword").remove();
     this.zoomInput = "press";
     window.slider.value(Math.min(slider.value(), 0));
+    if (iter==0) this.displayedLevel+=1;
     if (this.treeDepth<this.DataObj.getTreeSize()-1)
     {
       this.treeDepth += 1;
@@ -748,13 +757,15 @@ export class Visualization {
       window.slider.value([slider.value() - this.zoomStep]);
       this.updateScreen(this.DataObj)
     }
+    if (iter==0 && this.treeDepth>1) this.zoomIn(1);
   }
 
   // Zoom out (decrease zoom value)
-  zoomOut() {
+  zoomOut(iter = 0) {
     console.log("zoom out")
     d3.selectAll(".keyword").remove();
     this.zoomInput = "press";
+    if (iter==0) this.displayedLevel-=1;
     if (this.treeDepth>=1)
     {
       this.treeDepth -= 1;
@@ -775,6 +786,7 @@ export class Visualization {
       window.slider.value([slider.value() + this.zoomStep]);
       this.updateScreen(this.DataObj)
     }
+    if (iter==0 && this.treeDepth>1) this.zoomOut(1);
   }
 
   setSliderZoom(value) {
@@ -947,7 +959,7 @@ export class Visualization {
       if (this.treeDepth == 0) {
         levelText.textContent = "Speech Bubbles";
       } else {
-        levelText.textContent = "Level " + this.treeDepth;
+        levelText.textContent = "Level " + this.displayedLevel;
       }
       // } else if (this.zoomValue < 0.35) {
       //   levelText.textContent = "10s Topics";

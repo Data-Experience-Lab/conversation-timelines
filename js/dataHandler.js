@@ -1,13 +1,17 @@
 // Hosted
 import { OpenAI } from "/conversation-timelines/js/openaiController.js";
-import { localStorageHelper } from "./localStorageHelper.js";
-import mockData from "./mockData.js";
+import { localStorageHelper } from "/conversation-timelines/localStorageHelper.js";
+import mockData from "/conversation-timelines/mockData.js";
+//Local
+// import { OpenAI } from "./openaiController.js";
+// import { localStorageHelper } from "./localStorageHelper.js";
+// import mockData from "./mockData.js";
 // import mockData2 from "./mockData2.js";
 
 export class DataHandler {
   constructor() {  
     this.localStorageHelper = new localStorageHelper();
-    this.tree = this.initTree();
+    this.tree = mockData2;
     this.openAI = new OpenAI();
   }
 
@@ -115,15 +119,22 @@ export class DataHandler {
     
     // OpenAI call
     let parentNodes;
+    let result;
+    let time = node1.time;
     let twoParents = true;
     let lastTopic = (this.tree[depth]!=null) ? this.tree[depth].at(-1) : "";
-    let result = await this.openAI.gptResult(transcript, lastTopic, "turn");
-    // console.log("OpenAI result:\t", result)
+
+    if (this.getTimeDiff(time, "totalMin")>30) {
+      result=null
+    } else {
+      result = await this.openAI.gptResult(transcript, lastTopic, "turn");
+    }
+      // console.log("OpenAI result:\t", result)
     console.log("DH result 1: ", result)
     if (result == null) {
         twoParents = false;
         console.log("DH Turn detected: ", transcript)
-        numStrings = String(node1.segments).split(' '); // Split by whitespace
+        numStrings = String(node2.segments).split(' '); // Split by whitespace
         numbers = numStrings.map(Number).filter(num => !isNaN(num));
         transcript = "";
         for (let i=0; i<numbers.length; i++) {
@@ -131,9 +142,10 @@ export class DataHandler {
         }
         result = await this.openAI.gptResult(transcript, lastTopic);
         console.log("DH result 2: ", result)
-        parentNodes = {[node1.depth]: [node1.id]};
-        id = node1.id;
-        segments = node1.segments;
+        parentNodes = {[node2.depth]: [node2.id]};
+        id = node2.id;
+        segments = node2.segments;
+        time = node2.time;
     } else {
         parentNodes = (node1.depth==node2.depth) ?  {[node1.depth]: [node1.id, node2.id]} : {[node1.depth]: [node1.id], [node2.depth]: [node2.id]};
     }
@@ -148,7 +160,7 @@ export class DataHandler {
         this.createNode(result.topic.toUpperCase(), 
                         result.sentence, 
                         transcript, 
-                        node1.time,
+                        time,
                         null,
                         id,
                         depth,
@@ -183,7 +195,31 @@ export class DataHandler {
           "parentNodes": parentNodes,
           "childNodes": {[depth+1]: []},
           "segments": segments,
-          "keywords": keywords
+          "keywords": keywords,
+          "totalTime": this.getTimeDiff(time)
         }
+  }
+
+  getTimeDiff(startTime, mode="string") {
+    let currViewedTime = new Date();
+    const [chours, cminutes, cseconds] = startTime.split(":").map(Number);
+    startTime = new Date();
+    startTime.setHours(chours, cminutes, cseconds, 0);
+
+    let diffMs = Math.abs(startTime - currViewedTime); // Use Math.abs to handle negative differences
+    let diffSeconds = Math.floor(diffMs / 1000);
+    let hours = Math.floor(diffSeconds / 3600);
+    let minutes = Math.floor((diffSeconds % 3600) / 60);
+    let seconds = diffSeconds % 60;
+
+    if (mode=="string"){
+      let time = ""
+      if (hours>0) time += `${hours}h `
+      if (minutes>0) time += `${minutes}m `
+      time += `${seconds}s`
+      return time;
+    } else if (mode=="totalMin"){
+      return diffMs
+    }
   }
 }

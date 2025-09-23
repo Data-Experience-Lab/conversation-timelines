@@ -1,5 +1,7 @@
 //Hosted
 import { SpeechToTopic } from "/conversation-timelines/js/speechController.js";
+//Local
+// import { SpeechToTopic } from "./js/speechController.js";
 
 // swipe recognition
 let touchStartX = null;
@@ -8,11 +10,6 @@ let touchStartY = null;
 let touchEndY = null;
 let sliderVal = 0;
 // let hidden = false;
-
-// New local storage object for each day
-// Merge all existing local storage items
-// Delete after 7 days
-
 
 // Create class objects
 let speechController = new SpeechToTopic();
