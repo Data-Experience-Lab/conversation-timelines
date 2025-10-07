@@ -36,7 +36,7 @@ export class OpenAI {
                     properties: {
                       topic: {
                         type: "string",
-                        description: `1-3 words succinctly describing the overarching conversation topic of the segment. It should not use any of the following words: ${lastTopic}. Highlight something else if possible.                              It should be as specific as possible; rather than simply broadly classifying a topic about trying new foods as 'culinary experience', personalize the topic with words from the transcript as much as possible where it makes sense to do so.`
+                        description: `1-3 words succinctly describing the overarching conversation topic of the segment. It must not use any of the following words: ${lastTopic}. Highlight something else if possible. It should be as specific as possible; rather than simply broadly classifying a topic about trying new foods as 'culinary experience', personalize the topic with words from the transcript as much as possible where it makes sense to do so. Do not highlight filler words like "mm-hmm" or "yeah", or general non-useful topics such as "Expression of Uncertainty" or "Agreement"; This topic expression should describe the conversation topic of as much of the transcript as possible.`
                       },
                       sentence: {
                         type: "string",
@@ -51,7 +51,7 @@ export class OpenAI {
                         items: {
                           type: "string"
                         },  
-                        description: `2-6 most important keywords (this may include clear phrases such as 'motorcycle license' or 'jen's wedding') from the transcript that give a clear idea of a part of the conversation at a quick glance, and that would be likely to trigger a memory of the conversation's specifics. Keywords should all exist in the transcript. Only provide as many keywords as is necessary to gain a general picture of transcript contents- shorter transcripts are more likely to have less keywords.`
+                        description: `2-6 most important keywords (this may include clear phrases such as 'motorcycle license' or 'jen's wedding') directly from the transcript that give a clear idea of a part of the conversation at a quick glance, and that would be likely to trigger a memory of the conversation's specifics. Keywords should be very specific and all exist in the transcript. Only provide as many keywords as is necessary to gain a general picture of transcript contents- shorter transcripts are more likely to have less keywords. Do not highlight generic phrases.`
                       },
                     },
                     required: ["topic", "sentence", "segment", "keywords"],
