@@ -459,16 +459,16 @@ export class Visualization {
     });
     console.log("Total turns: ", totalTurns)
 
-    let bubbleHeight = null
-    if (this.treeDepth > 3){
-      let maxHeight = 120;
-      bubbleHeight = `clamp(0.01px, ${
-          (maxHeight / totalTurns)
-          }px, 0.5vw)`;
-      console.log(`${data.id} bubble height: `, bubbleHeight);
-    } else {
-      bubbleHeight = null;
-    }
+  let maxHeight = 120; 
+  let defaultHeight = 24; 
+
+  // Calculate height per turn, clamp to min/max
+  let heightPerTurn;
+  if (totalTurns > 0) {
+    heightPerTurn = `clamp(0.01px, ${(maxHeight / totalTurns)}px, 0.25vw)`;
+  } else {
+    heightPerTurn = defaultHeight;
+  }
 
     segments.forEach((int) => {
       let segment = this.segments[int];
@@ -503,7 +503,7 @@ export class Visualization {
             const bubbleDiv = segmentDiv.append("div")
               .attr("class", "speechBubbleItem")
               .classed(speakerClass, true)
-              .style("height", bubbleHeight)
+              .style("height", `${heightPerTurn}px`)
 
             if (turn.speakerId=="None"){
               bubbleDiv.style("background-color", "#000000").classed("Empty", true);
