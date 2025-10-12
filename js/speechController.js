@@ -1,9 +1,9 @@
 // Hosted
-import { DataHandler } from "/conversation-timelines/js/dataHandler.js";
-import { Visualization } from "/conversation-timelines/js/visualization.js";
+// import { DataHandler } from "/conversation-timelines/js/dataHandler.js";
+// import { Visualization } from "/conversation-timelines/js/visualization.js";
 //Local
- // import { DataHandler } from "./dataHandler.js";
- // import { Visualization } from "./visualization.js";
+ import { DataHandler } from "./dataHandler.js";
+ import { Visualization } from "./visualization.js";
 
 const APIURL = "https://convtimelines-backend.onrender.com"
 
@@ -47,8 +47,10 @@ export class SpeechToTopic {
               console.log(
                 "Restarting Azure SDK session before 10-minute timeout..."
               );
+              this.transcriptionStop();
               this.restartAzureSession();
-            }, 9 * 60 * 1000); // 9 minutes (540,000 ms)
+            // }, 9 * 60 * 1000); // 9 minutes (540,000 ms)
+            }, 30 *1000);
           }
         },
         (err) => {
@@ -80,12 +82,11 @@ export class SpeechToTopic {
             this.silenceLength += 1;
           }
 
+          this.transcriptionStart();
+
           // Reset transcript and speaker turns
           this.transcript = "";
           this.speakerTurns = { total: 0, speakers: [], turns: [] };
-
-          // Immediately restart transcription for the next 10-second cycle
-          this.transcriptionStart();
         },
         (err) => {
           console.trace("Error stopping transcription: " + err);
@@ -94,40 +95,52 @@ export class SpeechToTopic {
     }
   }
 
-  restartAzureSession() {
+  async restartAzureSession() {
     console.log("Restarting Azure Speech SDK session...");
 
-    // Clear both timeouts to prevent multiple scheduled restarts
+    // Clear any pending timeouts
     clearTimeout(this.shortTimeoutId);
     clearTimeout(this.longTimeoutId);
-
-    // Immediately reset longTimeoutId to ensure proper restart
     this.longTimeoutId = null;
 
     try {
-      // Stop any active transcriber session
+      // --- Gracefully stop any existing transcriber ---
       if (this.conversationTranscriber) {
-        this.conversationTranscriber.stopTranscribingAsync();
-      }
-      
-      this.sdkSetup();
+        console.log("Stopping old transcriber before restart...");
+        await new Promise((resolve) => {
+          this.conversationTranscriber.stopTranscribingAsync(
+            () => {
+              console.log("Old transcriber stopped cleanly.");
+              resolve();
+            },
+            (err) => {
+              console.error("Error stopping old transcriber:", err);
+              resolve(); // continue anyway
+            }
+          );
+        });
 
-      console.log("Azure Speech SDK session restarted.");
+        // Explicitly clear reference to help GC
+        this.conversationTranscriber = null;
+      }
+
+      // --- Reinitialize SDK and start fresh ---
+      await this.sdkSetup();
+      console.log("Azure Speech SDK session restarted successfully.");
     } catch (error) {
       console.error("Error restarting Azure session:", error);
     } finally {
-      this.longTimeoutId = null; // Ensure it's reset even if an error occurs
+      // Ensure restart timer resets properly
+      this.longTimeoutId = null;
     }
-
-    // Start new transcription cycle
-    // this.transcriptionStart();
   }
+
 
   async startContinuousRecording() {
     // Call function for initial render of display
     this.vis.updateScreen(this.data, false);
     try {
-      this.transcriptionStop();
+      this.transcriptionStart();
     } catch (error) {
       console.error("Error accessing microphone:", error);
     }
@@ -201,68 +214,74 @@ export class SpeechToTopic {
 
   async sdkSetup() {
     try {
-      // Get speech token + region from backend
-      const response = await fetch(`${APIURL}/api/speech-token`, {
-        method: "POST"
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch speech token");
-      }
+      // --- Get token + region from backend ---
+      const response = await fetch(`${APIURL}/api/speech-token`, { method: "POST" });
+      if (!response.ok) throw new Error("Failed to fetch speech token");
 
       const { token, region } = await response.json();
+      if (!token || !region) throw new Error("Missing token or region");
 
-      if (!token || !region) {
-        throw new Error("Missing token or region");
-      }
-
-      // Use token to configure Speech SDK
+      // --- Create speech + audio configs ---
       const speechConfig = window.SpeechSDK.SpeechConfig.fromAuthorizationToken(token, region);
       speechConfig.speechRecognitionLanguage = "en-US";
-
-      // Store config, or continue with recognizer creation
-      this.speechConfig = speechConfig;
       const audioConfig = window.SpeechSDK.AudioConfig.fromDefaultMicrophoneInput();
 
       this.SpeechSDK = window.SpeechSDK;
+
+      // --- Safety cleanup: ensure no old transcriber persists ---
+      if (this.conversationTranscriber) {
+        console.warn("Previous transcriber still active — stopping...");
+        await new Promise((resolve) =>
+          this.conversationTranscriber.stopTranscribingAsync(() => resolve(), () => resolve())
+        );
+        this.conversationTranscriber = null;
+      }
+
+      // --- Create new transcriber instance ---
       this.conversationTranscriber = new this.SpeechSDK.ConversationTranscriber(
         speechConfig,
         audioConfig
       );
-      
-      this.conversationTranscriber.sessionStarted = function (s, e) {
+
+      // --- Event Handlers (use arrow functions for proper 'this') ---
+      this.conversationTranscriber.sessionStarted = (s, e) => {
         this.time = Date.now();
-        console.log("SessionStarted event");
-        console.log("SessionId:" + e.sessionId);
+        this.currentSessionId = e.sessionId;
+        console.log("SessionStarted:", e.sessionId);
       };
-      this.conversationTranscriber.sessionStopped = function (s, e) {
-        console.log("SessionStopped event");
-        console.log("SessionId:" + e.sessionId);
-        this.conversationTranscriber.stopTranscribingAsync();
-      };
-      this.conversationTranscriber.canceled = function (s, e) {
-        console.log("Canceled event");
-        console.log(e.errorDetails);
-        this.conversationTranscriber.stopTranscribingAsync();
-      };
-      this.conversationTranscriber.transcribed = (s, e) => {
-        if (e.result.text != undefined && e.result.speakerId != "Unknown") {
-          console.log(e.result);
-          console.log(
-            "TRANSCRIBED: Text=" +
-              e.result.text +
-              " Speaker ID=" +
-              e.result.speakerId
+
+      this.conversationTranscriber.sessionStopped = (s, e) => {
+        console.log("SessionStopped:", e.sessionId);
+        if (this.conversationTranscriber) {
+          this.conversationTranscriber.stopTranscribingAsync(
+            () => console.log("Stopped after sessionStopped event."),
+            (err) => console.error("Error stopping after sessionStopped:", err)
           );
+        }
+      };
+
+      this.conversationTranscriber.canceled = (s, e) => {
+        console.warn("Canceled event:", e.errorDetails);
+        if (this.conversationTranscriber) {
+          this.conversationTranscriber.stopTranscribingAsync(
+            () => console.log("Stopped after cancel."),
+            (err) => console.error("Error stopping after cancel:", err)
+          );
+        }
+      };
+
+      this.conversationTranscriber.transcribed = (s, e) => {
+        if (e.result.text && e.result.speakerId !== "Unknown") {
+          console.log(`[${this.currentSessionId}] ${e.result.speakerId}: ${e.result.text}`);
           this.addSegment(e.result);
           this.transcript += e.result.text + " ";
-          console.log("transcript = " + this.transcript);
         }
       };
     } catch (err) {
       console.error("Speech SDK setup failed:", err);
     }
   }
+
 
   addSegment(result) {
     const guestID = result.speakerId;

@@ -1,0 +1,496 @@
+***********************
+
+Question: How did you decide where to place visualizations in head and spatial AR? (Ex over the shoulder off to the side) Were there differences in how you placed them in each mode?
+
+- I placed them in a way such that it was easy for me to see the other people or in a neutral background where there is not a lot of contrasting contours. Because otherwise I wouldn't see the content clearly or not see the people properly
+
+- In front personally. Try to make it big and able to see everything.
+
+- In Head AR I felt somewhat disconnected from others because I had to focus on adjusting the visualization which sometimes interrupted the natural flow of conversation. It also made eye contact harder which might have reduced engagement. In contrast Spatial AR felt more natural and inclusive since everyone could see and interact with the visualization in the environment. This seemed to encourage more discussion and engagement among participants.
+
+- In spatial AR I chose to place visualizations beside the people I was talking to. This made it convenient to simultaneously face the other participants while 
+
+- Right in front of me to make it easiest to read. I did not see others.
+
+- I decided to put it slightly above my field of view so I could see it easily while also seeing the other participants.
+
+- For head mode I decided to put it behind the people opposite to me so I could still see them but still loop up if I wanted to. For spatial I didn't change it I just kept it infront of me and looked at people from the corner of my eye. And sometimes when the information for the visuals was a bit short I could look at the people head on!
+
+- I honestly mostly just left them where they were which might've been a mistake because they were often covering people's faces which was kind of distracting.
+
+- For the one that moved around with my head I liked placing it above the conversation pretty small so I could glance to it but I found it got a bit dizzy the way it followed me around. The spacial one I put to the side on the table so I could just glance to it while feeling more present in the conversation. 
+
+- I tried to place them in areas that did not obstruct my view of the other participants.
+
+- I usually just place it in my periphery so that it doesn't block people's faces
+
+- I initially made them large to make the words easier to see but then realized I was not looking at anyone during conversation. Then I reduced the size to appear small and over the shoulder of those I was talking to
+
+- I liked having the spatial AR in a neutral space like the black board
+
+I liked having the head tracked one over the person in front of me's shoulder
+
+- I picked above the right shoulder slightly over the face and shoulder 
+
+- In front and on the side
+
+- Over head
+
+- When I was in head anchor mode I usually made it smaller and farther away where it wasn't as distracting. When it was spatial anchor i placed it over the shoulder of the person in the middle of the group
+
+- i decided to place them directly in front of my eyes but not over the other people in front of me. didn't change throughout the study
+
+- Off to the side away from people in spatial and in direct vision for head
+
+- In spatial AR I placed it away from them because it felt rude to read it while talking. In head AR is followed my vision so I just placed it on the person.
+
+- I placed them behind the shoulder ti the left of the person across from me 
+
+- I placed both off to the side as i wanted it not distract me when looking forward for the video/ speaking which kind of made it look like a stream 
+
+- In spatial i kept the vidualizaton beside the video so i could easily turn and see the transcript. during the conversation i kept it right in front of me slightly to the top so i could keep an eye on the people as well. in head i kept it near the top so it would stay out of the way of the people but still be close enough to read.
+
+- For the spatial visualisations I kept it over the shoulder of another participant. This made it easier for me to be able to look between the participant and the visualisation as the conversation continued. For the head AR I kept the visualisation large and covered most of my vision as I was able to move my head around as I pleased. 
+
+
+
+***********************
+
+Question: In general what effect do you think each condition had on the engagement of other participants and the general social dynamic?
+
+- I think that having the head anchored and spatial AR setups allowed me and the participants to be more active.
+
+- The mobile in my opinion was the least helpful as you have to take your eyes and face away from the conversation whereas the glasses especially the anchored one is easier to be engaged with the topics as your face can see the person while looking at them.
+
+- I felt the AR users were a little disengaged as I could not see their eyes. Eyes contribute to lot of facial expressions and thus the quality of the conversation
+
+- I think the mobile was the most likely to make people engage in the conversation because it wasn't as cool as the head and spatial fixed Goggles. The head fixed one is the nicest and the spatial fixed one is ok. The ones that were cooler/more mesmerizing were probably more likely to cause people not to engage as much in the conversation imo.
+
+- For me I would say that a person without a phone had a faster response time compared to others which increased engagement but it couldn't fulfill or continue the nature of the answers. AR-equipped conditions helped more to deliver an enjoyable and slower conversation with a slower response time which affected the nature of the conversation.
+
+- I think that the head anchored AR was a bit distracting for people conversing so they were struggling to follow the conversation as well otherwise I would say that each condition didn't really have a major impact on the engagement of the participants. I think that the general social dynamic was changed by people seeing who was dominating the conversation on the left bar and also by being reminded of what was previously said in that we were talking about what was showing up on the summary.
+
+- I felt as though I was a lot more engaged in the conversation when I didn't have the mobile or the visuals. It kinda distracted me a bit. But it also helped to provide something to focus on in order to not loose my train of thought. Because do you know how sometimes you are listening to someone but you start doing something else like picking your nails or fixing your shirt but at the same time you are still listening to the conversation? Yeah the visuals were kinda like that for me. Though with the information if I wanted to read it it really drew my attention too much and so I couldn't focus on the conversation anymore. As such when I was on the visuals I had to actively try to show the social cues that imply I'm invested in a conversation where as if I didn't have the visuals or mobile I kinda did that more naturally. But the mobile was the most distracting of all. There is already a social understanding that if someone is on their phone why you are talking then they are not as involved in the conversation. So when I had the phone or when others had the phone it felt a lot more separated.
+
+- I felt like talking to someone with AR glasses on made you feel slightly separated in that you can't really see their eyes as well as you would otherwise be able to and it feels like you're not quite part of the same shared experience since they're seeing something you're not seeing.
+
+- I think the spacial technology could definitely be helpful! Especially in meeting situations for work to recap things. I think it would be most helpful for recapping or recalling rather than in real time looking at it. 
+
+- I think the phone was the most disruptive to engagement. It gave the impression that the user was not paying attention. I think the head anchored device was also disruptive to the conversation. The spatial device was the least disruptive to the conversation but it felt like an afterthought to the conversation.
+
+- The phone definitely disengaged me too much because it's so close to me. While the spatial anchoring interface is far enough to be in almost the same depth as other people so that I don't have to switch my focus frequently.
+
+- I don't think it impacted the engagement negatively. It was harder to read others when they were using the headset though. If I could see someone modifying the headset view or swiping on the mobile app I would not initiate conversation because I did not want to interrupt what they were doing.  
+
+- It helped us remember what we were speaking abojt
+
+- I think head anchor had me the most distracted and I wasn't making eye contact it was also my favourite though because it was the easiest to use
+
+- head anchored was a lot easier 
+
+- None
+
+- I think that the AR headsets were a little distracting and caused people to be a little less engaged in the conversations compared to when they were on mobile or none
+
+- spatial: participant's seemed engaged and not distracted by the glasses.
+head: few distractions to the people wearing glasses not as attentive on conversation or environment when used.
+mobile: seemed to me most participants didn't attend to mobile as much and wasn't easily distracted or inattentive to other people in conversation even when attending to phone.
+
+- Sometimes that would be the topic of the conversation straying us away from actually engaging in main conversation
+
+- Both ARs seemed distracting and poorly summarized the conversations. I felt more disengagement when using the AR and the others seemed more disengaged. It did feel less awkward talking to new people however using the AR.
+
+- I think maybe the person that had the mobile was the most engaged as they didn't look at their phone often. I think the person with the special one was the least engaged because they had to look away from the conversation to find the list again and then I think the Head one was also very engaged as the text followed their movement and I also found that made it easier to not tear myself away from the conversation if I wanted to go and look at the text. 
+
+- I would say the head engagement is similar to like a VR headset making it more interesting as it does move with you the spatial is like a cinema if you look away it won't be visible till you look back and the mobile is just like our everyday action to our phone 
+
+- I think spatial might be the less distracting compared to head since it is not always following the view around. I think this made some people more engaged compared to the head. The phone was honestly easy to forget as you have to make a much more consious effort to look at the transcript while in the AR modes the transcript can be placed closer and in a better position for viewing.
+
+- I felt more overstimulated by the head AR as wherever I moved the visualisation would follow me. This made me feel less engaged in the conversation as wherever I looked I could only see the transcripts of our conversation rather than be present. When I was on the mobile I felt more relaxed but I wasn't able to keep up with the visualisation. People were the most engaged with the spatial visualisation. 
+
+
+
+***********************
+
+Question: Explain the reasoning for your ranking of platforms.
+
+- I preferred the flexibility of the head anchored display and both displays let me stay focused on the conversation at hand.
+
+- Spatial gave the ability to move the display to a better position and was more usable than mobile because you could make a quick glance at the transcript rather than taking your eyes off the screen to look at your phone.
+
+- The head anchored was the highest as you can see the conversation topics at all time and is easier to use. The spatial was not as good as you have to move the program if another person starts to lead the conversation.
+
+- using mobile I could choose to see what's going on if i want to. But AR was a little bit obstructing the view. May be because I was not used to it. I am not sure the difference of the spatial and head but I believe head anchored is the one where it was anchored closer to my view and this view was easy to read
+
+- Head anchored goggles were the most mesmerizing. It's generally cool to see the visualization on goggles.
+
+- I made this ranking based on how comfortable they are and how easy it is efficient to use.
+
+- The spatial anchored AR allowed me to place the window at a fixed point in space. Having a spatial reference point for the conversational menu was more intuitive than the head anchored AR. While these two modes were slightly distracting I believe that with an adjustment period the user would more seamlessly be able to navigate between reading the display and making eye contact with other people in the conversation. The mobile display felt most natural at first (likely due to familiarly with mobile devices) but it was cumbersome to look down at the device while listening to the other participants. 
+
+- based on how intrusive they are. I like when it's more out of the way. difficult to see others with glasses on 
+
+- The spatial anchoring was convenient I could read the summary and focus on the other participants the head anchored AR was the most distracting and the mobile was squarely in the middle.
+
+- Head is the best because it's available and I can stay socially engaged without having to look down to find the information about the converation. Though the bad thing about it was that when I looked away it was too dark to see everyone clearly. Then is the special one because it's just better than the mobile. And mobile is the worse because of the social understandings on not being engaged when you are on your phone.
+
+- With mobile it at least feels like you know when the person is looking at the phone compared to the other two modes.
+I struggled with making the head anchored feel 'normal' and found it was more distracting than useful. I think with time this ranking might change if I got more used to the interface. At the moment mobile is just the most intuitive interface for me since I use it regularly.
+
+- Spacial I felt the most engaged mobile I felt a bit out of the convo or I would forget it was there and the head anchored one really annoyed me I didn't like how it followed me and made me dizzy. 
+
+- The spatial anchoring device was a cool and non-disruptive conversation assistant. The head-anchored device was disruptive but still fun to use. The phone was disruptive and also not very entertaining to use.
+
+- Compared to the spatial anchoring conditions the head anchoring can follow me when I'm turning my head to see the person next to me. But spatial anchoring interface is more engaging and less distracting than mobile definition. 
+
+- The spatial anchored AR retrospectively made me feel a little dizzy compared to the head anchored AR. It was mild enough that I did not notice until reflecting back on the experience. 
+
+- I felt that the head tracking one kept me in the conversation more I didn't have to look around anywhere else like with the phone or the spatial
+
+- I like talking without the screen visible and the spatial allowed me to look away from the screen though the head was my favourite for ease of use I wouldn't want to use it
+
+- head anchored was easier to control mobile was easier to navigate and SA AR had a bit more time prior to beginning 
+
+- Preferred the special anchor 
+
+- I liked mobile the most because it was the least distracting and I felt like I could be the most engaged in what people were saying. The spatial anchored was an in between since it wasn't moving with me always I didn't always have to see it so it wasn't distracting me as much whereas the head anchor one was always there and I found myself reading the timeline a lot more than any of the other ones which made me lose focus on the conversation a lot more easily.
+
+- the spatial anchored AR seemed best to navigate and use since the screen won't move around a lot and you can see relevant info when needed at the side of your sight or wherever you wanna place it.
+head anchored AR was quite hard to navigate and did cause me a few headaches and slight sight aversion it was quite hard to utilize with and without glasses on.
+mobile was good as you can easily control what you want to get/see from screen without worrying if you're not environmentally aware of your surroundings.
+
+- I liked the spatial because it allowed me to place it somewhere and look there if I wanted to check in on the conversation without always drawing my attention to it. It kept it seperate but a worthwhile addition to my space.
+
+- I dont like looking at technology when talking to someone and I didnt have to look at the phone. The head AR was more comfortable and easier to use than Spatial AR
+
+- Similar to what I said above. The head one allowed me to be more present in the conversation than the spacial one. 
+
+- i didn't like the spatial as it didn't move with me and just cuts of the screen making you have to turn your head back to the original position to read. I like the head as it was moving with me and i can just side eyed to the side and see the text and mobile due to it being similar to me reading off my phone 
+
+- spatial feels the best and more realistic for using since its easy to simply look away and not get distracted. head anchored can be a bit distracting if it follows the bead movement when nothing else in the world moves. the phone was less useful in using the transcript as it cannot be made a larger size and you have to manually look at it.
+
+- The spatial AR was the most comfortable for me as I was able to look at the person I was talking to while simultaneously being able to glance at the visualisation. It made me feel less dizzy than the head AR where the visualisation continued to follow my head. 
+
+
+
+***********************
+
+Question: What time mode did you prefer (10s 30s 1m 5m topics)? Why?
+
+- 30s. I found it to be more relevant to the 1 m time mode and more accurate than the 10 second time mode.
+
+- 10s so I can look at what was just said in case I missed it
+
+- I prefer 10-30s as the longer the text may have some problems with the topic summary as there can too many words for a concise summary.
+
+- 10s and 30s can be too much information while 5m may be less information and does not cover everything according the pace of the conversation
+
+- 10s. I like seeing what exactly is tracked.
+
+- I would select "topics" as it becomes more relevant when you communicate more. As someone moves further with topics you can communicate more efficiently and keep track of the conversation with a deeper understanding.
+
+- I found the 10s and 30s modes to be to too inaccurate throughout the conversation. Given the pace of our conversations the 1m mode was ideal in summarizing each topic or subtopic discussed. 
+
+- 10s bc it updated quickly 
+
+- I preferred 30seconds I think as it gave a coarser view while also giving frequent enough updates.
+
+- 10s or topic. Ten second just because it was constantly changing and updating rather than being static. Then topic was good to look at because I like to see a history of how did we end up here lol.
+
+- I mostly used the 10s mode to see what was last being discussed but if I were to do this again I would probably switch.
+
+- 30s and topics I found 10s too fast and the others 30 was perfect for real time. Topic was nice for the end to see what we chatted about. 
+
+- 30s was a good mode to use because the topics changed very frequently.
+
+- 10s because it updates the most frequently.
+
+- I liked the topic summaries. I found the time modes did not provide any information I did not have from listening to others alone. 
+
+- 10s because it's like subtitles while I'm watching a movie. 
+
+- 30s
+
+- 5m topics as i was able to control it faster
+
+- 5m more conversation time 
+
+- the topics mode. I think that it was nice to have things split up by topic to keep me on track with what we were talking about at the time rather than just splitting it into time zones
+
+- 10s seemed best to follow/refresh memory on what we were just discussing 
+
+- 30s it kept generally out of the way not popping up too often and distracting me from conversation.
+
+- 10s because the summarizations were ridiculous and funny. For practicality sake 1m seemed to do a better job.
+
+- 10s because I feel like we switched topics so many times and that gave a more accurate representation of the conversation. Otherwise the headings were too broad and maybe didn't capture all of the subject changes. 
+
+- I prefer the 30s as it wasn't too much and let me see the previous topic as I can be absent minded and forget for abit what was the previous topic and it was helpful to refresh my mind remember.
+
+- I liked 30s the most. most of what it said was accurate and i found it filtered some of the mistranscribed words.
+
+- 10s as I was able to see the conversation being updated the quickest. This made it easier for me to check what topics we had already discussed. 
+
+
+
+***********************
+
+Question: How many topics did you choose to display? Why? How did this change (if at all) across conditions (phone spatial anchored AR head anchored AR)?
+
+- 7
+
+- The full transcript 
+
+- Around 10. In my opinion it is the best as it can have enough topics without the text being too small to see. The phone became slightly distracting compared to the glasses. I found the glasses to be good.
+
+- i think I forgot about this part that I could change the number of topics. But it was around 4 topics for AR and around 8 on phone. And i just used what was there
+
+- I chose to display as many as possible.
+
+- I tried to display as many topics as I could as I wanted to know if it was efficient for each topic with different modes of display. For the phone I was reading and responding while for spatial and head AR I was just reading and answering without listening to others much.
+
+- I only chose to display as few topics at a time in all modes. It was easier to identify each topic without overwhelming my field of view. 
+
+- the default amount sincw I didn't find it that helpful to look at so I leftit as it was
+
+- I chose to display fewer topics as I was only really concerned about what was recently said. When I was on the mobile I tried showing a lot of topics just to see what the overall summary was but I don't think this was conducive during the actual conversation.
+
+- I didn't really change it because it was fine how it was. Also there was a lot of things happening at the same time so I decided to not change anything.
+
+- I usually kept it around 3-ish topics because I mostly just wanted it to see what it had to say about the last topic discussed.
+
+- I was often displaying between 5-10 topics mostly depending on if we were switching topics a lot or not. 
+
+- I chose to display around 5 topics at a time it was very funny to see the topics we talked about in real time.
+
+- I didn't change the default setting but I'm mostly only focusing on the latest topic.
+
+- I chose not to display topics at times since it was difficult to focus on both the topics and listening to others. 
+
+- 6 seemed like an easy amount to look at
+
+- I liked have a medium amount of topics so I can see more but not as much detail and more accurate
+
+- the top 5 topics (?) from what i remember 
+
+- 6
+
+- I think 3 or 4? it didn't change much between devices but i felt like having less topics up helped me stay more focused on the conversation 
+
+- representative topics of 10s intervals. didn't change throughout study
+
+- About 4 or 5 at a time. Kept it the same on all 3 mediums. Didn't want too much text on the screen in front of me
+
+- As little as possible to prevent distractions during the conversation. It didn't change across conditions.
+
+- I filtered between the 10s 30s and the 5min and I preferred the 10s one in the end based on what I said in the above question. 
+
+- i choose to display all for each of them as it's easy access for me and i like to look back at them when i zone out 
+
+- i liked having around 3 or 4 topics displayed. more than that felt too clunky to look at thr specific information underneath and less than that was too sparse and not detailed enough. this was mainly the same across conditions except the phone since the aspect ratio is long i preferred having 6 or 7 topics.
+
+- I chose to display all of the topics because I was curious to see what we had talked about. Seeing all the topics laid out like that made it easier to follow along. This did not change for any of the other conditions as I preferred to see all the topics. 
+
+
+
+***********************
+
+Question: Did the conversation visualizations or any individual features help you address specific conversation challenges?
+
+- I think the visualizations helped me stay on topic and helped me identify previous talking points. It was easy to go back and identify what was covered in the video in a broad general way however the transcriptions were innacurate and made discussion of previous details difficult.
+
+- Helped me get back on track if I was to zone out during the conversation 
+
+- Yes because you are able to see the last part of the conversation in case your mind wanders for a second which it makes it possible to refresh your memory and continue the conversation from where it was left off.
+
+- The transcript helps to catch up on any missed parts of the conversation. Also subtopics helps to understand a summary of what someone said and that helps to understand where their opinions stand without having to evaluate that in my head
+
+- I think being able to keep track is kinda useful. Sometimes you wonder why conversations have headed in a certain direction.
+
+- While talking the devices displaying the topic and subtopics helped me stay on track and decide what to say next. This improved my communication efficiency and made the conversation flow more smoothly.
+
+- The visualization summaries helped to reference previous topics brought up in conversations or recall anything I may have missed while navigating through the menus. However I felt that both shorter conversation modes and the head-anchored AR were the most distracting of any feature. 
+
+- not particularly 
+
+- I don't think so it seemed only like a novelty to me. I felt that the conversation wouldn't have gone any worse if I didn't have the conversation visualizations.
+
+- The speaker turn helped me gauge if I'm talking too much or too little. Because I always care about that and am worried about that. So it's nice to have that information available 
+
+- It's nice to be able to go back to previous things.
+
+- It was nice to see how much people were talking but in terms of in the moment there was only so much info I could process while being in the situation. 
+
+- The visualizations did allow me to remember what we were talking about if we went on a tangent.
+
+- I usually don't remember what I have talked about but the subtopics help me keep track of that. So it's interesting to see how we got from one topic to another actually.
+
+- The colour representations were awesome at making it evident when there is an imbalance in how much some people are speaking compared to others. 
+
+- It served as a good tool to recall information
+
+- I liked looking back at the topics to remember what we listened to
+
+- Yes it showed a timeline throughout a conversation 
+
+- Not really I did go back to see what the topic was about 
+
+- I think if I got distracted it was nice for me to find my way back to the conversation but I also think it made me more distracted at times
+
+- don't think so no
+
+- No
+
+- Not really. I'm also worried that relying on these tools in the future will distance ourselves from each other and could lead to cognitive decline. Relying on technology to remeber or evaluate a conversation for you puts almost no owness on the people speaking.
+
+- It reminded me about the points that were mentioned in the video which helped me Houde my conversation about the video 
+
+- i do miss some words when a conservation is held as I feel like i visualized better than it being heard so this was quite helpful for me
+
+- i found that the topics visual was quite useful for having some kind of notes on the lecture video and having them when talking also made it easier to keep track of where the conversation was.
+
+- I felt that the topics made it easier for me to follow along with what others were saying. Having a summarised sentence for the conversation made me more focused on what we were talking about without getting carried away.
+
+
+
+***********************
+
+Question: How comfortable would you feel using or interacting with someone who is using such a system in your day to day life knowing that it is recording and transcribing you? Why?
+
+- Comfortable
+
+- Not very comfortable because I like my privacy and would not feel like I could speak freely
+
+- Depending on the type of conversation if the conversation is school or work I feel it like it would be very useful and quite comfortable as  you can see the conversation topics if something happens to restart.
+
+- It feels a little disconnected to talk to someone using this system as you cannot see their eyes like i mentioned before. Also knowing that what I say is recorded and can be used against me makes me feel uncomfortable.
+
+- I don't think I'd mind. It might help someone with ADHD or who has a hard time tracking things down in meetings and nothing them down.
+
+- I would feel somewhat uncomfortable as transcribing or recording could make my personal information along with personal chats data or plans accessible to others. This would make me uncomfortable if it were a random person I didn't know well.
+
+- I would not be entirely comfortable unless I knew exactly what this type of system was used for. While this system is useful for recalling details and summarizing conversations I would have privacy concerns because this data could be misused or manipulated. While talking to a person without this system I would be able to clarify details or misunderstandings but I wouldn't have control on how the system would interpret my words. 
+
+- if it is something that helps them I don't mind bc it means I'm being understood better but if they are just doing it for fun I would not like them putting my words through that 
+
+- I would feel comfortable with that depending on what that data was being used for but if it was just to aid them in conversation I wouldn't have a problem with it. If it would be a positive for our interaction then I'm all for it.
+
+- Pretty comfortable because I don't really have anything to hide. But it would potentially be a conflict if there was a private conversation required because we didn't really go over how to pause it or stop it.
+
+- I think that it can sometimes make you think a bit before saying something knowing that it's being recorded and can be repeated. 
+
+- I think I would be a bit uncomfortable if it was required by my company or something but I think if it was voluntary then it would be valuable for meetings or perhaps like DND campaigns. 
+
+- At work I would be comfortable with it as long as my coworker informed me that I was being recorded. In a conversation with my friends I think I would be less comfortable talking to my friend they used it.
+
+- I feel it's completely fine to me. Because it's not like the system is telling them what to do. Their reactions are still authentic. It's just more like a tool that help them understand and on track with the conversation better. Also people whose first language is not English or someone who is easily distracted can definitely benefit from having some transcriptions.
+
+- I personally would not feel comfortable with it. I like to keep private between myself and the people I am having a conversation with and I also feel a bit insecure when I don't think I have someone's full attention while speaking. 
+
+- I wouldn't like it I don't like to be recorded constantly 
+
+- I'd prefer not to but the spatial would be useful for classes
+
+- I wouldn't if it's more a personal conversation unless it's for legal purposes. However for a lighthearted everyday conversation it could be fun for memories or even turning it into your own personal podcast episode 
+
+- Comfortable if the data collected is secure 
+
+- Not very comfortable. Honestly it kind of feels like it puts a disconnect between me and the person I'm talking to because there's a bright screen behind/around them telling me what we've been talking about and it keeps me from being present in the moment. I also personally don't like the idea of having technology on my eyes all the time and prefer to be more present in the moment with the people I'm with
+
+- not too comfortable the privacy that could be breached would be concerning as well as the unattentiveness throughout the convo is something that would pose problems maybe down the line
+
+- I think I would feel somewhat comfortable. Since we're having conversation I think it's fine if they want to relive or remember what we talked about. But if it transcribed it wrong then I would have a problem with that.
+
+- I'd choose not to engage with that person. I'm not a fan of being recorded or transcribed.
+
+- I would feel comfortable in a classroom setting as I think it would help remover points in a lecture 
+
+- I would be comfortable as we already have the thinking our phone can hear us as well and this can be helpfully to remember and maybe as evidence/throwbacks for some scenarios. it also cna help with some people who can't write as fast as they listen too or some disabilities.
+
+- I think the glasses make the experience a little bit weird due to seeing people move their heads and not having direct eye contact but for the most part it was pretty comfortable to have a conversation with and can definitely be useful. one issue i did find is that the darkness of the glasses made watching the video a bit difficult since the video brightness didnt shine through the glasses.
+
+- I would be okay with it as I recognise its utilities and importance for people that have disabilities. Being able to visualise real time conversations by using these glasses make it easier for people to communicate. However I wouldn't be comfortable in interacting with people who wore this if the topic of conversation was more controversial or political. I am a little hesitant about where the data for these recordings go to but not to the point where I exclude these technologies. 
+
+
+
+***********************
+
+Question: In what ways did the system positively or negatively affect your understanding of and engagement with the video?
+
+- I thought it helped me engage with the video after the fact. I didn't have to take notes and was able to go recall important points. I don't think it would have been as useful for me if there was no wider discussion however.
+
+- The Mobile became distracting if I looked at the phone and tried to see the summaries the glasses are more helpful in this aspect.
+
+- It was hard to see the video 
+
+- It was distracting when the topics weren't accurate but when they were it helpful for reminding
+
+- Honestly pretty neutral. I kept it off most of the time because it was in my way most of the time in my most comfortable position for it.
+
+- It distracted me from the video as I found myself trying to make sense of the nonsense summarization the system was providing.
+
+- It helped me remember what the video was about and the different topics 
+
+- i wouldn't say it was negative for me since we could position however we want and it was positive since i put to the side and look at it if i thiink i mis heard or miss hearing some words.
+
+- It positively affected my understanding of the video by allowing me to see the topic distribution and have a set of notes to base conversation topics off of. It negatively affected my ebgagement when the transcription would be off and i would have to think a little bit more to try and remember what was said. 
+
+- Pros: I was able to follow along with the different topics and respond as such. 
+Cons: It was difficult to stay clearly engaged as I kept looking between the visualisation and the person speaking. 
+
+
+
+***********************
+
+Question: Do you have any other comments or feedback about the system the study or anything else?
+
+- No
+
+- A demo with showing the controls would be nice compared to a set of slides. And if the demo also included the finger movements triggering different commands it would me much clearer.
+
+- It was pretty interesting. I honestly think I'd use something like this for notetaking in lectures.
+
+- No
+
+- I think this is a great way to leverage LLM and AR technology in a real-world use case. While there are imperfections such as inaccurate transcription I believe this is a good first start if this type of system were to be made commercially available. It could be possible for a system like this one to assist people with attention deficits or hearing deficits in recalling information or simple transcription. 
+
+As for the study I felt that is was well-conducted overall. In my opinion longer trial times (>5 minutes) would help conversations flow more naturally without interruption. 
+
+I enjoyed participating in this study and seeing how AR can be used creatively to assist people in day-to-day interactions! I'd be excited to see how this can be taken further in domains such as education accessibility and productivity. 
+
+- no
+
+- It was fun I enjoyed participating.
+
+- If it is possible to have the glasses be in such a way that doesn't black out area around the scream but only the screen that would be useful because I had a hard time still interacting with people irl 
+
+- I think using the AR glasses have a bit of a learning curve and it would be nice if there were more time to practice and get used to the functionality.
+
+- I think the hardware itself was a bit bulky but the spacial I could see the biggest use case for. Even just for virtual meeting to have in the side. 
+
+- My fellow study participants were awesome!
+
+- Thanks for the opportunity this was a really fun study to be a part of!
+
+- It was very fun to use 
+
+- It could be very helpful for lectures
+
+- N/A
+
+- None
+
+- Nope!
+
+- No. It was very interesting to interact with such equipment. I really enjoyed the spatial mode!
+
+- The study was fantastic! Everyone was very friendly and professional :)
+
+- No 
+
+- i dont have much to say as it is a cool item to get the chance to try out and i have seen something similar like the transcribe glasses which was focus to help the deaf/ hearing issues people but this glasses had more features which is more helpful in my opinion
+
+- no
+
+- Some of the visualisations are difficult to use as they glitch out or disappear from view. Other than that I don't have any problems with this experience. 
+
