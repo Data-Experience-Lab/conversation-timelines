@@ -49,8 +49,7 @@ export class SpeechToTopic {
               );
               this.transcriptionStop();
               this.restartAzureSession();
-            // }, 9 * 60 * 1000); // 9 minutes (540,000 ms)
-            }, 30 *1000);
+             }, 9 * 60 * 1000); // 9 minutes (540,000 ms)
           }
         },
         (err) => {
