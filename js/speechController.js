@@ -17,19 +17,20 @@ export class SpeechToTopic {
     this.time = "";
     this.transcript = "";
     this.speakerTurns = { total: 0, speakers: [], turns: [] };
+    this.isTranscribing = false;
     // subscription key and region for speech services.
     this.sdkSetup();
     this.silenceLength = 0;
-    this.recordingStatus = true;
+    this.recordingStatus = false;
   }
 
-  setRecordingStatus(status) {
-    this.recordingStatus = status;
-    console.log(this.recordingStatus)
-  }
 
   transcriptionStart() {
-    if (this.recordingStatus) {
+    console.log(`Recording status: ${this.recordingStatus}`)
+    if (!this.recordingStatus) {
+      console.log(`is Transcribing ${this.isTranscribing}`)
+      this.recordingStatus = true;
+
       console.log("Starting transcription...");
       this.conversationTranscriber.startTranscribingAsync(
         () => {
@@ -47,8 +48,11 @@ export class SpeechToTopic {
               console.log(
                 "Restarting Azure SDK session before 10-minute timeout..."
               );
-              this.transcriptionStop();
+              // this.transcriptionStop();
               this.restartAzureSession();
+              
+              // this.transcriptionStart();
+              
             // }, 9 * 60 * 1000); // 9 minutes (540,000 ms)
             }, 30 *1000);
           }
@@ -64,6 +68,7 @@ export class SpeechToTopic {
   }
 
   transcriptionStop() {
+    console.log(`Recording status: ${this.recordingStatus}`)
     if (this.recordingStatus) {
       console.log("Stopping transcription...");
 
@@ -72,6 +77,7 @@ export class SpeechToTopic {
 
       this.conversationTranscriber.stopTranscribingAsync(
         () => {
+          this.recordingStatus = false;
           console.log("Transcription stopped.");
           const time = this.formatTime(new Date());
 
@@ -82,7 +88,8 @@ export class SpeechToTopic {
             this.silenceLength += 1;
           }
 
-          this.transcriptionStart();
+          if (!this.isTranscribing)
+            this.transcriptionStart();
 
           // Reset transcript and speaker turns
           this.transcript = "";
@@ -121,11 +128,19 @@ export class SpeechToTopic {
         });
 
         // Explicitly clear reference to help GC
-        this.conversationTranscriber = null;
+        this.conversationTranscriber.sessionStarted = null;
+        this.conversationTranscriber.sessionStopped = null;
+        this.conversationTranscriber.transcribed = null;
+        this.conversationTranscriber.canceled = null;
+        this.recordingStatus = false;
       }
+
+      
 
       // --- Reinitialize SDK and start fresh ---
       await this.sdkSetup();
+      console.log("restart transcription")
+      this.transcriptionStart();
       console.log("Azure Speech SDK session restarted successfully.");
     } catch (error) {
       console.error("Error restarting Azure session:", error);
