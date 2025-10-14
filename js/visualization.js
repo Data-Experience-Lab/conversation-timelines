@@ -735,9 +735,9 @@ export class Visualization {
     d3.selectAll(".keyword").remove();
     this.zoomInput = "press";
     window.slider.value(Math.min(slider.value(), 0));
-    if (iter==0) this.displayedLevel+=1;
     if (this.treeDepth<this.DataObj.getTreeSize()-1)
     {
+      if (iter==0) this.displayedLevel+=1;
       this.treeDepth += 1;
       console.log(this.treeDepth)
       let newData = this.DataObj.getData(this.treeDepth);
@@ -765,9 +765,9 @@ export class Visualization {
     console.log("zoom out")
     d3.selectAll(".keyword").remove();
     this.zoomInput = "press";
-    if (iter==0) this.displayedLevel-=1;
     if (this.treeDepth>=1)
     {
+      if (iter==0) this.displayedLevel-=1;
       this.treeDepth -= 1;
       let newData = this.DataObj.getData(this.treeDepth);
       if (!this.currViewedTopic.parentNodes[this.treeDepth].length==0){

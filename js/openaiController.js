@@ -86,7 +86,7 @@ export class OpenAI {
               messages: [
                 {
                   role: "system",
-                  content: `Given the following conversation transcript, analyze whether a clear turn sentence exists which creates two distinct topics in the conversation. For example, a conversation about Skydiving which shifts to discussion about a motorcycle license is two distinct topics. However, discussion about travel destinations and then a more specific conversation about travel in europe or collecting postcards is one cohesive topic; travel. If so, return the turn sentence. Otherwise, if the entire transcript encompasses a singular cohesive topic, return null. \nTranscript: ${speech}`
+                  content: `Given the following conversation transcript, analyze whether a clear turn sentence exists which creates two distinct topics in the conversation. For example, a conversation about Skydiving which shifts to discussion about a motorcycle license is two distinct topics. However, discussion about travel destinations and then a more specific conversation about travel in europe or collecting postcards is one cohesive topic; travel. If so, return the turn sentence. Otherwise, if the entire transcript encompasses a singular cohesive topic, return null. If the turn sentences occurs less than 50 characters into or from the end of the transcript, disregard and return as if there is no turn. \nTranscript: ${speech}`
                 }
               ],
               temperature: 1,
@@ -149,6 +149,7 @@ export class OpenAI {
         // Check if the segment contains a turn sentence for a new topic
         const turn = await this.checkForTopicTurn(speech);
         if (turn.has_turn) {
+          console.log(turn.turn_sentence)
           return null;
         } else {
           const value = await this.topicClassify(speech, lastTopic);

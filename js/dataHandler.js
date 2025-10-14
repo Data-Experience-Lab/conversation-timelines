@@ -23,6 +23,7 @@ export class DataHandler {
     } else {
       return {0: []};
     }
+    // return {0: []};
   }
 
   // Get data for a specific level
@@ -107,6 +108,7 @@ export class DataHandler {
   async summarizeNodes(node1, node2, depth) {
 
     let id, segments;
+    let timeDiff;
     [id, segments] = this.getUniqueID(node1.segments + " " + node2.segments);
     console.log(id)
     console.log(segments)
@@ -124,7 +126,7 @@ export class DataHandler {
     let twoParents = true;
     let lastTopic = (this.tree[depth]!=null) ? this.tree[depth].at(-1) : "";
 
-    if (this.getTimeDiff(time, "totalMin")>30) {
+    if (this.getTimeDiff(time, "", "totalMin")>30) {
       result=null
     } else {
       result = await this.openAI.gptResult(transcript, lastTopic, "turn");
@@ -134,25 +136,34 @@ export class DataHandler {
     if (result == null) {
         twoParents = false;
         console.log("DH Turn detected: ", transcript)
-        numStrings = String(node2.segments).split(' '); // Split by whitespace
+        numStrings = String(node1.segments).split(' '); // Split by whitespace
         numbers = numStrings.map(Number).filter(num => !isNaN(num));
-        transcript = "";
+        let new_Transcript = "";
         for (let i=0; i<numbers.length; i++) {
-            transcript += this.tree[0][numbers[i]].segment;
+            new_Transcript += this.tree[0][numbers[i]].segment;
         }
-        result = await this.openAI.gptResult(transcript, lastTopic);
+        result = await this.openAI.gptResult(new_Transcript, lastTopic);
         console.log("DH result 2: ", result)
-        parentNodes = {[node2.depth]: [node2.id]};
-        id = node2.id;
-        segments = node2.segments;
-        time = node2.time;
+        parentNodes = {[node1.depth]: [node1.id]};
+        id = node1.id;
+        segments = node1.segments;
+        console.log(node2)
+        console.log(node2.time)
+        console.log("One node")
+        timeDiff = this.getTimeDiff(time, node2.time);
     } else {
-        parentNodes = (node1.depth==node2.depth) ?  {[node1.depth]: [node1.id, node2.id]} : {[node1.depth]: [node1.id], [node2.depth]: [node2.id]};
+      console.log("two nodes")
+      parentNodes = (node1.depth==node2.depth) ?  {[node1.depth]: [node1.id, node2.id]} : {[node1.depth]: [node1.id], [node2.depth]: [node2.id]};
+      timeDiff = this.getTimeDiff(time, "");
+    }
+
+    if (timeDiff == "0s") {
+      return null;
     }
 
     // Ensure the layer exists in the tree
     if (!this.tree[depth]) {
-        this.tree[depth] = [];
+      this.tree[depth] = [];
     }
 
     // Create and return new node
@@ -166,7 +177,8 @@ export class DataHandler {
                         depth,
                         parentNodes,
                         segments,
-                        result.keywords
+                        result.keywords,
+                        timeDiff
                         )
 
     // Push child node to parent node children
@@ -184,7 +196,7 @@ export class DataHandler {
     return [id.join(''), segments.join(' ')];
   }
 
-  createNode(topic, description, segment, time, speakerTurns, id, depth, parentNodes, segments, keywords) {
+  createNode(topic, description, segment, time, speakerTurns, id, depth, parentNodes, segments, keywords, timeDiff) {
     return {"topic": topic,
           "description": description,
           "segment": segment,
@@ -196,17 +208,32 @@ export class DataHandler {
           "childNodes": {[depth+1]: []},
           "segments": segments,
           "keywords": keywords,
-          "totalTime": this.getTimeDiff(time)
+          "totalTime": timeDiff
         }
   }
 
-  getTimeDiff(startTime, mode="string") {
-    let currViewedTime = new Date();
+  getTimeDiff(startTime, endTime="", mode="string") {
+    console.log(`Start time 1: ${startTime}`)
+    console.log(`End time 1: ${endTime}`)
+    let currTime;
+    if (endTime==""){
+      console.log("create time")
+      currTime = new Date();
+      console.log(endTime)
+    } else {
+      const [chours, cminutes, cseconds] = endTime.split(":").map(Number);
+      currTime = new Date();
+      currTime.setHours(chours, cminutes, cseconds, 0);
+    }
+
     const [chours, cminutes, cseconds] = startTime.split(":").map(Number);
     startTime = new Date();
     startTime.setHours(chours, cminutes, cseconds, 0);
 
-    let diffMs = Math.abs(startTime - currViewedTime); // Use Math.abs to handle negative differences
+    console.log(`Start time 2: ${startTime}`)
+    console.log(`End time 2: ${currTime}`)
+
+    let diffMs = Math.abs(startTime - currTime); // Use Math.abs to handle negative differences
     let diffSeconds = Math.floor(diffMs / 1000);
     let hours = Math.floor(diffSeconds / 3600);
     let minutes = Math.floor((diffSeconds % 3600) / 60);
