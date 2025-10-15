@@ -241,7 +241,7 @@ h2 {
 
 .repSentences {
   color: white;
-  font-size: 2vmin; /* Smaller font size relative to topicSentences */
+  font-size: 1.5vmin; /* Smaller font size relative to topicSentences */
   background: none;
   border-radius: 1vh;
   padding: 0.2vh 1vw;

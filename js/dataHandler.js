@@ -11,7 +11,7 @@ import mockData from "./mockData.js";
 export class DataHandler {
   constructor() {  
     this.localStorageHelper = new localStorageHelper();
-    this.tree = this.initTree();
+    this.tree = mockData2;
     this.openAI = new OpenAI();
   }
 

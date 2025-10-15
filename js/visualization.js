@@ -54,7 +54,7 @@ export class Visualization {
     let params = new URLSearchParams(document.location.search);
     let numTopicsParam = parseInt(params.get("numtopics"), 10);
     this.requestedNum =
-      !isNaN(numTopicsParam) && numTopicsParam > 0 ? numTopicsParam : 4;
+      !isNaN(numTopicsParam) && numTopicsParam > 0 ? numTopicsParam : 5;
     if (this.numTopicsShown > 16) {
       this.numTopicsShown = 16;
     }
@@ -139,7 +139,7 @@ export class Visualization {
           "transform": [
             "translateX(-800px)", "translateX(0px)"
           ],
-          "font-size": ["20px", "25px"]
+          "font-size": ["20px", "10px"]
         }
       },
       "repSentences": {
@@ -298,8 +298,8 @@ export class Visualization {
     let line = enter
       .append("div")
       .attr("class", "line") 
-      .style("flex-grow", 0.5)
-      .style("margin-bottom", "1.5%")
+      .style("flex-grow", 0.3)
+      .style("margin-bottom", 0)
       .style("align-items", "center")
       .style("display", "flex")
       .style("position", "relative")
@@ -440,7 +440,7 @@ export class Visualization {
         .style("position", "absolute")
         .style("left", x + "px")
         .style("top", y + "px")
-        .style("font-size", "15px")
+        .style("font-size", "10px")
         .style("color", "white")
         .style("transform", `rotate(${rotation}deg)`)
         .style("transform-origin", "top left");
@@ -939,6 +939,7 @@ export class Visualization {
           console.log(currentBgColor)
           if (bubble.classList.contains("Empty")) {
             bubble.style.backgroundColor = "#000000"
+            bubble.style.border = "0.5vw solid #80808042";
           } else {
             const speakerId = bubble.classList[2] % 5;
             bubble.style.backgroundColor = this.speakerColours[speakerId];
