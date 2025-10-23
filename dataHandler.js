@@ -3234,7 +3234,86 @@ export class DataHandler {
           id: "m1-3",
         },
       ],
-      m5: [],
+      m5: [{
+          topic: "SKYDIVING READINESS",
+          description:
+            "She was like let's go skydiving like right now and I was just like I've never even thought about this before.",
+          segment:
+            "time to mentally prepare i was not ready but she was ready oh my gosh um yeah no she was like let's go skydiving like right now and I was just like I've never even thought about this before what do you mean? Yeah I thought she was like joking at first or like by how soon she wanted to go. And I. In between to. She's very much like that, like she asked me a couple times and I was always like oh like I'll think about it whatever and then she's like okay enough is enough and she just went and did it which is crazy I was Oh, do you think Emmanuel would go with you? Well, I don't know cuz like he's I I think he would cuz he's definitely like an adrenaline junkie to a certain extent, like he really likes to do that type of stuff, but I mean honestly, yeah probably.",
+          time: "17:18:55",
+          speakerTurns: {
+            total: 207,
+            speakers: [
+              {
+                speakerId: "Guest-1",
+                length: 86,
+              },
+              {
+                speakerId: "Guest-2",
+                length: 66,
+              },
+            ],
+            turns: [
+              {
+                speakerId: "Guest-1",
+                speakerSeg:
+                  "It's hard to mentally prepare. I was not ready when she was ready. Oh my gosh.",
+                length: 16,
+              },
+              {
+                speakerId: "Guest-1",
+                speakerSeg:
+                  "Yeah, she was like, let's go skydiving, like right now.",
+                length: 10,
+              },
+              {
+                speakerId: "Guest-1",
+                speakerSeg:
+                  "I've never even thought about this before. What do you mean? Yeah, I thought she was like joking at first, or like by how soon she wanted to go, but then.",
+                length: 31,
+              },
+              {
+                speakerId: "Guest-1",
+                speakerSeg:
+                  "Pictures of her. And I was like, Oh yeah, OK, yeah, I thought. I thought that would be more time in between.",
+                length: 22,
+              },
+              {
+                speakerId: "Guest-1",
+                speakerSeg: "Yeah, like she's, she's very much like.",
+                length: 7,
+              },
+              {
+                speakerId: "Guest-2",
+                speakerSeg:
+                  "Couple times and I was always like, oh, like I'll think about it, whatever. And then she's like OK, enough is enough. And she just went into this, which is crazy. I was like, oh, do you think?",
+                length: 38,
+              },
+              {
+                speakerId: "Guest-2",
+                speakerSeg:
+                  "Bro, I don't know, 'cause like he's I, I think he would 'cause he's definitely like an adrenaline junkie to a certain extent. Like he really likes it.",
+                length: 28,
+              },
+              {
+                speakerId: "Guest-2",
+                speakerSeg:
+                  "That type of stuff. But I mean, honestly, yeah, probably. I feel like you guys could go together then. That'd be cute.",
+                length: 22,
+              },
+              {
+                speakerId: "Guest-2",
+                speakerSeg:
+                  "Want to, But I'm also like, there's just so many implications going and it's like like, yeah, you're with the instructor, but like things can always go.",
+                length: 27,
+              },
+            ],
+          },
+          topicIndex: 4,
+          zoomInIndex: 5,
+          zoomOutIndex: null,
+          id: "m5-0",
+        },],
       topics: [
         {
           topic: "SKYDIVING INVITATION",
