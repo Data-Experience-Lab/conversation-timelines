@@ -1,4 +1,4 @@
-// // Hosted
+// Hosted
 import { OpenAI } from "/conversation-timelines/js/openaiController.js";
 import { localStorageHelper } from "./localStorageHelper.js";
 import mockData from "./mockData.js";
@@ -11,20 +11,19 @@ import mockData from "./mockData.js";
 export class DataHandler {
   constructor() {  
     this.localStorageHelper = new localStorageHelper();
-    this.tree = this.initTree();
+    this.tree = this.initData();
     this.openAI = new OpenAI();
   }
 
   initTree() {
     if (localStorage.length>0) {
-      localStorage.clear()
+      // localStorage.clear()
       let json = this.localStorageHelper.getJSONItem();
       json = (json!=null) ? json : {0: []};
       return json
     } else {
       return {0: []};
     }
-    // return {0: []};
   }
 
   // Get data for a specific level

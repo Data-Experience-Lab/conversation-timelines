@@ -18,7 +18,6 @@ export class Visualization {
     this.selfID = "Guest-1";
     this.bubbleFontSize = "10px";
     this.bubbleHeight = null;
-    this.displayedLevel=0;
 
     //  font sizes
     this.topicSize = "";
@@ -737,7 +736,6 @@ export class Visualization {
     window.slider.value(Math.min(slider.value(), 0));
     if (this.treeDepth<this.DataObj.getTreeSize()-1)
     {
-      if (iter==0) this.displayedLevel+=1;
       this.treeDepth += 1;
       console.log(this.treeDepth)
       let newData = this.DataObj.getData(this.treeDepth);
@@ -767,7 +765,6 @@ export class Visualization {
     this.zoomInput = "press";
     if (this.treeDepth>=1)
     {
-      if (iter==0) this.displayedLevel-=1;
       this.treeDepth -= 1;
       let newData = this.DataObj.getData(this.treeDepth);
       if (!this.currViewedTopic.parentNodes[this.treeDepth].length==0){
@@ -960,17 +957,12 @@ export class Visualization {
       if (this.treeDepth == 0) {
         levelText.textContent = "Speech Bubbles";
       } else {
-        levelText.textContent = "Level " + this.displayedLevel;
+        console.log("Tree depth")
+        console.log(this.treeDepth)
+        console.log("displayed:")
+        console.log((this.treeDepth+1)/2)
+        levelText.textContent = "Level " + (this.treeDepth+1)/2;
       }
-      // } else if (this.zoomValue < 0.35) {
-      //   levelText.textContent = "10s Topics";
-      // } else if (this.zoomValue < 0.55) {
-      //   levelText.textContent = "30s Topics";
-      // } else if (this.zoomValue < 0.75) {
-      //   levelText.textContent = "1m Topics";
-      // } else {
-      //   levelText.textContent = "5m Topics";
-      // }
     }
   }
 
