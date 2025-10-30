@@ -3,7 +3,7 @@ export class OpenAI {
   
   // Get response from openAI
   async topicClassify(speech, lastTopic) {
-      console.log("getting topic" + speech);
+      console.log("getting topic " + speech);
       let resultText = "";
 
       try {
@@ -86,7 +86,7 @@ export class OpenAI {
               messages: [
                 {
                   role: "system",
-                  content: `Given the following conversation transcript, analyze whether a clear turn sentence exists which creates two distinct topics in the conversation. For example, a conversation about Skydiving which shifts to discussion about a motorcycle license is two distinct topics. However, discussion about travel destinations and then a more specific conversation about travel in europe or collecting postcards is one cohesive topic; travel. If so, return the turn sentence. Otherwise, if the entire transcript encompasses a singular cohesive topic, return null. If the turn sentences occurs less than 50 characters into or from the end of the transcript, disregard and return as if there is no turn. \nTranscript: ${speech}`
+                  content: `Given the following conversation transcript, analyze whether a clear turn sentence exists which creates two distinct and completely unrelated topics in the conversation. For example, a conversation about Skydiving which shifts to discussion about a motorcycle license is two distinct topics. However, discussion about travel destinations and then a more specific conversation about travel in europe or collecting postcards is one cohesive topic; travel. If so, return the turn sentence. Otherwise, if the entire transcript appears to generally encompass a singular cohesive topic, return null. You may make implications about the transcript; for example, if it discusses cost then starts describing an item, you can infer it is one topic about this item. If there is less than 50 characters before or after the turn sentence, return null. \nTranscript: ${speech}`
                 }
               ],
               temperature: 1,
@@ -125,11 +125,11 @@ export class OpenAI {
           });
           const data = await response.json();
           resultText = JSON.parse(data.choices[0].message.content);
+          console.log("openai turn sentence", resultText.turn_sentence);
         } catch (error) {
         console.error("Error:", error);
         resultText = "Error occurred while generating.";
       }
-      // console.log("openai response", resultText.is_same_topic);
       return resultText;
   }
   
@@ -138,6 +138,7 @@ export class OpenAI {
     let result = null;
 
     if (mode === "topic") {
+      console.log("check for topic")
       try {
         const value = await this.topicClassify(speech, lastTopic);
         result = value;
@@ -145,6 +146,7 @@ export class OpenAI {
         console.error("Error in topic mode:", error);
       }
     } else {
+      console.log("check for turn")
       try {
         // Check if the segment contains a turn sentence for a new topic
         const turn = await this.checkForTopicTurn(speech);

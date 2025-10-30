@@ -11,12 +11,13 @@ import mockData from "./mockData.js";
 export class DataHandler {
   constructor() {  
     this.localStorageHelper = new localStorageHelper();
-    this.tree = mockData2;
+    this.tree = this.initTree();
     this.openAI = new OpenAI();
   }
 
   initTree() {
     if (localStorage.length>0) {
+      localStorage.clear()
       let json = this.localStorageHelper.getJSONItem();
       json = (json!=null) ? json : {0: []};
       return json
@@ -126,11 +127,12 @@ export class DataHandler {
     let twoParents = true;
     let lastTopic = (this.tree[depth]!=null) ? this.tree[depth].at(-1) : "";
 
-    if (this.getTimeDiff(time, "", "totalMin")>30) {
-      result=null
-    } else {
-      result = await this.openAI.gptResult(transcript, lastTopic, "turn");
-    }
+    // if (this.getTimeDiff(time, "", "totalMin")>30) {
+    //   console.log("")
+    //   result=null
+    // } else {
+    result = await this.openAI.gptResult(transcript, lastTopic, "turn");
+    // }
       // console.log("OpenAI result:\t", result)
     console.log("DH result 1: ", result)
     if (result == null) {
