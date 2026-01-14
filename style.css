@@ -20,7 +20,7 @@
 }
 
 /* Import fonts */
-@font-face {
+/* @font-face {
   font-family: HK Grotesk;
   src: url("https://cdn.glitch.me/605e2a51-d45f-4d87-a285-9410ad350515%2FHKGrotesk-Regular.otf?v=1603136326027")
     format("opentype");
@@ -30,7 +30,7 @@
   font-weight: bold;
   src: url("https://cdn.glitch.me/605e2a51-d45f-4d87-a285-9410ad350515%2FHKGrotesk-Bold.otf?v=1603136323437")
     format("opentype");
-}
+} */
 
 /* Our remix on glitch button */
 .btn--remix {
