@@ -1,4 +1,4 @@
-Hosted site: https://data-experience-lab.github.io/conversation-timelines/
+Hosted site: https://data-experience-lab.github.io/conversation-timelines/ (Currently Inactive)
 
 Backend: https://convtimelines-backend.onrender.com
 
